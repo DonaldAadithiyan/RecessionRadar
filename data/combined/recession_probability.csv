@@ -1,4 +1,4 @@
-date,recession_probability,1_month_recession_probability,3_month_recession_probability,6_month_recession_probability,1_year_rate,3_months_rate,6_months_rate,CPI,INDPRO_x,10_year_rate,share_price,unemplyment_rate,PPI,OECD_CLI_index,CSI_index
+date,recession_probability,1_month_recession_probability,3_month_recession_probability,6_month_recession_probability,1_year_rate,3_months_rate,6_months_rate,CPI,INDPRO,10_year_rate,share_price,unemployment_rate,PPI,OECD_CLI_index,CSI_index
 1967-02-01,.,.,.,0.0,4.5744444444444445,4.561111111111111,4.5905555555555555,33.0,34.765,4.63,4.733288,3.8,27.2,98.5902660588199,94.1
 1967-03-01,.,.,0.8,0.26,4.185,4.259090909090909,4.221818181818182,33.0,34.5691,4.54,4.854181,3.8,27.2,98.60635753598852,94.1
 1967-04-01,.,.,0.5,0.08,3.8985,3.8375,3.8945,33.1,34.8951,4.59,4.943822,3.8,27.2,98.745386504646,94.1
