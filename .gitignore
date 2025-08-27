@@ -23,6 +23,6 @@ venv/
 *.pkl
 
 # Data
-*.csv
+
 *.h5
 *.sqlite
