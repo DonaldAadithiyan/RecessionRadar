@@ -539,7 +539,7 @@ def display_custom_prediction():
             factors = ["Balanced economic conditions"]
         
         for factor in factors:
-            st.markdown(f"- {factor}")
+            st.markdown(f"- {factor}") 
         
         # Yield Curve visualization
         st.markdown("---")
@@ -654,11 +654,7 @@ def display_information():
     
     st.markdown("""
     - Federal Reserve Economic Data (FRED)
-    - U.S. Bureau of Economic Analysis
-    - U.S. Bureau of Labor Statistics
-    - Organisation for Economic Co-operation and Development (OECD)
-    - University of Michigan Consumer Sentiment Index
-    - Standard & Poor's
+    - US Recession Dataset - kaggle (shubhaanshkumar)
     """)
 
 if __name__ == "__main__":
