@@ -307,96 +307,106 @@ def display_custom_prediction():
         # Dictionary to store user inputs
         user_inputs = {}
         
+        # Helper function to validate numeric input
+        def get_numeric_input(label, default_value, key):
+            value = st.text_input(
+                label,
+                value=str(default_value),
+                key=key
+            )
+            try:
+                return float(value)
+            except ValueError:
+                return default_value
+        
         with col1:
-            user_inputs['1-Year Rate'] = st.slider(
+            st.markdown("**Treasury Rates**")
+            user_inputs['1-Year Rate'] = get_numeric_input(
                 "1-Year Treasury Rate (%)",
-                min_value=0.0,
-                max_value=10.0,
-                value=float(default_indicators['1-Year Rate']),
-                step=0.01
+                default_indicators['1-Year Rate'],
+                "1yr_rate"
             )
             
-            user_inputs['3-Month Rate'] = st.slider(
+            user_inputs['3-Month Rate'] = get_numeric_input(
                 "3-Month Treasury Rate (%)",
-                min_value=0.0,
-                max_value=10.0,
-                value=float(default_indicators['3-Month Rate']),
-                step=0.01
+                default_indicators['3-Month Rate'],
+                "3m_rate"
             )
             
-            user_inputs['6-Month Rate'] = st.slider(
+            user_inputs['6-Month Rate'] = get_numeric_input(
                 "6-Month Treasury Rate (%)",
-                min_value=0.0,
-                max_value=10.0,
-                value=float(default_indicators['6-Month Rate']),
-                step=0.01
+                default_indicators['6-Month Rate'],
+                "6m_rate"
             )
             
-            user_inputs['10-Year Rate'] = st.slider(
+            user_inputs['10-Year Rate'] = get_numeric_input(
                 "10-Year Treasury Rate (%)",
-                min_value=0.0,
-                max_value=10.0,
-                value=float(default_indicators['10-Year Rate']),
-                step=0.01
+                default_indicators['10-Year Rate'],
+                "10yr_rate"
             )
         
         with col2:
-            user_inputs['CPI'] = st.slider(
+            st.markdown("**Economic Indicators**")
+            user_inputs['CPI'] = get_numeric_input(
                 "Consumer Price Index (% change)",
-                min_value=-2.0,
-                max_value=10.0,
-                value=float(default_indicators['CPI']),
-                step=0.1
+                default_indicators['CPI'],
+                "cpi"
             )
             
-            user_inputs['PPI'] = st.slider(
+            user_inputs['PPI'] = get_numeric_input(
                 "Producer Price Index (% change)",
-                min_value=-2.0,
-                max_value=10.0,
-                value=float(default_indicators['PPI']),
-                step=0.1
+                default_indicators['PPI'],
+                "ppi"
             )
             
-            user_inputs['Unemployment Rate'] = st.slider(
+            user_inputs['Unemployment Rate'] = get_numeric_input(
                 "Unemployment Rate (%)",
-                min_value=2.0,
-                max_value=15.0,
-                value=float(default_indicators['Unemployment Rate']),
-                step=0.1
+                default_indicators['Unemployment Rate'],
+                "unemp_rate"
             )
             
-            user_inputs['Industrial Production'] = st.slider(
+            user_inputs['Industrial Production'] = get_numeric_input(
                 "Industrial Production Index",
-                min_value=80.0,
-                max_value=120.0,
-                value=float(default_indicators['Industrial Production']),
-                step=0.1
+                default_indicators['Industrial Production'],
+                "indpro"
             )
         
         with col3:
-            user_inputs['Share Price'] = st.slider(
+            st.markdown("**Market & Sentiment Indicators**")
+            user_inputs['Share Price'] = get_numeric_input(
                 "Share Price Index",
-                min_value=3000.0,
-                max_value=5500.0,
-                value=float(default_indicators['Share Price']),
-                step=1.0
+                default_indicators['Share Price'],
+                "share_price"
             )
             
-            user_inputs['OECD CLI Index'] = st.slider(
+            user_inputs['OECD CLI Index'] = get_numeric_input(
                 "OECD CLI Index",
-                min_value=95.0,
-                max_value=105.0,
-                value=float(default_indicators['OECD CLI Index']),
-                step=0.1
+                default_indicators['OECD CLI Index'],
+                "oecd_cli"
             )
             
-            user_inputs['CSI Index'] = st.slider(
+            user_inputs['CSI Index'] = get_numeric_input(
                 "Consumer Sentiment Index",
-                min_value=50.0,
-                max_value=110.0,
-                value=float(default_indicators['CSI Index']),
-                step=0.1
+                default_indicators['CSI Index'],
+                "csi"
             )
+        
+        # Add a note about value ranges
+        st.markdown("---")
+        st.markdown("""
+        <p class='info-text'>
+        <b>Note:</b> Typical ranges for indicators:
+        <ul>
+        <li>Treasury Rates: 0-10%</li>
+        <li>CPI/PPI: -2 to 10%</li>
+        <li>Unemployment: 2-15%</li>
+        <li>Industrial Production: 80-120</li>
+        <li>Share Price Index: 3000-5500</li>
+        <li>OECD CLI: 95-105</li>
+        <li>Consumer Sentiment: 50-110</li>
+        </ul>
+        </p>
+        """, unsafe_allow_html=True)
         
         # Submit button
         submitted = st.form_submit_button("Generate Prediction")
