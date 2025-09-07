@@ -510,13 +510,19 @@ def display_custom_prediction():
     # Load data
     _, default_indicators, using_real_data = load_data()
     
-    # Check if we have Treasury yield data
-    treasury_rates = {k: v for k, v in default_indicators.items() if 'Rate' in k}
+    # Define the specific treasury rates we need based on our dataset columns
+    required_rates = {
+        '1-Year Rate': 4.86,  # Default values if real-time data isn't available
+        '3-Month Rate': 4.52,
+        '6-Month Rate': 4.65,
+        '10-Year Rate': 3.81
+    }
     
-    if not treasury_rates:
-        st.warning("⚠️ Real-time Treasury yield data is not available at the moment.")
-        st.info("This is required for custom predictions. Please try again later or use the 'Rerun Data Pipeline' button in the sidebar.")
-        return
+    # Update with any real values we have from FRED
+    treasury_rates = {k: v for k, v in default_indicators.items() if 'Rate' in k}
+    for rate in required_rates:
+        if rate in treasury_rates:
+            required_rates[rate] = treasury_rates[rate]
     
     # Create form for user input
     with st.form("custom_prediction_form"):
@@ -542,15 +548,17 @@ def display_custom_prediction():
         
         with col1:
             st.markdown("**Treasury Rates**")
-            # Include all available Treasury rates from our real-time data
-            for rate_name in ['1-Month Rate', '3-Month Rate', '6-Month Rate', '1-Year Rate', 
-                             '2-Year Rate', '5-Year Rate', '10-Year Rate', '30-Year Rate']:
-                if rate_name in default_indicators:
-                    user_inputs[rate_name] = get_numeric_input(
-                        f"{rate_name} (%)",
-                        default_indicators[rate_name],
-                        rate_name.replace('-', '').replace(' ', '_').lower()
-                    )
+            # Include the specific rates we need for our model
+            for rate_name, default_value in required_rates.items():
+                user_inputs[rate_name] = get_numeric_input(
+                    f"{rate_name} (%)",
+                    default_value,
+                    rate_name.replace('-', '').replace(' ', '_').lower()
+                )
+            
+            # Debug info to show which rates are available from real-time data
+            if st.checkbox("Show debug info"):
+                st.write("Available rates from FRED:", list(treasury_rates.keys()))
         
         with col2:
             st.markdown("**Economic Indicators**")
