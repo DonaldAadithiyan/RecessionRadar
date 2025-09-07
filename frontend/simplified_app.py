@@ -6,6 +6,10 @@ import seaborn as sns
 from datetime import datetime, timedelta
 import os
 import sys
+import requests
+from pandas_datareader import data as pdr
+import warnings
+warnings.filterwarnings('ignore')
 
 # Add the parent directory to sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -61,9 +65,58 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Function to load sample data
-def load_sample_data():
-    # Generate sample recession probability data
+# Function to fetch Treasury yield data from FRED
+@st.cache_data(ttl=3600)  # Cache for 1 hour
+def fetch_treasury_yields():
+    """
+    Fetch real treasury yield data from FRED using pandas_datareader
+    """
+    try:
+        # Define the end date as today
+        end_date = datetime.now()
+        # Start date is 7 days ago to ensure we get recent data even with holidays/weekends
+        start_date = end_date - timedelta(days=14)  # Extended from 7 to 14 days
+        
+        # Define the treasury series codes to fetch from FRED
+        series_codes = {
+            'DGS1MO': '1-Month Rate',    # 1-month Treasury constant maturity
+            'TB3MS': '3-Month Rate',     # 3-month Treasury bill
+            'TB6MS': '6-Month Rate',     # 6-month Treasury bill
+            'GS1': '1-Year Rate',        # 1-year Treasury constant maturity
+            'GS2': '2-Year Rate',        # 2-year Treasury constant maturity
+            'GS5': '5-Year Rate',        # 5-year Treasury constant maturity
+            'GS10': '10-Year Rate',      # 10-year Treasury constant maturity
+            'GS30': '30-Year Rate'       # 30-year Treasury constant maturity
+        }
+        
+        # Dictionary to store the results
+        yields = {}
+        
+        # Fetch each series
+        for code, name in series_codes.items():
+            try:
+                # Get data from FRED
+                df = pdr.DataReader(code, 'fred', start_date, end_date)
+                # Get latest non-NaN value
+                if not df.empty:
+                    # Drop NaN values and get most recent
+                    latest_data = df.dropna()
+                    if not latest_data.empty:
+                        yields[name] = latest_data.iloc[-1, 0]
+                    else:
+                        print(f"No valid data found for {name}")
+            except Exception as e:
+                print(f"Error fetching {name}: {str(e)}")
+        
+        return yields
+    
+    except Exception as e:
+        print(f"Error in fetch_treasury_yields: {str(e)}")
+        return {}
+
+# Function to load data
+def load_data():
+    # Generate sample recession probability data (keeping synthetic for demo)
     today = datetime.now()
     dates = [today - timedelta(days=30*i) for i in range(120)]
     dates.reverse()
@@ -77,22 +130,30 @@ def load_sample_data():
     })
     df.set_index('date', inplace=True)
     
-    # Sample economic indicators (most recent values) - Updated based on the image
-    indicators = {
-        '1-Year Rate': 4.86,
-        '3-Month Rate': 4.52,
-        '6-Month Rate': 4.65,
+    # Get real treasury yield data (no fallbacks)
+    real_yields = fetch_treasury_yields()
+    
+    # Create indicators dictionary
+    indicators = {}
+    
+    # Add Treasury rates - ONLY use real data
+    indicators.update(real_yields)
+    
+    # Other economic indicators (still using sample data since we're focusing on Treasury yields)
+    indicators.update({
         'CPI': 3.2,
         'Industrial Production': 104.5,
-        '10-Year Rate': 3.81,
         'Share Price': 4512.8,
         'Unemployment Rate': 3.8,
         'PPI': 2.8,
         'OECD CLI Index': 99.2,
         'CSI Index': 82.7
-    }
+    })
     
-    return df, indicators
+    # Track if we're using real data for yield curve
+    using_real_data = len(real_yields) > 0
+    
+    return df, indicators, using_real_data
 
 # Simulate predicting recession probability based on user inputs
 def predict_custom_recession(inputs):
@@ -116,26 +177,41 @@ def predict_custom_recession(inputs):
     }
     
     # Normalize input values based on typical ranges (completely made up for demo)
-    normalized = {
-        '1-Year Rate': (inputs['1-Year Rate'] - 0) / 8,  # assume range 0-8
-        '3-Month Rate': (inputs['3-Month Rate'] - 0) / 8,  # assume range 0-8
-        '6-Month Rate': (inputs['6-Month Rate'] - 0) / 8,  # assume range 0-8
-        'CPI': (inputs['CPI'] - 0) / 10,  # assume range 0-10
-        'Industrial Production': (inputs['Industrial Production'] - 90) / 30,  # assume range 90-120
-        '10-Year Rate': (inputs['10-Year Rate'] - 0) / 8,  # assume range 0-8
-        'Share Price': (inputs['Share Price'] - 3000) / 2000,  # assume range 3000-5000
-        'Unemployment Rate': (inputs['Unemployment Rate'] - 3) / 7,  # assume range 3-10
-        'PPI': (inputs['PPI'] - 0) / 10,  # assume range 0-10
-        'OECD CLI Index': (inputs['OECD CLI Index'] - 95) / 10,  # assume range 95-105
-        'CSI Index': (inputs['CSI Index'] - 60) / 40  # assume range 60-100
-    }
+    normalized = {}
+    for key in weights.keys():
+        if key in inputs:
+            if key == '1-Year Rate':
+                normalized[key] = (inputs[key] - 0) / 8
+            elif key == '3-Month Rate':
+                normalized[key] = (inputs[key] - 0) / 8
+            elif key == '6-Month Rate':
+                normalized[key] = (inputs[key] - 0) / 8
+            elif key == 'CPI':
+                normalized[key] = (inputs[key] - 0) / 10
+            elif key == 'Industrial Production':
+                normalized[key] = (inputs[key] - 90) / 30
+            elif key == '10-Year Rate':
+                normalized[key] = (inputs[key] - 0) / 8
+            elif key == 'Share Price':
+                normalized[key] = (inputs[key] - 3000) / 2000
+            elif key == 'Unemployment Rate':
+                normalized[key] = (inputs[key] - 3) / 7
+            elif key == 'PPI':
+                normalized[key] = (inputs[key] - 0) / 10
+            elif key == 'OECD CLI Index':
+                normalized[key] = (inputs[key] - 95) / 10
+            elif key == 'CSI Index':
+                normalized[key] = (inputs[key] - 60) / 40
+        else:
+            normalized[key] = 0.5  # Default to neutral value if missing
     
     # Calculate weighted sum
     weighted_sum = sum(weights[key] * normalized[key] for key in weights)
     
     # Check for yield curve inversion (3-Month > 10-Year) - adds recession probability
-    if inputs['3-Month Rate'] > inputs['10-Year Rate']:
-        weighted_sum += 0.2
+    if '3-Month Rate' in inputs and '10-Year Rate' in inputs:
+        if inputs['3-Month Rate'] > inputs['10-Year Rate']:
+            weighted_sum += 0.2
     
     # Convert to probability using sigmoid function
     base_prob = 1 / (1 + np.exp(-weighted_sum * 5))
@@ -147,6 +223,81 @@ def predict_custom_recession(inputs):
         '6-Month': min(max(base_prob + 0.2, 0), 1)
     }
 
+# Function to render the yield curve
+def plot_yield_curve(treasury_rates, title='Treasury Yield Curve', highlight_inversion=True, custom=False):
+    """
+    Creates and returns a yield curve visualization
+    
+    Args:
+        treasury_rates: Dictionary with maturity rates
+        title: Title for the plot
+        highlight_inversion: Whether to highlight yield curve inversions
+        custom: Whether this is a custom user-defined curve
+    
+    Returns:
+        matplotlib figure
+    """
+    fig, ax = plt.figure(figsize=(10, 5)), plt.subplot()
+    
+    # Define the order of maturities for proper x-axis plotting
+    maturity_order = [
+        '1-Month Rate', '3-Month Rate', '6-Month Rate', '1-Year Rate',
+        '2-Year Rate', '5-Year Rate', '10-Year Rate', '30-Year Rate'
+    ]
+    
+    # Extract available maturities and rates in correct order
+    maturities = []
+    rates = []
+    
+    for maturity in maturity_order:
+        if maturity in treasury_rates:
+            # Extract just the maturity name without "Rate"
+            maturities.append(maturity.replace(' Rate', ''))
+            rates.append(treasury_rates[maturity])
+    
+    # Plot the yield curve
+    ax.plot(maturities, rates, marker='o', linewidth=2, color='#1E88E5')
+    ax.set_ylabel('Yield Rate (%)')
+    ax.set_title(title)
+    ax.grid(True, alpha=0.3)
+    
+    # Check for inversions
+    if highlight_inversion and len(maturities) >= 2:
+        # Look for any case where a shorter-term rate is higher than a longer-term rate
+        inversions = []
+        for i in range(len(maturities) - 1):
+            for j in range(i + 1, len(maturities)):
+                if rates[i] > rates[j]:
+                    inversions.append((i, j))
+        
+        # If there's an inversion, highlight the most significant one (typically short vs long term)
+        if inversions:
+            # Find the inversion with the largest gap between maturity positions
+            most_significant = max(inversions, key=lambda x: x[1] - x[0])
+            i, j = most_significant
+            
+            # Highlight the inversion
+            ax.annotate('Yield Curve Inversion\n(Recession Signal)', 
+                       xy=(maturities[j], rates[j]), 
+                       xytext=(maturities[j-1], rates[j] - 0.4 if rates[j] > 0.5 else rates[j] + 0.4),
+                       arrowprops=dict(facecolor='red', shrink=0.05),
+                       color='red')
+            
+            # Add shading to visualize the inversion
+            ax.fill_between(maturities[i:j+1], rates[i:j+1], alpha=0.15, color='red')
+    
+    # Add steepness indicator
+    if len(maturities) >= 2:
+        # Calculate steepness (difference between longest and shortest maturity)
+        steepness = rates[-1] - rates[0]
+        ax.text(0.02, 0.95, f"Curve Steepness: {steepness:.2f}%", 
+                transform=ax.transAxes, fontsize=9, 
+                bbox=dict(facecolor='white', alpha=0.6))
+    
+    # Use tighter layout to maximize plot area
+    plt.tight_layout()
+    return fig
+
 # Main app
 def main():
     # Create sidebar
@@ -156,6 +307,21 @@ def main():
         
         # Navigation
         page = st.radio("Navigation", ["Dashboard", "Custom Prediction", "Information"])
+        
+        # Add a "Rerun Pipeline" button
+        if st.button("🔄 Rerun Data Pipeline", help="Refresh all data from FRED and recalculate indicators"):
+            # Clear the cache for the fetch_treasury_yields function
+            fetch_treasury_yields.clear()
+            st.success("✅ Data pipeline rerun successfully! Treasury yield data has been refreshed.")
+            st.experimental_rerun()
+        
+        # Check data source for yield curve
+        _, _, using_real_data = load_data()
+        if using_real_data:
+            st.success("✓ Using real-time Treasury yield data")
+        else:
+            st.error("✗ Unable to fetch real-time Treasury yield data")
+            st.info("Please check your internet connection or try again later.")
         
         # Disclaimer
         st.markdown("---")
@@ -179,11 +345,11 @@ def main():
         display_information()
 
 def display_dashboard():
-    st.markdown("<h1 class='main-header'>Recession Radar Dashboard</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='main-header'>RecessionRadar Dashboard</h1>", unsafe_allow_html=True)
     st.markdown("<p class='info-text'>This dashboard visualizes the probability of a recession occurring within the next 1, 3, and 6 months based on economic indicators.</p>", unsafe_allow_html=True)
     
-    # Load sample data
-    df, indicators = load_sample_data()
+    # Load data
+    df, indicators, using_real_data = load_data()
     
     # Display metrics cards
     col1, col2, col3 = st.columns(3)
@@ -247,55 +413,110 @@ def display_dashboard():
     # Create 3 columns for indicators
     col1, col2, col3 = st.columns(3)
     
-    indicators_list = list(indicators.items())
+    # Filter out treasury rates that will be shown in the yield curve
+    non_treasury_indicators = {k: v for k, v in indicators.items() if 'Rate' not in k}
+    non_treasury_list = list(non_treasury_indicators.items())
+    
+    # Calculate items per column
+    items_per_col = len(non_treasury_list) // 3 + (1 if len(non_treasury_list) % 3 > 0 else 0)
     
     with col1:
-        for name, value in indicators_list[:4]:
+        for name, value in non_treasury_list[:items_per_col]:
             st.markdown(f"**{name}:** {value}")
     
     with col2:
-        for name, value in indicators_list[4:8]:
+        for name, value in non_treasury_list[items_per_col:items_per_col*2]:
             st.markdown(f"**{name}:** {value}")
     
     with col3:
-        for name, value in indicators_list[8:]:
+        for name, value in non_treasury_list[items_per_col*2:]:
             st.markdown(f"**{name}:** {value}")
     
     # Yield Curve visualization
     st.markdown("---")
     st.markdown("<h2 class='sub-header'>Treasury Yield Curve</h2>", unsafe_allow_html=True)
     
-    # Create yield curve visualization
-    fig, ax = plt.figure(figsize=(10, 5)), plt.subplot()
+    # Extract treasury rates from indicators
+    treasury_rates = {k: v for k, v in indicators.items() if 'Rate' in k}
     
-    maturities = ['3-Month', '6-Month', '1-Year', '10-Year']
-    rates = [indicators['3-Month Rate'], indicators['6-Month Rate'], 
-             indicators['1-Year Rate'], indicators['10-Year Rate']]
-    
-    ax.plot(maturities, rates, marker='o', linewidth=2, color='#1E88E5')
-    ax.set_ylabel('Yield Rate (%)')
-    ax.set_title('Treasury Yield Curve')
-    ax.grid(True, alpha=0.3)
-    
-    # Annotate the yield curve inversion if it exists
-    if indicators['3-Month Rate'] > indicators['10-Year Rate']:
-        ax.annotate('Yield Curve Inversion\n(Recession Signal)', 
-                   xy=(3, rates[3]), 
-                   xytext=(2.5, rates[3] - 0.5),
-                   arrowprops=dict(facecolor='red', shrink=0.05),
-                   color='red')
-    
-    plt.tight_layout()
-    st.pyplot(fig)
-    
-    st.markdown("<p class='info-text'>The yield curve shows the relationship between treasury bond maturities and their yields. An inverted yield curve (when short-term rates are higher than long-term rates) is often considered a recession indicator.</p>", unsafe_allow_html=True)
+    if not treasury_rates:
+        # No real Treasury yield data available
+        st.warning("⚠️ Real-time Treasury yield data is not available at the moment.")
+        st.info("This could be due to connectivity issues, API limits, or market closures. Please try again later.")
+        st.button("🔄 Try Refreshing Data", on_click=lambda: fetch_treasury_yields.clear())
+    elif len(treasury_rates) <= 1:
+        # Only limited data available
+        st.warning("⚠️ Only limited Treasury yield data is available. A full yield curve requires at least two data points.")
+        st.info("Try using the 'Rerun Data Pipeline' button in the sidebar to refresh the data.")
+        
+        # Still show what we have
+        fig = plot_yield_curve(treasury_rates)
+        st.pyplot(fig)
+    else:
+        # Create yield curve visualization
+        fig = plot_yield_curve(treasury_rates)
+        st.pyplot(fig)
+        
+        # Add data source info
+        st.caption("Source: Federal Reserve Economic Data (FRED) - Current as of today")
+        
+        # Check for inversions and provide interpretation
+        has_inversion = False
+        short_rates = ['1-Month Rate', '3-Month Rate', '6-Month Rate']
+        long_rates = ['10-Year Rate', '30-Year Rate']
+        
+        for short in short_rates:
+            for long in long_rates:
+                if short in treasury_rates and long in treasury_rates:
+                    if treasury_rates[short] > treasury_rates[long]:
+                        has_inversion = True
+                        st.markdown(f"<p class='info-text warning'>The yield curve is currently inverted ({short.replace(' Rate', '')} > {long.replace(' Rate', '')}). This has historically preceded recessions by 6-18 months.</p>", unsafe_allow_html=True)
+                        break
+            if has_inversion:
+                break
+        
+        if not has_inversion:
+            st.markdown("<p class='info-text'>The yield curve is currently normal (long-term rates > short-term rates), which typically indicates economic expansion.</p>", unsafe_allow_html=True)
+        
+        # Add information about steepness if we have enough data points
+        if len(treasury_rates) >= 2:
+            # Find shortest and longest maturity
+            maturity_order = ['1-Month Rate', '3-Month Rate', '6-Month Rate', '1-Year Rate', 
+                              '2-Year Rate', '5-Year Rate', '10-Year Rate', '30-Year Rate']
+            
+            shortest = None
+            longest = None
+            
+            for maturity in maturity_order:
+                if maturity in treasury_rates:
+                    if shortest is None:
+                        shortest = maturity
+                    longest = maturity
+            
+            if shortest and longest and shortest != longest:
+                steepness = treasury_rates[longest] - treasury_rates[shortest]
+                
+                if steepness > 1.5:
+                    st.markdown("<p class='info-text'>The yield curve is quite steep, which often indicates strong economic growth expectations.</p>", unsafe_allow_html=True)
+                elif steepness < -0.5:
+                    st.markdown("<p class='info-text warning'>The yield curve is deeply inverted, which historically has been a stronger recession signal.</p>", unsafe_allow_html=True)
+        
+        st.markdown("<p class='info-text'>The yield curve shows the relationship between treasury bond maturities and their yields. An inverted yield curve (when short-term rates are higher than long-term rates) is often considered a recession indicator.</p>", unsafe_allow_html=True)
 
 def display_custom_prediction():
     st.markdown("<h1 class='main-header'>Custom Recession Prediction</h1>", unsafe_allow_html=True)
     st.markdown("<p class='info-text'>Adjust the economic indicators below to generate a custom recession probability forecast.</p>", unsafe_allow_html=True)
     
-    # Load sample data
-    _, default_indicators = load_sample_data()
+    # Load data
+    _, default_indicators, using_real_data = load_data()
+    
+    # Check if we have Treasury yield data
+    treasury_rates = {k: v for k, v in default_indicators.items() if 'Rate' in k}
+    
+    if not treasury_rates:
+        st.warning("⚠️ Real-time Treasury yield data is not available at the moment.")
+        st.info("This is required for custom predictions. Please try again later or use the 'Rerun Data Pipeline' button in the sidebar.")
+        return
     
     # Create form for user input
     with st.form("custom_prediction_form"):
@@ -321,29 +542,15 @@ def display_custom_prediction():
         
         with col1:
             st.markdown("**Treasury Rates**")
-            user_inputs['1-Year Rate'] = get_numeric_input(
-                "1-Year Treasury Rate (%)",
-                default_indicators['1-Year Rate'],
-                "1yr_rate"
-            )
-            
-            user_inputs['3-Month Rate'] = get_numeric_input(
-                "3-Month Treasury Rate (%)",
-                default_indicators['3-Month Rate'],
-                "3m_rate"
-            )
-            
-            user_inputs['6-Month Rate'] = get_numeric_input(
-                "6-Month Treasury Rate (%)",
-                default_indicators['6-Month Rate'],
-                "6m_rate"
-            )
-            
-            user_inputs['10-Year Rate'] = get_numeric_input(
-                "10-Year Treasury Rate (%)",
-                default_indicators['10-Year Rate'],
-                "10yr_rate"
-            )
+            # Include all available Treasury rates from our real-time data
+            for rate_name in ['1-Month Rate', '3-Month Rate', '6-Month Rate', '1-Year Rate', 
+                             '2-Year Rate', '5-Year Rate', '10-Year Rate', '30-Year Rate']:
+                if rate_name in default_indicators:
+                    user_inputs[rate_name] = get_numeric_input(
+                        f"{rate_name} (%)",
+                        default_indicators[rate_name],
+                        rate_name.replace('-', '').replace(' ', '_').lower()
+                    )
         
         with col2:
             st.markdown("**Economic Indicators**")
@@ -511,8 +718,9 @@ def display_custom_prediction():
         factors = []
         
         # Yield curve inversion check
-        if user_inputs['3-Month Rate'] > user_inputs['10-Year Rate']:
-            factors.append("Inverted yield curve (3-Month > 10-Year rate)")
+        if '3-Month Rate' in user_inputs and '10-Year Rate' in user_inputs:
+            if user_inputs['3-Month Rate'] > user_inputs['10-Year Rate']:
+                factors.append("Inverted yield curve (3-Month > 10-Year rate)")
         
         if user_inputs['Unemployment Rate'] > 5.0:
             factors.append("Elevated unemployment rate")
@@ -545,33 +753,48 @@ def display_custom_prediction():
         st.markdown("---")
         st.markdown("<h3 class='sub-header'>Treasury Yield Curve Analysis</h3>", unsafe_allow_html=True)
         
-        # Create yield curve visualization for user inputs
-        fig, ax = plt.figure(figsize=(10, 5)), plt.subplot()
+        # Extract treasury rates from user inputs
+        treasury_rates = {k: v for k, v in user_inputs.items() if 'Rate' in k}
         
-        maturities = ['3-Month', '6-Month', '1-Year', '10-Year']
-        rates = [user_inputs['3-Month Rate'], user_inputs['6-Month Rate'], 
-                 user_inputs['1-Year Rate'], user_inputs['10-Year Rate']]
-        
-        ax.plot(maturities, rates, marker='o', linewidth=2, color='#1E88E5')
-        ax.set_ylabel('Yield Rate (%)')
-        ax.set_title('Custom Treasury Yield Curve')
-        ax.grid(True, alpha=0.3)
-        
-        # Annotate the yield curve inversion if it exists
-        if user_inputs['3-Month Rate'] > user_inputs['10-Year Rate']:
-            ax.annotate('Yield Curve Inversion\n(Recession Signal)', 
-                       xy=(3, rates[3]), 
-                       xytext=(2.5, rates[3] - 0.5),
-                       arrowprops=dict(facecolor='red', shrink=0.05),
-                       color='red')
-        
-        plt.tight_layout()
+        # Create yield curve visualization
+        fig = plot_yield_curve(treasury_rates, title='Custom Treasury Yield Curve', custom=True)
         st.pyplot(fig)
         
-        if user_inputs['3-Month Rate'] > user_inputs['10-Year Rate']:
-            st.markdown("<p class='info-text warning'>Your inputs show an inverted yield curve, which has historically been a strong predictor of recessions within the next 6-18 months.</p>", unsafe_allow_html=True)
-        else:
+        # Check for inversions and provide interpretation
+        has_inversion = False
+        short_rates = ['1-Month Rate', '3-Month Rate', '6-Month Rate']
+        long_rates = ['10-Year Rate', '30-Year Rate']
+        
+        for short in short_rates:
+            for long in long_rates:
+                if short in treasury_rates and long in treasury_rates:
+                    if treasury_rates[short] > treasury_rates[long]:
+                        has_inversion = True
+                        st.markdown(f"<p class='info-text warning'>Your inputs show an inverted yield curve ({short.replace(' Rate', '')} > {long.replace(' Rate', '')}). This has historically preceded recessions by 6-18 months.</p>", unsafe_allow_html=True)
+                        break
+            if has_inversion:
+                break
+        
+        if not has_inversion:
             st.markdown("<p class='info-text'>Your inputs show a normal yield curve, which typically indicates economic expansion.</p>", unsafe_allow_html=True)
+        
+        # Add information about steepness if we have enough data points
+        if len(treasury_rates) >= 2:
+            # Find shortest and longest maturity
+            maturity_order = ['1-Month Rate', '3-Month Rate', '6-Month Rate', '1-Year Rate', 
+                              '2-Year Rate', '5-Year Rate', '10-Year Rate', '30-Year Rate']
+            
+            available_rates = [rate for rate in maturity_order if rate in treasury_rates]
+            if len(available_rates) >= 2:
+                shortest = available_rates[0]
+                longest = available_rates[-1]
+                
+                steepness = treasury_rates[longest] - treasury_rates[shortest]
+                
+                if steepness > 1.5:
+                    st.markdown("<p class='info-text'>Your custom yield curve is quite steep, which often indicates strong economic growth expectations.</p>", unsafe_allow_html=True)
+                elif steepness < -0.5:
+                    st.markdown("<p class='info-text warning'>Your custom yield curve is deeply inverted, which historically has been a stronger recession signal.</p>", unsafe_allow_html=True)
 
 def display_information():
     st.markdown("<h1 class='main-header'>Information</h1>", unsafe_allow_html=True)
@@ -579,18 +802,14 @@ def display_information():
     st.markdown("<h2 class='sub-header'>About Recession Radar</h2>", unsafe_allow_html=True)
     st.markdown("""
     <p class='info-text'>
-    Recession Radar is a dashboard for visualizing and forecasting the probability of a recession occurring within different time horizons based on economic indicators.
-    </p>
-    
-    <p class='info-text'>
-    This simplified version uses synthetic data to demonstrate how the dashboard would work with real data and trained models.
+    RecessionRadar is a dashboard for visualizing and forecasting the probability of a recession occurring within different time horizons based on economic indicators.
     </p>
     """, unsafe_allow_html=True)
     
     st.markdown("<h2 class='sub-header'>How It Works</h2>", unsafe_allow_html=True)
     st.markdown("""
     <p class='info-text'>
-    In the full version, Recession Radar uses machine learning models trained on historical economic data to predict the probability of a recession occurring within 1, 3, and 6 months.
+    RecessionRadar uses machine learning models trained on historical economic data to predict the probability of a recession occurring within 1, 3, and 6 months.
     </p>
     
     <p class='info-text'>
@@ -608,6 +827,74 @@ def display_information():
     - OECD Composite Leading Indicator
     - Consumer Sentiment Index
     """)
+    
+    st.markdown("<h2 class='sub-header'>Understanding the Treasury Yield Curve</h2>", unsafe_allow_html=True)
+    st.markdown("""
+    <p class='info-text'>
+    The Treasury yield curve is a key economic indicator that plots interest rates of U.S. Treasury bonds at different maturities. In a normal economic environment, longer-term bonds have higher yields than shorter-term bonds, creating an upward-sloping curve.
+    </p>
+    
+    <p class='info-text'>
+    <b>Types of yield curves:</b>
+    </p>
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        - **Normal (Upward Sloping)**: Long-term rates higher than short-term rates; typical during economic expansions
+        - **Inverted**: Short-term rates higher than long-term rates; often precedes recessions
+        """)
+    
+    with col2:
+        st.markdown("""
+        - **Flat**: Similar yields across all maturities; often occurs during transitions
+        - **Steep**: Large gap between short and long-term yields; common during early recovery phases
+        """)
+    
+    st.markdown("""
+    <p class='info-text'>
+    <b>Why the yield curve matters:</b> An inverted yield curve (particularly when the 3-Month rate exceeds the 10-Year rate) has preceded every U.S. recession since 1955, with a typical lead time of 6-18 months. This happens because investors expect economic weakness and lower inflation in the future, driving demand for longer-term bonds and pushing their yields down.
+    </p>
+    """, unsafe_allow_html=True)
+    
+    # Show example yield curves
+    st.markdown("<h3>Example Yield Curves</h3>", unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Normal curve example
+        normal_curve = {
+            '1-Month Rate': 3.8,
+            '3-Month Rate': 3.9,
+            '6-Month Rate': 4.1,
+            '1-Year Rate': 4.3,
+            '2-Year Rate': 4.5,
+            '5-Year Rate': 4.7,
+            '10-Year Rate': 5.0,
+            '30-Year Rate': 5.3
+        }
+        fig = plot_yield_curve(normal_curve, title='Normal Yield Curve (Expansion)', highlight_inversion=False)
+        st.pyplot(fig)
+        st.caption("A normal yield curve typically indicates economic expansion")
+    
+    with col2:
+        # Inverted curve example
+        inverted_curve = {
+            '1-Month Rate': 5.2,
+            '3-Month Rate': 5.1,
+            '6-Month Rate': 5.0,
+            '1-Year Rate': 4.9,
+            '2-Year Rate': 4.7,
+            '5-Year Rate': 4.5,
+            '10-Year Rate': 4.3,
+            '30-Year Rate': 4.1
+        }
+        fig = plot_yield_curve(inverted_curve, title='Inverted Yield Curve (Recession Warning)')
+        st.pyplot(fig)
+        st.caption("An inverted yield curve often precedes recessions")
     
     st.markdown("<h2 class='sub-header'>Key Indicators Explained</h2>", unsafe_allow_html=True)
     
@@ -648,12 +935,12 @@ def display_information():
     st.markdown("<h2 class='sub-header'>Data Sources</h2>", unsafe_allow_html=True)
     st.markdown("""
     <p class='info-text'>
-    In the full version, the economic data used for training the models and generating forecasts is obtained from the following sources:
+    The economic data used for training the models and generating forecasts is obtained from the following sources:
     </p>
     """, unsafe_allow_html=True)
     
     st.markdown("""
-    - Federal Reserve Economic Data (FRED)
+    - Federal Reserve Economic Data (FRED) - Real-time Treasury yield data
     - US Recession Dataset - kaggle (shubhaanshkumar)
     """)
 
