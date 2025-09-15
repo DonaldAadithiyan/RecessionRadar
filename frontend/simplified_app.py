@@ -22,45 +22,100 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Apply custom CSS
+# Apply custom CSS for dark theme
 st.markdown("""
 <style>
+    /* Overall theme */
+    .stApp {
+        background-color: #1e1e1e;
+        color: #f0f0f0;
+    }
+    
+    /* Headers */
     .main-header {
-        font-size: 2.5rem !important;
-        font-weight: 700 !important;
-        color: #1E88E5 !important;
+        font-size: 2.2rem !important;
+        font-weight: 600 !important;
+        color: #ffffff !important;
+        margin-bottom: 0.5rem !important;
     }
     .sub-header {
-        font-size: 1.5rem !important;
-        font-weight: 600 !important;
-        color: #424242 !important;
+        font-size: 1.4rem !important;
+        font-weight: 500 !important;
+        color: #e0e0e0 !important;
+        margin-bottom: 0.5rem !important;
     }
     .info-text {
-        font-size: 1rem !important;
-        color: #616161 !important;
+        font-size: 0.9rem !important;
+        color: #b0b0b0 !important;
     }
+    
+    /* Cards and containers */
     .highlight {
-        background-color: #f0f2f6;
+        background-color: #2d2d2d;
         padding: 1.5rem;
-        border-radius: 0.5rem;
+        border-radius: 0.4rem;
+        border: 1px solid #3d3d3d;
     }
+    .metrics-card {
+        background-color: #2d2d2d;
+        border-radius: 0.4rem;
+        padding: 1.2rem;
+        border: 1px solid #3d3d3d;
+        box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.3);
+        transition: transform 0.2s ease;
+    }
+    .metrics-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Status colors */
     .warning {
         color: #ff6b6b;
         font-weight: 600;
     }
     .success {
-        color: #51cf66;
+        color: #4ade80;
         font-weight: 600;
     }
-    .metrics-card {
-        background-color: #ffffff;
-        border-radius: 0.5rem;
-        padding: 1rem;
-        box-shadow: 0 0.15rem 0.3rem rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease;
+    .info {
+        color: #38bdf8;
+        font-weight: 600;
     }
-    .metrics-card:hover {
-        transform: translateY(-5px);
+    
+    /* Override Streamlit defaults */
+    .stTextInput > div > div > input {
+        background-color: #333333;
+        color: #f0f0f0;
+    }
+    .stSelectbox > div > div > select {
+        background-color: #333333;
+        color: #f0f0f0;
+    }
+    .stNumberInput > div > div > input {
+        background-color: #333333;
+        color: #f0f0f0;
+    }
+    
+    /* Chart background */
+    .stPlotlyChart {
+        background-color: #2d2d2d !important;
+    }
+    
+    /* Sidebar styling */
+    .css-1d391kg, .css-12oz5g7 {
+        background-color: #252525;
+    }
+    
+    /* Adjust metric styles for dark theme */
+    div[data-testid="stMetricValue"] {
+        color: #ffffff !important;
+    }
+    div[data-testid="stMetricDelta"] svg {
+        color: #4ade80 !important;
+    }
+    div[data-testid="stMetricDeltaIcon"] {
+        color: #4ade80 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -237,7 +292,20 @@ def plot_yield_curve(treasury_rates, title='Treasury Yield Curve', highlight_inv
     Returns:
         matplotlib figure
     """
-    fig, ax = plt.figure(figsize=(10, 5)), plt.subplot()
+    # Set dark background style
+    plt.style.use('dark_background')
+    fig, ax = plt.figure(figsize=(10, 6)), plt.subplot()
+    
+    # Dark theme colors
+    background_color = '#1e1e1e'
+    grid_color = '#333333'
+    text_color = '#e0e0e0'
+    line_color = '#FFA000'  # Orange color like in screenshot
+    inversion_color = '#ff5252'
+    
+    # Set figure background
+    fig.patch.set_facecolor(background_color)
+    ax.set_facecolor(background_color)
     
     # Define the order of maturities for proper x-axis plotting
     maturity_order = [
@@ -255,13 +323,24 @@ def plot_yield_curve(treasury_rates, title='Treasury Yield Curve', highlight_inv
             maturities.append(maturity.replace(' Rate', ''))
             rates.append(treasury_rates[maturity])
     
-    # Plot the yield curve
-    ax.plot(maturities, rates, marker='o', linewidth=2, color='#1E88E5')
-    ax.set_ylabel('Yield Rate (%)')
-    ax.set_title(title)
-    ax.grid(True, alpha=0.3)
+    # Plot the yield curve with professional styling
+    ax.plot(maturities, rates, marker='o', linewidth=3, color=line_color)
+    
+    # Customize grid and spines
+    ax.grid(True, alpha=0.2, color=grid_color, linestyle='--')
+    for spine in ax.spines.values():
+        spine.set_color(grid_color)
+    
+    # Style labels and title
+    ax.set_ylabel('Yield (%)', color=text_color, fontsize=10)
+    ax.set_xlabel('Maturity', color=text_color, fontsize=10)
+    ax.set_title(title, color=text_color, fontsize=14, pad=10)
+    
+    # Style tick labels
+    ax.tick_params(colors=text_color)
     
     # Check for inversions
+    has_inversion = False
     if highlight_inversion and len(maturities) >= 2:
         # Look for any case where a shorter-term rate is higher than a longer-term rate
         inversions = []
@@ -269,30 +348,23 @@ def plot_yield_curve(treasury_rates, title='Treasury Yield Curve', highlight_inv
             for j in range(i + 1, len(maturities)):
                 if rates[i] > rates[j]:
                     inversions.append((i, j))
+                    has_inversion = True
         
-        # If there's an inversion, highlight the most significant one (typically short vs long term)
+        # If there's an inversion, highlight the most significant one
         if inversions:
             # Find the inversion with the largest gap between maturity positions
             most_significant = max(inversions, key=lambda x: x[1] - x[0])
             i, j = most_significant
             
-            # Highlight the inversion
-            ax.annotate('Yield Curve Inversion\n(Recession Signal)', 
-                       xy=(maturities[j], rates[j]), 
-                       xytext=(maturities[j-1], rates[j] - 0.4 if rates[j] > 0.5 else rates[j] + 0.4),
-                       arrowprops=dict(facecolor='red', shrink=0.05),
-                       color='red')
-            
-            # Add shading to visualize the inversion
-            ax.fill_between(maturities[i:j+1], rates[i:j+1], alpha=0.15, color='red')
+            # Add shading to visualize the inversion - more subtle than before
+            ax.fill_between(maturities[i:j+1], rates[i:j+1], alpha=0.15, color=inversion_color)
     
-    # Add steepness indicator
-    if len(maturities) >= 2:
-        # Calculate steepness (difference between longest and shortest maturity)
-        steepness = rates[-1] - rates[0]
-        ax.text(0.02, 0.95, f"Curve Steepness: {steepness:.2f}%", 
-                transform=ax.transAxes, fontsize=9, 
-                bbox=dict(facecolor='white', alpha=0.6))
+    # Add inversion indicator in top-right corner if inversion exists
+    if has_inversion:
+        ax.text(0.97, 0.97, "Inverted Yield Curve Detected", 
+                transform=ax.transAxes, fontsize=10, ha='right', va='top',
+                bbox=dict(facecolor='#541414', alpha=0.8, boxstyle='round,pad=0.5'),
+                color=inversion_color)
     
     # Use tighter layout to maximize plot area
     plt.tight_layout()
@@ -300,41 +372,71 @@ def plot_yield_curve(treasury_rates, title='Treasury Yield Curve', highlight_inv
 
 # Main app
 def main():
-    # Create sidebar
+    # Create sidebar with dark theme
     with st.sidebar:
-        st.image("https://img.icons8.com/fluency/96/000000/economic-improvement.png", width=80)
-        st.title("Recession Radar")
+        # Add custom CSS to style sidebar
+        st.markdown("""
+        <style>
+            [data-testid="stSidebar"] {
+                background-color: #252525;
+            }
+            .sidebar-title {
+                font-size: 1.5rem !important;
+                font-weight: 600 !important;
+                color: #ffffff !important;
+                margin-bottom: 1rem !important;
+            }
+            .sidebar-item {
+                padding: 0.5rem 0;
+                border-bottom: 1px solid #3d3d3d;
+            }
+        </style>
+        """, unsafe_allow_html=True)
         
-        # Navigation
-        page = st.radio("Navigation", ["Dashboard", "Custom Prediction", "Information"])
+        # Header with logo
+        st.markdown("""
+        <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+            <img src="https://img.icons8.com/fluency/96/000000/economic-improvement.png" width="40">
+            <h1 class="sidebar-title" style="margin-left: 10px; margin-bottom: 0 !important;">RecessionRadar</h1>
+        </div>
+        <div style="font-size: 0.8rem; color: #b0b0b0; margin-bottom: 1.5rem;">Economic Analysis Tool</div>
+        """, unsafe_allow_html=True)
         
-        # Add a "Rerun Pipeline" button
-        if st.button("🔄 Rerun Data Pipeline", help="Refresh all data from FRED and recalculate indicators"):
+        # Navigation - styled to look like the screenshot
+        st.markdown("<div style='margin-bottom: 1.5rem;'>", unsafe_allow_html=True)
+        page = st.radio("", ["Dashboard", "Custom Prediction", "Information"])
+        st.markdown("</div>", unsafe_allow_html=True)
+        
+        # Add a "Rerun Pipeline" button with better styling
+        st.markdown("<div class='sidebar-item'>", unsafe_allow_html=True)
+        if st.button("🔄 Refresh Data", help="Refresh all data from FRED and recalculate indicators"):
             # Clear the cache for the fetch_treasury_yields function
             fetch_treasury_yields.clear()
-            st.success("✅ Data pipeline rerun successfully! Treasury yield data has been refreshed.")
+            st.success("✅ Data refreshed successfully")
             st.experimental_rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
         
         # Check data source for yield curve
+        st.markdown("<div class='sidebar-item'>", unsafe_allow_html=True)
         _, _, using_real_data = load_data()
         if using_real_data:
-            st.success("✓ Using real-time Treasury yield data")
+            st.markdown("<p style='color: #4ade80; font-size: 0.8rem;'>✓ Using real-time Treasury data</p>", unsafe_allow_html=True)
         else:
-            st.error("✗ Unable to fetch real-time Treasury yield data")
-            st.info("Please check your internet connection or try again later.")
+            st.markdown("<p style='color: #ff6b6b; font-size: 0.8rem;'>✗ Unable to fetch real-time data</p>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
         
-        # Disclaimer
-        st.markdown("---")
-        st.caption("**Disclaimer:** This application provides recession probability forecasts based on economic indicators. These forecasts are not financial advice and should not be used as the sole basis for financial decisions.")
+        # Add some space
+        st.markdown("<div style='height: 20px'></div>", unsafe_allow_html=True)
         
-        # About section
-        st.markdown("---")
-        st.caption("**About**")
-        st.caption("RecessionRadar is a dashboard for visualizing and forecasting recession probabilities based on economic indicators.")
+        # Disclaimer in smaller font
+        st.markdown("<div class='sidebar-item' style='font-size: 0.7rem; color: #888888;'>", unsafe_allow_html=True)
+        st.markdown("**Disclaimer:** This application provides recession probability forecasts based on economic indicators. These forecasts are not financial advice.", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
         
-        # Version
-        st.markdown("---")
-        st.caption("Version 1.0 | Demo Version")
+        # Version at bottom
+        st.markdown("<div style='position: absolute; bottom: 10px; left: 10px; right: 10px; font-size: 0.7rem; color: #666666; text-align: center;'>", unsafe_allow_html=True)
+        st.markdown("Version 1.0.0", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
     
     # Page content
     if page == "Dashboard":
@@ -345,92 +447,218 @@ def main():
         display_information()
 
 def display_dashboard():
+    # Main header with professional styling
     st.markdown("<h1 class='main-header'>RecessionRadar Dashboard</h1>", unsafe_allow_html=True)
-    st.markdown("<p class='info-text'>This dashboard visualizes the probability of a recession occurring within the next 1, 3, and 6 months based on economic indicators.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #b0b0b0; margin-bottom: 20px;'>Monitoring economic indicators and recession probabilities</p>", unsafe_allow_html=True)
+    
+    # Add info box for demo notice
+    st.markdown("""
+    <div style="display: flex; align-items: center; background-color: rgba(56, 189, 248, 0.1); padding: 10px; border-radius: 5px; margin-bottom: 20px; border-left: 3px solid #38bdf8;">
+        <div style="margin-right: 10px; color: #38bdf8;"><i>ℹ️</i></div>
+        <div style="color: #b0b0b0; font-size: 0.9rem;">Currently showing hardcoded sample data. This will be replaced with real API data when connected to the backend.</div>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Load data
     df, indicators, using_real_data = load_data()
     
-    # Display metrics cards
+    # Display header for forecast section
+    st.markdown("<h2 class='sub-header'>Recession Probability Forecast</h2>", unsafe_allow_html=True)
+    
+    # Display metrics cards in a more professional dark theme style
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("<div class='metrics-card'>", unsafe_allow_html=True)
-        st.metric(
-            label="1-Month Recession Probability",
-            value=f"{df['recession_probability_1m'].iloc[-1]:.1%}",
-            delta=f"{(df['recession_probability_1m'].iloc[-1] - df['recession_probability_1m'].iloc[-2]):.1%}"
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("""
+        <div class='metrics-card'>
+            <h3 style='margin-top:0; font-size: 1.1rem; color: #e0e0e0;'>1-Month Forecast</h3>
+            <p style='font-size: 2.2rem; font-weight: bold; margin: 0.2rem 0; color: #ff5252;'>
+                {:.1%}
+            </p>
+            <p style='font-size: 0.8rem; color: #b0b0b0; margin: 0;'>
+                Probability within next month
+            </p>
+        </div>
+        """.format(df['recession_probability_1m'].iloc[-1]), unsafe_allow_html=True)
     
     with col2:
-        st.markdown("<div class='metrics-card'>", unsafe_allow_html=True)
-        st.metric(
-            label="3-Month Recession Probability",
-            value=f"{df['recession_probability_3m'].iloc[-1]:.1%}",
-            delta=f"{(df['recession_probability_3m'].iloc[-1] - df['recession_probability_3m'].iloc[-2]):.1%}"
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("""
+        <div class='metrics-card'>
+            <h3 style='margin-top:0; font-size: 1.1rem; color: #e0e0e0;'>3-Month Forecast</h3>
+            <p style='font-size: 2.2rem; font-weight: bold; margin: 0.2rem 0; color: #ff5252;'>
+                {:.1%}
+            </p>
+            <p style='font-size: 0.8rem; color: #b0b0b0; margin: 0;'>
+                Probability within next three months
+            </p>
+        </div>
+        """.format(df['recession_probability_3m'].iloc[-1]), unsafe_allow_html=True)
     
     with col3:
-        st.markdown("<div class='metrics-card'>", unsafe_allow_html=True)
-        st.metric(
-            label="6-Month Recession Probability",
-            value=f"{df['recession_probability_6m'].iloc[-1]:.1%}",
-            delta=f"{(df['recession_probability_6m'].iloc[-1] - df['recession_probability_6m'].iloc[-2]):.1%}"
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("""
+        <div class='metrics-card'>
+            <h3 style='margin-top:0; font-size: 1.1rem; color: #e0e0e0;'>6-Month Forecast</h3>
+            <p style='font-size: 2.2rem; font-weight: bold; margin: 0.2rem 0; color: #ff5252;'>
+                {:.1%}
+            </p>
+            <p style='font-size: 0.8rem; color: #b0b0b0; margin: 0;'>
+                Probability within next six months
+            </p>
+        </div>
+        """.format(df['recession_probability_6m'].iloc[-1]), unsafe_allow_html=True)
+        
+    # Add last updated timestamp
+    current_time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S %p")
+    st.caption(f"Last updated: {current_time}")
     
     st.markdown("---")
     
     # Plot recession probabilities
-    st.markdown("<h2 class='sub-header'>Recession Probability Trends</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='sub-header'>Historical Recession Probability</h2>", unsafe_allow_html=True)
     
+    # Set dark background style
+    plt.style.use('dark_background')
     fig, ax = plt.figure(figsize=(12, 6)), plt.subplot()
-    ax.plot(df.index, df['recession_probability_1m'], label='1-Month', linewidth=2, color='#1E88E5')
-    ax.plot(df.index, df['recession_probability_3m'], label='3-Month', linewidth=2, color='#FFA000')
-    ax.plot(df.index, df['recession_probability_6m'], label='6-Month', linewidth=2, color='#D81B60')
+    
+    # Dark theme colors
+    background_color = '#1e1e1e'
+    grid_color = '#333333'
+    text_color = '#e0e0e0'
+    
+    # Set figure background
+    fig.patch.set_facecolor(background_color)
+    ax.set_facecolor(background_color)
+    
+    # Plot lines with more professional styling
+    ax.plot(df.index, df['recession_probability_1m'], label='1-Month Probability', linewidth=2, color='#3a86ff')
+    ax.plot(df.index, df['recession_probability_3m'], label='3-Month Probability', linewidth=2, color='#ffa000')
+    ax.plot(df.index, df['recession_probability_6m'], label='6-Month Probability', linewidth=2, color='#ff5252')
+    
+    # Set y-axis range and add percentage markers
     ax.set_ylim(0, 1)
-    ax.set_ylabel('Probability')
-    ax.set_xlabel('Date')
-    ax.legend()
-    ax.grid(True, alpha=0.3)
+    ax.set_yticks([0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0])
+    ax.set_yticklabels(['0%', '20%', '40%', '50%', '60%', '80%', '100%'])
+    
+    # Style grid and spines
+    ax.grid(True, alpha=0.2, color=grid_color, linestyle='--')
+    for spine in ax.spines.values():
+        spine.set_color(grid_color)
+    
+    # Add labels
+    ax.set_ylabel('Probability (%)', color=text_color, fontsize=10)
+    ax.set_xlabel('Date', color=text_color, fontsize=10)
+    
+    # Style tick labels
+    ax.tick_params(colors=text_color)
     
     # Add horizontal reference lines
-    ax.axhline(y=0.5, color='gray', linestyle='--', alpha=0.7)
-    ax.axhline(y=0.7, color='red', linestyle='--', alpha=0.7)
+    ax.axhline(y=0.5, color='#888888', linestyle='--', alpha=0.5)
+    ax.axhline(y=0.7, color='#ff5252', linestyle='--', alpha=0.5)
+    
+    # Add a better legend
+    legend = ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.12), 
+              frameon=True, ncol=3, facecolor=background_color, 
+              edgecolor=grid_color, fontsize=10)
+    for text in legend.get_texts():
+        text.set_color(text_color)
+    
+    # Add title above chart
+    ax.text(0.5, 1.05, "Recession Probability Over Time", 
+            transform=ax.transAxes, fontsize=14, ha='center', 
+            va='bottom', color=text_color)
     
     plt.tight_layout()
     st.pyplot(fig)
+    
+    # Add caption below chart
+    st.caption("The chart shows the recession probability trends over time. A probability above 50% indicates a higher likelihood of a recession occurring within the specified time frame.")
     
     st.markdown("<p class='info-text'>The chart shows the recession probability trends over time. A probability above 50% indicates a higher likelihood of a recession occurring within the specified time frame.</p>", unsafe_allow_html=True)
     
     st.markdown("---")
     
-    # Display key economic indicators
+    # Display key economic indicators with better styling
     st.markdown("<h2 class='sub-header'>Key Economic Indicators</h2>", unsafe_allow_html=True)
     
-    # Create 3 columns for indicators
-    col1, col2, col3 = st.columns(3)
+    # Create a stylish container for indicators
+    st.markdown("""
+    <style>
+    .indicator-container {
+        background-color: #2d2d2d;
+        border: 1px solid #3d3d3d;
+        border-radius: 0.4rem;
+        padding: 1rem;
+    }
+    .indicator-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #3d3d3d;
+    }
+    .indicator-item:last-child {
+        border-bottom: none;
+    }
+    .indicator-name {
+        color: #b0b0b0;
+        font-size: 0.9rem;
+    }
+    .indicator-value {
+        color: #ffffff;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
     # Filter out treasury rates that will be shown in the yield curve
     non_treasury_indicators = {k: v for k, v in indicators.items() if 'Rate' not in k}
-    non_treasury_list = list(non_treasury_indicators.items())
     
-    # Calculate items per column
-    items_per_col = len(non_treasury_list) // 3 + (1 if len(non_treasury_list) % 3 > 0 else 0)
+    # Create columns for indicators
+    col1, col2 = st.columns(2)
     
+    # Prepare indicator lists for each column
+    indicators_list = list(non_treasury_indicators.items())
+    mid_point = len(indicators_list) // 2
+    
+    # Create first column of indicators
     with col1:
-        for name, value in non_treasury_list[:items_per_col]:
-            st.markdown(f"**{name}:** {value}")
+        st.markdown("<div class='indicator-container'>", unsafe_allow_html=True)
+        for name, value in indicators_list[:mid_point]:
+            # Format value with appropriate styling
+            if name == 'CPI' or name == 'PPI':
+                formatted_value = f"{value}%"
+            elif name == 'Unemployment Rate':
+                formatted_value = f"{value}%"
+            else:
+                formatted_value = f"{value}"
+                
+            st.markdown(f"""
+            <div class="indicator-item">
+                <div class="indicator-name">{name}</div>
+                <div class="indicator-value">{formatted_value}</div>
+            </div>
+            """, unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
     
+    # Create second column of indicators
     with col2:
-        for name, value in non_treasury_list[items_per_col:items_per_col*2]:
-            st.markdown(f"**{name}:** {value}")
-    
-    with col3:
-        for name, value in non_treasury_list[items_per_col*2:]:
-            st.markdown(f"**{name}:** {value}")
+        st.markdown("<div class='indicator-container'>", unsafe_allow_html=True)
+        for name, value in indicators_list[mid_point:]:
+            # Format value with appropriate styling
+            if name == 'CPI' or name == 'PPI':
+                formatted_value = f"{value}%"
+            elif name == 'Unemployment Rate':
+                formatted_value = f"{value}%"
+            else:
+                formatted_value = f"{value}"
+                
+            st.markdown(f"""
+            <div class="indicator-item">
+                <div class="indicator-name">{name}</div>
+                <div class="indicator-value">{formatted_value}</div>
+            </div>
+            """, unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
     
     # Yield Curve visualization
     st.markdown("---")
