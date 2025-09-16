@@ -229,9 +229,6 @@ async def create_custom_prediction(request: CustomPredictionRequest):
             six_month = float(six_month_model.predict(dataset)[0])
     except FileNotFoundError as e:
         raise HTTPException(status_code=500, detail=f"Model file not found: {e.filename}")
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail=f"Error loading model or predicting: {str(e)}")
 
     print(one_month, three_month, six_month)    
 

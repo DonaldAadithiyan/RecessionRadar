@@ -6,6 +6,7 @@ import os
 import pickle
 
 from scipy.stats import boxcox
+from models import LGBMWrapper
 import warnings
 warnings.filterwarnings("ignore")
 
