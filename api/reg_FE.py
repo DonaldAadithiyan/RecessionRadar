@@ -6,6 +6,8 @@ import os
 import pickle
 
 from scipy.stats import boxcox
+import warnings
+warnings.filterwarnings("ignore")
 
 # Load the saved dictionary
 with open("anomaly_models/anomaly_stats.pkl", "rb") as f:
@@ -204,7 +206,7 @@ def feature_eng(input_data):
             
     for col, anomaly_col in zip(anomaly_cols_, anomaly_cols):
         if col in input_data:
-            df_reduced.at[df_reduced.index[-1], anomaly_col] = is_anomaly(col, input_data[col], anomaly_stats)
+            df_reduced.at[df_reduced.index[-1], anomaly_col] = int(is_anomaly(col, input_data[col], anomaly_stats))
             
     for col in input_data:
         if col in df_reduced.columns:
