@@ -1,0 +1,38 @@
+ENHANCED RECESSION PREDICTION ENSEMBLE
+==================================================
+
+Generated: 2025-09-16 23:30:23.385846
+Models saved: 5
+Targets: recession_probability, 1_month_recession_probability, 3_month_recession_probability, 6_month_recession_probability
+
+MODEL DETAILS:
+--------------------
+Enhanced CatBoost:
+  Type: ImprovedCatBoostModel
+  Size: 2.12 MB
+
+Enhanced LightGBM:
+  Type: ImprovedLightGBMModel
+  Size: 0.06 MB
+
+Enhanced Random Forest:
+  Type: ImprovedRandomForestModel
+  Size: 15.25 MB
+
+Weighted Ensemble:
+  Type: WeightedEnsemble
+  Size: 17.59 MB
+
+Enhanced Stacking:
+  Type: ImprovedStackingEnsemble
+  Size: 17.59 MB
+
+ENHANCEMENTS IMPLEMENTED:
+------------------------------
+• Improved feature scaling (RobustScaler/StandardScaler)
+• Enhanced hyperparameter tuning
+• Stratified cross-validation
+• Feature engineering for meta-learning
+• ElasticNet meta-models with nested CV
+• Better data cleaning and transformation
+• Early stopping and validation sets
