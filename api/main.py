@@ -8,6 +8,12 @@ from datetime import datetime, timedelta
 import random
 import os
 import json
+import requests
+import dotenv
+import concurrent.futures
+
+
+dotenv.load_dotenv()
 
 # Create FastAPI app
 app = FastAPI(
@@ -48,6 +54,49 @@ class RecessionPrediction(BaseModel):
 
 class CustomPredictionRequest(BaseModel):
     indicators: Dict[str, float]
+    
+    
+FRED_API_KEY = os.getenv("FRED_API_KEY")
+# FRED_API_KEY = "b9aad5fff9989e57826ce9229a0f0bdb"
+
+FRED_SERIES = {
+    "3-Month Rate": "DTB3",
+    "6-Month Rate": "DTB6",
+    "1-Year Rate": "DTB1YR",
+    "2-Year Rate": "DGS2",
+    "5-Year Rate": "DGS5",
+    "10-Year Rate": "DGS10",
+    "30-Year Rate": "DGS30"
+}
+
+ECON_FRED_SERIES = {
+    "CPI": "CPIAUCSL",
+    "PPI": "PPIACO",
+    "Industrial Production": "INDPRO",
+    "Share Price": "SP500",
+    "Unemployment Rate": "UNRATE",
+    "OECD CLI Index": "OECDLOLITOAASTSAM",
+    "CSI Index": "UMCSENT"
+}
+
+def fetch_latest_fred_value(series_id):
+    url = f"https://api.stlouisfed.org/fred/series/observations"
+    params = {
+        "series_id": series_id,
+        "api_key": FRED_API_KEY,
+        "file_type": "json",
+        "sort_order": "desc",
+        "limit": 1
+    }
+    resp = requests.get(url, params=params)
+    data = resp.json()
+    if "observations" in data and len(data["observations"]) > 0:
+        value = data["observations"][0]["value"]
+        try:
+            return float(value)
+        except ValueError:
+            return None
+    return None
 
 # Root endpoint
 @app.get("/")
@@ -57,19 +106,23 @@ async def root():
 # Get Treasury Yields
 @app.get("/api/treasury-yields", response_model=TreasuryYields)
 async def get_treasury_yields():
-    # In a real implementation, this would fetch from FRED
-    # For now, using hardcoded data similar to your Streamlit app
-    yields = {
-        "1-Month Rate": 4.52,
-        "3-Month Rate": 4.58,
-        "6-Month Rate": 4.65,
-        "1-Year Rate": 4.86,
-        "2-Year Rate": 4.47,
-        "5-Year Rate": 4.21,
-        "10-Year Rate": 3.98,
-        "30-Year Rate": 4.10
-    }
+    if not FRED_API_KEY:
+        raise HTTPException(status_code=500, detail="FRED API key not set in environment variable FRED_API_KEY")
+
+    yields = {}
     
+    def fetch(label_series):
+        label, series_id = label_series
+        value = fetch_latest_fred_value(series_id)
+        value = float(value) if value is not None else None
+        return (label, value)
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        results = list(executor.map(fetch, FRED_SERIES.items()))
+        for label, value in results:
+            yields[label] = value
+            
+    print(yields)
     return TreasuryYields(
         yields=yields,
         updated_at=datetime.now().isoformat()
@@ -78,16 +131,23 @@ async def get_treasury_yields():
 # Get Economic Indicators
 @app.get("/api/economic-indicators", response_model=EconomicIndicators)
 async def get_economic_indicators():
-    # Hardcoded economic indicators for now
-    indicators = {
-        "CPI": 3.2,
-        "PPI": 2.8,
-        "Industrial Production": 104.5,
-        "Share Price": 4512.8,
-        "Unemployment Rate": 3.8,
-        "OECD CLI Index": 99.2,
-        "CSI Index": 82.7
-    }
+    if not FRED_API_KEY:
+        raise HTTPException(status_code=500, detail="FRED API key not set in environment variable FRED_API_KEY")
+
+    indicators = {}
+
+    def fetch(label_series):
+        label, series_id = label_series
+        value = fetch_latest_fred_value(series_id)
+        value = float(value) if value is not None else None
+        return (label, value)
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        results = list(executor.map(fetch, ECON_FRED_SERIES.items()))
+        for label, value in results:
+            indicators[label] = value
+            
+    print(indicators)
     
     return EconomicIndicators(
         indicators=indicators,
