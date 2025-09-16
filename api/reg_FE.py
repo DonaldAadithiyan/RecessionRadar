@@ -202,15 +202,34 @@ def feature_eng(input_data):
             transformed, lmbda = boxcox([share_price_val])
             input_data['share_price'] = transformed[0]
             
-    
     for col, anomaly_col in zip(anomaly_cols_, anomaly_cols):
         if col in input_data:
-            df_reduced[anomaly_col][-1] = is_anomaly(col, input_data[col], anomaly_stats)
+            df_reduced.at[df_reduced.index[-1], anomaly_col] = is_anomaly(col, input_data[col], anomaly_stats)
             
     for col in input_data:
         if col in df_reduced.columns:
-            df_reduced[col][-1] = input_data[col]
+            df_reduced.at[df_reduced.index[-1], col] = input_data[col]
+            
 
     df_reduced.to_csv('data/fix/feature_selected_reg_full.csv', index=False)
     
 
+if __name__ == "__main__":
+    sample_input = {
+        '3_months_rate': 5.0,
+        '6_months_rate': 5.5,
+        '1_year_rate': 6.0,
+        '2_year_rate': 6.5,
+        '5_year_rate': 7.0,
+        '10_year_rate': 7.5,
+        '30_year_rate': 8.0,
+        'CPI': 210.5,
+        'PPI': 215.0,
+        'Industrial Production': 105.0,
+        'Share Price': 4500.0,
+        'Unemployment Rate': 4.0,
+        'OECD CLI Index': 100.0,
+        'CSI Index': 80.0,
+        'gdp_per_capita': 65000
+    }
+    feature_eng(sample_input)
