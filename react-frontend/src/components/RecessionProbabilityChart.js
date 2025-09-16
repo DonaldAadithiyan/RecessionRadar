@@ -101,7 +101,8 @@ function RecessionProbabilityChart({ data }) {
           color: 'white'
         },
         ticks: {
-          color: 'white'
+          color: 'white',
+          maxTicksLimit: 15 // Show fewer x-axis labels
         },
         grid: {
           color: 'rgba(255, 255, 255, 0.1)' // Lighter grid lines for dark background
@@ -160,14 +161,19 @@ function RecessionProbabilityChart({ data }) {
     },
   };
 
+  // Calculate dynamic minWidth for horizontal scrolling (e.g., 40px per data point, min 1200px)
+  const minWidth = chartData && chartData.labels ? Math.max(chartData.labels.length * 40, 1200) : 1200;
+
   return (
-    <Paper sx={{ p: 3, mb: 4, height: 400, bgcolor: '#212121', color: 'white' }}>
+    <Paper sx={{ p: 3, mb: 4, height: 600, bgcolor: '#212121', color: 'white' }}>
       <Typography variant="h5" component="h2" gutterBottom color="white">
         Historical Recession Probability
       </Typography>
       {chartData ? (
-        <Box sx={{ height: 'calc(100% - 40px)' }}>
-          <Line options={options} data={chartData} />
+        <Box sx={{ height: 'calc(100% - 40px)', overflowX: 'auto' }}>
+          <Box sx={{ minWidth: minWidth, height: '100%' }}>
+            <Line options={options} data={chartData} height={1} />
+          </Box>
         </Box>
       ) : (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>

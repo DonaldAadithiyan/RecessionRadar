@@ -154,28 +154,41 @@ async def get_economic_indicators():
         updated_at=datetime.now().isoformat()
     )
 
-# Get Recession Probabilities
+# Get Recession Probabilities from FRED API and generate shifted columns
 @app.get("/api/recession-probabilities", response_model=RecessionProbabilities)
-async def get_recession_probabilities(months: int = 24):
-    # Generate synthetic data similar to your Streamlit app
-    today = datetime.now()
-    dates = [(today - timedelta(days=30*i)).strftime("%Y-%m-%d") for i in range(months)]
-    dates.reverse()
-    
-    # Create probabilities with some randomness and trends
-    # This simulates the np.sin pattern from your Streamlit app
-    seed = random.randint(0, 1000)  # For reproducibility within one request
-    rng = np.random.RandomState(seed)
-    
-    one_month = np.clip(np.sin(np.linspace(0, 6, months)) * 0.4 + 0.3 + rng.normal(0, 0.05, months), 0, 1).tolist()
-    three_month = np.clip(np.sin(np.linspace(0.5, 6.5, months)) * 0.35 + 0.4 + rng.normal(0, 0.05, months), 0, 1).tolist()
-    six_month = np.clip(np.sin(np.linspace(1, 7, months)) * 0.3 + 0.5 + rng.normal(0, 0.05, months), 0, 1).tolist()
-    
+async def get_recession_probabilities():
+    if not FRED_API_KEY:
+        raise HTTPException(status_code=500, detail="FRED API key not set in environment variable FRED_API_KEY")
+    # Fetch the RECPROUSM156N series from FRED
+    url = "https://api.stlouisfed.org/fred/series/observations"
+    params = {
+        "series_id": "RECPROUSM156N",
+        "api_key": FRED_API_KEY,
+        "file_type": "json"
+    }
+    resp = requests.get(url, params=params)
+    if resp.status_code != 200:
+        raise HTTPException(status_code=500, detail="Failed to fetch data from FRED API.")
+    data = resp.json()
+    if "observations" not in data:
+        raise HTTPException(status_code=500, detail="FRED API response missing observations.")
+    # Convert to DataFrame
+    df = pd.DataFrame(data["observations"])
+    if "date" not in df.columns or "value" not in df.columns:
+        raise HTTPException(status_code=500, detail="FRED data missing required columns.")
+    df = df[["date", "value"]].copy()
+    df["recession_probability"] = pd.to_numeric(df["value"], errors="coerce")
+    # Create shifted columns
+    df["1_month_recession_probability"] = df["recession_probability"].shift(-1)
+    df["3_month_recession_probability"] = df["recession_probability"].shift(-3)
+    df["6_month_recession_probability"] = df["recession_probability"].shift(-6)
+    # Drop rows with NaN in any probability column
+    df = df.dropna(subset=["1_month_recession_probability", "3_month_recession_probability", "6_month_recession_probability"])
     return RecessionProbabilities(
-        dates=dates,
-        one_month=one_month,
-        three_month=three_month,
-        six_month=six_month
+        dates=df["date"].tolist(),
+        one_month=df["1_month_recession_probability"].tolist(),
+        three_month=df["3_month_recession_probability"].tolist(),
+        six_month=df["6_month_recession_probability"].tolist()
     )
 
 # Get Current Recession Prediction
