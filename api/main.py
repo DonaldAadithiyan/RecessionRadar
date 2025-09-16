@@ -10,7 +10,10 @@ import os
 import json
 import requests
 import dotenv
+import pickle
 import concurrent.futures
+
+from reg_FE import feature_eng
 
 
 dotenv.load_dotenv()
@@ -206,66 +209,36 @@ async def get_current_prediction():
 # Custom Prediction endpoint
 @app.post("/api/custom-prediction", response_model=RecessionPrediction)
 async def create_custom_prediction(request: CustomPredictionRequest):
-    # This would normally call your model with the custom inputs
-    # For now, implementing a simplified version of your predict_custom_recession function
-    
     inputs = request.indicators
+    dataset = feature_eng(inputs)
     
-    # Similar weights as in your Streamlit implementation
-    weights = {
-        "1-Year Rate": 0.05,
-        "3-Month Rate": 0.05,
-        "6-Month Rate": 0.05,
-        "CPI": 0.15,
-        "Industrial Production": -0.15,
-        "10-Year Rate": -0.1,
-        "Share Price": -0.1,
-        "Unemployment Rate": 0.2,
-        "PPI": 0.1,
-        "OECD CLI Index": -0.15,
-        "CSI Index": -0.1
-    }
+    one_month_model_path = '../models/lgbm_recession_chain_model.pkl'
+    three_month_model_path = '../models/lgbm_recession_chain_model.pkl'
+    six_month_model_path = '../models/lgbm_recession_6m_model.pkl'
     
-    # Normalize input values
-    normalized = {}
-    for key in weights.keys():
-        if key in inputs:
-            # Simple normalization based on typical ranges
-            if "Rate" in key or "CPI" in key or "PPI" in key:
-                normalized[key] = inputs[key] / 10  # Rates typically 0-10%
-            elif key == "Unemployment Rate":
-                normalized[key] = inputs[key] / 20  # Unemployment typically 0-20%
-            elif key == "Industrial Production":
-                normalized[key] = (inputs[key] - 100) / 20  # Centered around 100
-            elif key == "Share Price":
-                normalized[key] = (inputs[key] - 4000) / 1000  # Normalized around 4000
-            elif key == "OECD CLI Index":
-                normalized[key] = (inputs[key] - 100) / 10  # Centered around 100
-            elif key == "CSI Index":
-                normalized[key] = (inputs[key] - 80) / 30  # Centered around 80
-            else:
-                normalized[key] = inputs[key] / 100  # Default normalization
-        else:
-            # Default values if not provided
-            normalized[key] = 0
-    
-    # Calculate weighted sum
-    weighted_sum = sum(weights[key] * normalized[key] for key in weights)
-    
-    # Check for yield curve inversion
-    if "3-Month Rate" in inputs and "10-Year Rate" in inputs:
-        if inputs["3-Month Rate"] > inputs["10-Year Rate"]:
-            weighted_sum += 0.2  # Add recession probability for inverted yield curve
-    
-    # Convert to probability using sigmoid function
-    import math
-    base_prob = 1 / (1 + math.exp(-weighted_sum * 5))
-    
-    # Create slightly different probabilities for different time horizons
+    # predict using the models
+    try:
+        with open(one_month_model_path, 'rb') as f:
+            one_month_model = pickle.load(f)
+            one_month = float(one_month_model.predict(dataset)[0])
+        with open(three_month_model_path, 'rb') as f:
+            three_month_model = pickle.load(f)
+            three_month = float(three_month_model.predict(dataset)[0])
+        with open(six_month_model_path, 'rb') as f:
+            six_month_model = pickle.load(f)
+            six_month = float(six_month_model.predict(dataset)[0])
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=500, detail=f"Model file not found: {e.filename}")
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=f"Error loading model or predicting: {str(e)}")
+
+    print(one_month, three_month, six_month)    
+
     return RecessionPrediction(
-        one_month=min(max(base_prob, 0), 1),
-        three_month=min(max(base_prob + 0.1, 0), 1),
-        six_month=min(max(base_prob + 0.2, 0), 1),
+        one_month=min(max(one_month, 0), 1),
+        three_month=min(max(three_month, 0), 1),
+        six_month=min(max(six_month, 0), 1),
         updated_at=datetime.now().isoformat()
     )
 

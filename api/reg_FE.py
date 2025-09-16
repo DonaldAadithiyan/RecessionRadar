@@ -9,11 +9,7 @@ from scipy.stats import boxcox
 import warnings
 warnings.filterwarnings("ignore")
 
-# Load the saved dictionary
-with open("anomaly_models/anomaly_stats.pkl", "rb") as f:
-    loaded_stats = pickle.load(f)
-
-def is_anomaly(col_name: str, value: float, stats_dict: dict = loaded_stats) -> bool:
+def is_anomaly(col_name: str, value: float, stats_dict) -> bool:
     """
     Check if a single value is an anomaly based on precomputed stats.
 
@@ -35,17 +31,9 @@ def is_anomaly(col_name: str, value: float, stats_dict: dict = loaded_stats) -> 
     return not (bounds["lower_bound"] <= value <= bounds["upper_bound"])
 
 
-
-val = 210.5
-if is_anomaly("CPI", val):
-    print(f"{val} is an anomaly for CPI")
-else:
-    print(f"{val} is normal for CPI")
-
-
 def feature_eng(input_data):
-    train_df = pd.read_csv('data/fix/feature_selected_recession_train.csv')
-    test_df = pd.read_csv('data/fix/feature_selected_recession_test.csv')
+    train_df = pd.read_csv('../data/fix/feature_selected_recession_train.csv')
+    test_df = pd.read_csv('../data/fix/feature_selected_recession_test.csv')
 
 
     train_df['CPI_unemployment_interaction'] = train_df['CPI'] * train_df['unemployment_rate']
@@ -212,8 +200,7 @@ def feature_eng(input_data):
         if col in df_reduced.columns:
             df_reduced.at[df_reduced.index[-1], col] = input_data[col]
             
-
-    df_reduced.to_csv('data/fix/feature_selected_reg_full.csv', index=False)
+    return df_reduced
     
 
 if __name__ == "__main__":

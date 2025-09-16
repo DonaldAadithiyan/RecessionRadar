@@ -130,13 +130,6 @@ frontend/*/__pycache__/
 # !data/processed/.gitkeep
 # !data/combined/.gitkeep
 
-# Model files (usually large)
-models/*.pkl
-models/*.joblib
-models/*.h5
-models/*.pb
-models/*.tflite
-models/*.pt
 
 # Jupyter notebook checkpoints
 notebooks/.ipynb_checkpoints/
