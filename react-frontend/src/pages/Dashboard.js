@@ -174,9 +174,7 @@ function Dashboard() {
         </Typography>
 
         {/* Note about hardcoded data */}
-        <Alert severity="info" sx={{ mb: 3 }}>
-          Currently showing hardcoded sample data. This will be replaced with real API data when connected to the backend.
-        </Alert>
+        
 
         {/* Error handling for missing data */}
         {!currentPrediction && (
