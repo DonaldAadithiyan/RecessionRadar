@@ -200,9 +200,10 @@ async def get_current_prediction():
     # This would normally be the latest prediction from your model
     # For now, hardcoding similar to your dashboard metrics
     return RecessionPrediction(
-        one_month=0.38,
-        three_month=0.51,
-        six_month=0.65,
+        # forcast=1/100,
+        one_month=0.5/100,
+        three_month = 12/100,
+        six_month = 80/100,
         updated_at=datetime.now().isoformat()
     )
 
@@ -230,6 +231,7 @@ async def create_custom_prediction(request: CustomPredictionRequest):
     except FileNotFoundError as e:
         raise HTTPException(status_code=500, detail=f"Model file not found: {e.filename}")
     except Exception as e:
+        # forcast = 1/100
         one_month = 0.5/100
         three_month = 12/100
         six_month = 80/100
@@ -237,6 +239,7 @@ async def create_custom_prediction(request: CustomPredictionRequest):
     print(one_month, three_month, six_month)    
 
     return RecessionPrediction(
+        # forcast = min(max(forcast, 0), 1),
         one_month=min(max(one_month, 0), 1),
         three_month=min(max(three_month, 0), 1),
         six_month=min(max(six_month, 0), 1),
