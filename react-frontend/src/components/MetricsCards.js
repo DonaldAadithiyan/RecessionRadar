@@ -30,7 +30,7 @@ function ProbabilityCard({ title, value, timeframe }) {
         </Box>
         
         <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color }}>
-          {Math.round(value * 100)}%
+          {Math.round(value * 100).toFixed(2)}%
         </Typography>
         
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
