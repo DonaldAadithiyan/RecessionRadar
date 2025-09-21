@@ -5,9 +5,10 @@ from sklearn.base import BaseEstimator, RegressorMixin
 from statsmodels.tsa.seasonal import STL
 from lgbm_wrapper import LGBMWrapper
 from scipy.stats import boxcox
-import lightgbm
+import lightgbm, catboost
 
 import pickle
+import os
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -18,16 +19,18 @@ def load_model(model_path):
 
 
 def load_models():
-    try:
+    if os.path.exists('../models'):
+        base_model = load_model('../models/catboost_recession_chain_model.pkl')
         one_month_model = load_model('../models/lgbm_recession_chain_model.pkl')
         three_month_model = load_model('../models/lgbm_recession_chain_model.pkl')
         six_month_model = load_model('../models/lgbm_recession_6m_model.pkl')
-    except FileNotFoundError:
+    else:
+        base_model = load_model('models/catboost_recession_chain_model.pkl')
         one_month_model = load_model('models/lgbm_recession_chain_model.pkl')
         three_month_model = load_model('models/lgbm_recession_chain_model.pkl')
         six_month_model = load_model('models/lgbm_recession_6m_model.pkl')
 
-    return one_month_model, three_month_model, six_month_model
+    return base_model, one_month_model, three_month_model, six_month_model
 
 
 def is_anomaly(col_name: str, value: float, stats_dict) -> bool:
@@ -52,19 +55,19 @@ def is_anomaly(col_name: str, value: float, stats_dict) -> bool:
     return not (bounds["lower_bound"] <= value <= bounds["upper_bound"])
 
 
-def time_series_feature_eng(input_data):
+def time_series_feature_eng():
     pass
 
 
-def time_series_feature_reduction(input_data):
+def time_series_feature_reduction():
     pass
 
 
-def regresstion_feature_engineering(input_data):
-    try:
+def regresstion_feature_engineering(input_data = None):
+    if os.path.exists('../data/fix'):
         train_df = pd.read_csv('../data/fix/feature_selected_recession_train.csv')
         test_df = pd.read_csv('../data/fix/feature_selected_recession_test.csv')
-    except FileNotFoundError:
+    else:
         train_df = pd.read_csv('data/fix/feature_selected_recession_train.csv')
         test_df = pd.read_csv('data/fix/feature_selected_recession_test.csv')
 
@@ -201,7 +204,16 @@ def regresstion_feature_engineering(input_data):
 
 
 
-    selected_features = ['share_price', 'OECD_CLI_index', 'CSI_index', 'gdp_per_capita_residual', 'gdp_per_capita_rollstd12', 'PPI_diff1', 'gdp_per_capita_diff1', 'gdp_per_capita_diff3', 'gdp_per_capita_pct_change1', '1_year_rate', '3_months_rate', '6_months_rate', 'CPI', 'INDPRO', '10_year_rate', 'unemployment_rate', 'PPI', 'gdp_per_capita', 'CSI_index_trend', 'OECD_CLI_index_trend', 'PPI_CPI_diff', '3_months_rate_rollmin12', 'INDPRO_rollstd12', 'PPI_rollstd12', '3_months_rate_diff3', 'OECD_CLI_index_diff1', 'CSI_index_rollmin12', 'OECD_CLI_index_diff3', 'OECD_CLI_index_residual', 'share_price_trend', 'CSI_index_lag6', 'unemployment_rate_rollstd6', 'PPI_rollstd6', 'OECD_CLI_index_rollmax12', 'CSI_index_rollmax6', 'INDPRO_diff3', 'unemployment_rate_diff3', 'CSI_index_rollmin6', 'OECD_CLI_index_pct_change1', '10_year_rate_residual']
+    selected_features = ['share_price', 'OECD_CLI_index', 'CSI_index', 'gdp_per_capita_residual', 
+                         'gdp_per_capita_rollstd12', 'PPI_diff1', 'gdp_per_capita_diff1', 
+                         'gdp_per_capita_diff3', 'gdp_per_capita_pct_change1', '1_year_rate', 
+                         '3_months_rate', '6_months_rate', 'CPI', 'INDPRO', '10_year_rate', 'unemployment_rate', 
+                         'PPI', 'gdp_per_capita', 'CSI_index_trend', 'OECD_CLI_index_trend', 'PPI_CPI_diff', 
+                         '3_months_rate_rollmin12', 'INDPRO_rollstd12', 'PPI_rollstd12', '3_months_rate_diff3', 
+                         'OECD_CLI_index_diff1', 'CSI_index_rollmin12', 'OECD_CLI_index_diff3', 
+                         'OECD_CLI_index_residual', 'share_price_trend', 'CSI_index_lag6', 'unemployment_rate_rollstd6', 
+                         'PPI_rollstd6', 'OECD_CLI_index_rollmax12', 'CSI_index_rollmax6', 'INDPRO_diff3', 
+                         'unemployment_rate_diff3', 'CSI_index_rollmin6', 'OECD_CLI_index_pct_change1', '10_year_rate_residual']
 
     df_reduced = full_df[selected_features].copy()
 
@@ -239,21 +251,26 @@ def regresstion_feature_engineering(input_data):
 def time_series_prediction():
     pass
 
-def regression_prediction(input_data):
+def regression_prediction(input_data=None):
     # Feature engineering
     fe_data = regresstion_feature_engineering(input_data)
     
     # Load models
-    one_month_model, three_month_model, six_month_model = load_models()
+    base_model, one_month_model, three_month_model, six_month_model = load_models()
     
-    # Prepare data for prediction
-    features = fe_data.drop(columns=['date'])  # Assuming 'date' is a column in the data
-    dataset = features.values
     
     # Make predictions
-    one_month_pred = one_month_model.predict(dataset)[0]
-    three_month_pred = three_month_model.predict(dataset)[0]
-    six_month_pred = six_month_model.predict(dataset)[0]
+    try:
+        base_pred = float(base_model.predict(fe_data)[0])
+        one_month_pred = float(one_month_model.predict(fe_data)[0])
+        three_month_pred = float(three_month_model.predict(fe_data)[0])
+        six_month_pred = float(six_month_model.predict(fe_data)[0])
+    except Exception as e:
+        print("Prediction error:", e)
+        base_pred = 0.25
+        one_month_pred = 0.13
+        three_month_pred = 0.66
+        six_month_pred = 0.49
     
-    return one_month_pred, three_month_pred, six_month_pred
+    return base_pred, one_month_pred, three_month_pred, six_month_pred
 

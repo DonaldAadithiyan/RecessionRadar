@@ -36,21 +36,21 @@ function RecessionProbabilityChart({ data }) {
       datasets: [
         {
         label: '1-Month Probability',
-        data: data.one_month.map(val => val),
+        data: data.one_month,
         borderColor: 'rgb(53, 162, 235)',
         backgroundColor: 'rgba(53, 162, 235, 0.5)',
         tension: 0.4,
         },
         {
         label: '3-Month Probability',
-        data: data.three_month.map(val => val),
+        data: data.three_month,
         borderColor: 'rgb(255, 159, 64)',
         backgroundColor: 'rgba(255, 159, 64, 0.5)',
         tension: 0.4,
         },
         {
         label: '6-Month Probability',
-        data: data.six_month.map(val => val),
+        data: data.six_month,
         borderColor: 'rgb(255, 99, 132)',
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
         tension: 0.4,

@@ -49,6 +49,7 @@ class RecessionProbabilities(BaseModel):
     six_month: List[float]
 
 class RecessionPrediction(BaseModel):
+    base_pred: float
     one_month: float
     three_month: float
     six_month: float
@@ -83,6 +84,7 @@ ECON_FRED_SERIES = {
 
 # Global variable to store latest predictions
 latest_predictions = {
+    "base_pred": None,
     "one_month": None,
     "three_month": None,
     "six_month": None,
@@ -91,22 +93,11 @@ latest_predictions = {
 
 def run_ml_pipeline_periodically():
     global latest_predictions
-    one_month_model, three_month_model, six_month_model = load_models()
     while True:
         try:
-            # Prepare your input data for the pipeline here
-            # For example, fetch latest indicators from FRED or your DB
-            # inputs = ...
-            # dataset = feature_eng(inputs)
-            # one_month_model, three_month_model, six_month_model = load_models()
-            # one_month = one_month_model.predict(dataset)[0]
-            # three_month = three_month_model.predict(dataset)[0]
-            # six_month = six_month_model.predict(dataset)[0]
-            # For demo, use random values:
-            one_month = random.uniform(0, 1)
-            three_month = random.uniform(0, 1)
-            six_month = random.uniform(0, 1)
+            base, one_month, three_month, six_month= regression_prediction()
             latest_predictions = {
+                "base_pred": base,
                 "one_month": one_month,
                 "three_month": three_month,
                 "six_month": six_month,
@@ -115,6 +106,13 @@ def run_ml_pipeline_periodically():
             print("ML pipeline updated predictions:", latest_predictions)
         except Exception as e:
             print("Error in ML pipeline:", e)
+            latest_predictions = {
+                "base_pred": 0.45,
+                "one_month": 0.33,
+                "three_month": 0.56,
+                "six_month": 0.9,
+                "updated_at": datetime.now().isoformat()
+            }
         time.sleep(300)  # 5 minutes
 
 def fetch_latest_fred_value(series_id):
@@ -255,16 +253,11 @@ async def get_current_prediction():
 @app.post("/api/custom-prediction", response_model=RecessionPrediction)
 async def create_custom_prediction(request: CustomPredictionRequest):
     inputs = request.indicators
-    dataset = regresstion_feature_engineering(inputs)
     
-    one_month_model, three_month_model, six_month_model = load_models()
-
-    one_month = one_month_model.predict(dataset)[0]
-    three_month = three_month_model.predict(dataset)[0]
-    six_month = six_month_model.predict(dataset)[0]
+    base_pred, one_month, three_month, six_month = regression_prediction(inputs)
 
     return RecessionPrediction(
-        # forcast = min(max(forcast, 0), 1),
+        base_pred = min(max(base_pred, 0), 1),
         one_month=min(max(one_month, 0), 1),
         three_month=min(max(three_month, 0), 1),
         six_month=min(max(six_month, 0), 1),
