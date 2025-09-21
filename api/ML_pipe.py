@@ -1,14 +1,34 @@
-from statsmodels.tsa.seasonal import STL
 import pandas as pd
 import numpy as np
-import pickle
-import os
-import pickle
 
+from sklearn.base import BaseEstimator, RegressorMixin
+from statsmodels.tsa.seasonal import STL
+from lgbm_wrapper import LGBMWrapper
 from scipy.stats import boxcox
-from models import LGBMWrapper
+import lightgbm
+
+import pickle
 import warnings
 warnings.filterwarnings("ignore")
+
+def load_model(model_path):
+    with open(model_path, 'rb') as f:
+        model = pickle.load(f)
+    return model
+
+
+def load_models():
+    try:
+        one_month_model = load_model('../models/lgbm_recession_chain_model.pkl')
+        three_month_model = load_model('../models/lgbm_recession_chain_model.pkl')
+        six_month_model = load_model('../models/lgbm_recession_6m_model.pkl')
+    except FileNotFoundError:
+        one_month_model = load_model('models/lgbm_recession_chain_model.pkl')
+        three_month_model = load_model('models/lgbm_recession_chain_model.pkl')
+        six_month_model = load_model('models/lgbm_recession_6m_model.pkl')
+
+    return one_month_model, three_month_model, six_month_model
+
 
 def is_anomaly(col_name: str, value: float, stats_dict) -> bool:
     """
@@ -32,9 +52,21 @@ def is_anomaly(col_name: str, value: float, stats_dict) -> bool:
     return not (bounds["lower_bound"] <= value <= bounds["upper_bound"])
 
 
-def feature_eng(input_data):
-    train_df = pd.read_csv('../data/fix/feature_selected_recession_train.csv')
-    test_df = pd.read_csv('../data/fix/feature_selected_recession_test.csv')
+def time_series_feature_eng(input_data):
+    pass
+
+
+def time_series_feature_reduction(input_data):
+    pass
+
+
+def regresstion_feature_engineering(input_data):
+    try:
+        train_df = pd.read_csv('../data/fix/feature_selected_recession_train.csv')
+        test_df = pd.read_csv('../data/fix/feature_selected_recession_test.csv')
+    except FileNotFoundError:
+        train_df = pd.read_csv('data/fix/feature_selected_recession_train.csv')
+        test_df = pd.read_csv('data/fix/feature_selected_recession_test.csv')
 
 
     train_df['CPI_unemployment_interaction'] = train_df['CPI'] * train_df['unemployment_rate']
@@ -202,24 +234,26 @@ def feature_eng(input_data):
             df_reduced.at[df_reduced.index[-1], col] = input_data[col]
             
     return df_reduced
-    
 
-if __name__ == "__main__":
-    sample_input = {
-        '3_months_rate': 5.0,
-        '6_months_rate': 5.5,
-        '1_year_rate': 6.0,
-        '2_year_rate': 6.5,
-        '5_year_rate': 7.0,
-        '10_year_rate': 7.5,
-        '30_year_rate': 8.0,
-        'CPI': 210.5,
-        'PPI': 215.0,
-        'Industrial Production': 105.0,
-        'Share Price': 4500.0,
-        'Unemployment Rate': 4.0,
-        'OECD CLI Index': 100.0,
-        'CSI Index': 80.0,
-        'gdp_per_capita': 65000
-    }
-    feature_eng(sample_input)
+
+def time_series_prediction():
+    pass
+
+def regression_prediction(input_data):
+    # Feature engineering
+    fe_data = regresstion_feature_engineering(input_data)
+    
+    # Load models
+    one_month_model, three_month_model, six_month_model = load_models()
+    
+    # Prepare data for prediction
+    features = fe_data.drop(columns=['date'])  # Assuming 'date' is a column in the data
+    dataset = features.values
+    
+    # Make predictions
+    one_month_pred = one_month_model.predict(dataset)[0]
+    three_month_pred = three_month_model.predict(dataset)[0]
+    six_month_pred = six_month_model.predict(dataset)[0]
+    
+    return one_month_pred, three_month_pred, six_month_pred
+

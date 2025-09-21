@@ -32,30 +32,30 @@ function RecessionProbabilityChart({ data }) {
   useEffect(() => {
     if (data && data.dates && data.one_month && data.three_month && data.six_month) {
       setChartData({
-        labels: data.dates.map(date => new Date(date).toLocaleDateString()),
-        datasets: [
-          {
-            label: '1-Month Probability',
-            data: data.one_month.map(val => val * 100),
-            borderColor: 'rgb(53, 162, 235)',
-            backgroundColor: 'rgba(53, 162, 235, 0.5)',
-            tension: 0.4,
-          },
-          {
-            label: '3-Month Probability',
-            data: data.three_month.map(val => val * 100),
-            borderColor: 'rgb(255, 159, 64)',
-            backgroundColor: 'rgba(255, 159, 64, 0.5)',
-            tension: 0.4,
-          },
-          {
-            label: '6-Month Probability',
-            data: data.six_month.map(val => val * 100),
-            borderColor: 'rgb(255, 99, 132)',
-            backgroundColor: 'rgba(255, 99, 132, 0.5)',
-            tension: 0.4,
-          },
-        ],
+      labels: data.dates.map(date => new Date(date).toLocaleDateString()),
+      datasets: [
+        {
+        label: '1-Month Probability',
+        data: data.one_month.map(val => val),
+        borderColor: 'rgb(53, 162, 235)',
+        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+        tension: 0.4,
+        },
+        {
+        label: '3-Month Probability',
+        data: data.three_month.map(val => val),
+        borderColor: 'rgb(255, 159, 64)',
+        backgroundColor: 'rgba(255, 159, 64, 0.5)',
+        tension: 0.4,
+        },
+        {
+        label: '6-Month Probability',
+        data: data.six_month.map(val => val),
+        borderColor: 'rgb(255, 99, 132)',
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        tension: 0.4,
+        },
+      ],
       });
     }
   }, [data]);

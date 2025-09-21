@@ -1,19 +1,19 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import Dict, List, Optional, Any
 import pandas as pd
 import numpy as np
-from datetime import datetime, timedelta
-import random
-import os
-import json
-import requests
-import dotenv
-import pickle
-import concurrent.futures
-
+from pydantic import BaseModel
 from reg_FE import feature_eng
+from ML_pipe import load_models
+
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+
+import os, time, random
+import json, requests
+import dotenv
+import threading, concurrent.futures
+from typing import Dict, List, Optional, Any
+from datetime import datetime, timedelta
 
 
 dotenv.load_dotenv()
@@ -60,7 +60,6 @@ class CustomPredictionRequest(BaseModel):
     
     
 FRED_API_KEY = os.getenv("FRED_API_KEY")
-# FRED_API_KEY = "b9aad5fff9989e57826ce9229a0f0bdb"
 
 FRED_SERIES = {
     "3-Month Rate": "DTB3",
@@ -81,6 +80,43 @@ ECON_FRED_SERIES = {
     "OECD CLI Index": "OECDLOLITOAASTSAM",
     "CSI Index": "UMCSENT"
 }
+
+
+# Global variable to store latest predictions
+latest_predictions = {
+    "one_month": None,
+    "three_month": None,
+    "six_month": None,
+    "updated_at": None
+}
+
+def run_ml_pipeline_periodically():
+    global latest_predictions
+    one_month_model, three_month_model, six_month_model = load_models()
+    while True:
+        try:
+            # Prepare your input data for the pipeline here
+            # For example, fetch latest indicators from FRED or your DB
+            # inputs = ...
+            # dataset = feature_eng(inputs)
+            # one_month_model, three_month_model, six_month_model = load_models()
+            # one_month = one_month_model.predict(dataset)[0]
+            # three_month = three_month_model.predict(dataset)[0]
+            # six_month = six_month_model.predict(dataset)[0]
+            # For demo, use random values:
+            one_month = random.uniform(0, 1)
+            three_month = random.uniform(0, 1)
+            six_month = random.uniform(0, 1)
+            latest_predictions = {
+                "one_month": one_month,
+                "three_month": three_month,
+                "six_month": six_month,
+                "updated_at": datetime.now().isoformat()
+            }
+            print("ML pipeline updated predictions:", latest_predictions)
+        except Exception as e:
+            print("Error in ML pipeline:", e)
+        time.sleep(300)  # 5 minutes
 
 def fetch_latest_fred_value(series_id):
     url = f"https://api.stlouisfed.org/fred/series/observations"
@@ -105,6 +141,15 @@ def fetch_latest_fred_value(series_id):
 @app.get("/")
 async def root():
     return {"message": "Welcome to RecessionRadar API"}
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    thread = threading.Thread(target=run_ml_pipeline_periodically, daemon=True)
+    thread.start()
+    yield
+
+app.router.lifespan_context = lifespan
 
 # Get Treasury Yields
 @app.get("/api/treasury-yields", response_model=TreasuryYields)
@@ -185,6 +230,7 @@ async def get_recession_probabilities():
     df["1_month_recession_probability"] = df["recession_probability"].shift(-1)
     df["3_month_recession_probability"] = df["recession_probability"].shift(-3)
     df["6_month_recession_probability"] = df["recession_probability"].shift(-6)
+    # Calculate the range (min, max) for each probability column
     # Drop rows with NaN in any probability column
     df = df.dropna(subset=["1_month_recession_probability", "3_month_recession_probability", "6_month_recession_probability"])
     return RecessionProbabilities(
@@ -197,15 +243,14 @@ async def get_recession_probabilities():
 # Get Current Recession Prediction
 @app.get("/api/current-prediction", response_model=RecessionPrediction)
 async def get_current_prediction():
-    # This would normally be the latest prediction from your model
-    # For now, hardcoding similar to your dashboard metrics
-    return RecessionPrediction(
-        # forcast=1/100,
-        one_month=0.5/100,
-        three_month = 12/100,
-        six_month = 80/100,
-        updated_at=datetime.now().isoformat()
-    )
+    return RecessionPrediction(**latest_predictions)
+    # return RecessionPrediction(
+    #     # forcast=1/100,
+    #     one_month=0.5/100,
+    #     three_month = 12/100,
+    #     six_month = 80/100,
+    #     updated_at=datetime.now().isoformat()
+    # )
 
 # Custom Prediction endpoint
 @app.post("/api/custom-prediction", response_model=RecessionPrediction)
@@ -213,30 +258,11 @@ async def create_custom_prediction(request: CustomPredictionRequest):
     inputs = request.indicators
     dataset = feature_eng(inputs)
     
-    one_month_model_path = '../models/lgbm_recession_chain_model.pkl'
-    three_month_model_path = '../models/lgbm_recession_chain_model.pkl'
-    six_month_model_path = '../models/lgbm_recession_6m_model.pkl'
-    
-    # predict using the models
-    try:
-        with open(one_month_model_path, 'rb') as f:
-            one_month_model = pickle.load(f)
-            one_month = float(one_month_model.predict(dataset)[0])
-        with open(three_month_model_path, 'rb') as f:
-            three_month_model = pickle.load(f)
-            three_month = float(three_month_model.predict(dataset)[0])
-        with open(six_month_model_path, 'rb') as f:
-            six_month_model = pickle.load(f)
-            six_month = float(six_month_model.predict(dataset)[0])
-    except FileNotFoundError as e:
-        raise HTTPException(status_code=500, detail=f"Model file not found: {e.filename}")
-    except Exception as e:
-        # forcast = 1/100
-        one_month = 0.5/100
-        three_month = 12/100
-        six_month = 80/100
+    one_month_model, three_month_model, six_month_model = load_models()
 
-    print(one_month, three_month, six_month)    
+    one_month = one_month_model.predict(dataset)[0]
+    three_month = three_month_model.predict(dataset)[0]
+    six_month = six_month_model.predict(dataset)[0]
 
     return RecessionPrediction(
         # forcast = min(max(forcast, 0), 1),
@@ -249,4 +275,5 @@ async def create_custom_prediction(request: CustomPredictionRequest):
 # For development testing
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
+    # print(load_models)
