@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
 from pydantic import BaseModel
-from reg_FE import feature_eng
-from ML_pipe import load_models
+from ML_pipe import load_models, time_series_prediction, regresstion_feature_engineering, regression_prediction
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -256,7 +255,7 @@ async def get_current_prediction():
 @app.post("/api/custom-prediction", response_model=RecessionPrediction)
 async def create_custom_prediction(request: CustomPredictionRequest):
     inputs = request.indicators
-    dataset = feature_eng(inputs)
+    dataset = regresstion_feature_engineering(inputs)
     
     one_month_model, three_month_model, six_month_model = load_models()
 
