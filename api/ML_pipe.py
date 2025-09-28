@@ -431,15 +431,18 @@ def trend_based_forecast(input_data, indicator, forecast_steps):
         return [series.iloc[-1]] * forecast_steps
 
 
-def time_series_feature_eng():
+def time_series_feature_eng(selected_columns=None):
     """
     Feature engineering pipeline for time series data.
-    - STL decomposition (trend, seasonal, residual) for financial indicators
-    - Anomaly detection on residuals (3-sigma rule)
-    - ACF features (autocorrelation)
+    Only computes features that are in selected_columns (if provided).
     Returns:
         pd.DataFrame: Feature engineered DataFrame
     """
+    import pandas as pd
+    import numpy as np
+    from statsmodels.tsa.seasonal import STL
+    from statsmodels.tsa.stattools import acf
+    import os
 
     # Load data
     if os.path.exists('../data/combined/'):
@@ -449,19 +452,25 @@ def time_series_feature_eng():
     df['date'] = pd.to_datetime(df['date'])
     df = df.sort_values('date').reset_index(drop=True)
 
-    financial_indicators = [
-        '1_year_rate', '3_months_rate', '6_months_rate', 'CPI', 'INDPRO',
-        '10_year_rate', 'share_price', 'unemployment_rate', 'PPI',
-        'OECD_CLI_index', 'CSI_index', 'gdp_per_capita'
-    ]
-    anomaly_columns = [
-        'INDPRO', 'CPI', 'unemployment_rate', 'PPI', 'share_price',
-        '1_year_rate', '3_months_rate', '6_months_rate', '10_year_rate'
-    ]
-    acf_columns = financial_indicators
+    # If no selected_columns provided, compute all features as before
+    if selected_columns is None:
+        selected_columns = df.columns.tolist()  # fallback: keep all
 
-    # STL decomposition
-    for col in financial_indicators:
+    # Identify which STL, residual, and trend features are needed
+    stl_needed = [col for col in selected_columns if col.endswith('_trend') or col.endswith('_residual') or col.endswith('_seasonal')]
+    stl_base = set([col.replace('_trend', '').replace('_residual', '').replace('_seasonal', '') for col in stl_needed])
+
+    # Identify which anomaly features are needed
+    anomaly_needed = [col for col in selected_columns if col.endswith('_anomaly')]
+    anomaly_base = set([col.replace('_anomaly', '') for col in anomaly_needed])
+
+    # Identify which ACF features are needed
+    acf_suffixes = ['first_acf_original', 'sumsq_acf_original', 'first_acf_diff1', 'sumsq_acf_diff1', 'first_acf_diff2', 'sumsq_acf_diff2', 'seasonal_acf']
+    acf_needed = [col for col in selected_columns if any(col.endswith('_' + suf) for suf in acf_suffixes)]
+    acf_base = set([col[:-(len(suf)+1)] for col in acf_suffixes for col in acf_needed if col.endswith('_' + suf)])
+
+    # STL decomposition (only for needed columns)
+    for col in stl_base:
         if col not in df.columns:
             continue
         series = df[col].fillna(method='ffill').fillna(method='bfill')
@@ -470,14 +479,17 @@ def time_series_feature_eng():
         try:
             stl = STL(series, seasonal=13, period=12)
             decomposition = stl.fit()
-            df[f'{col}_trend'] = decomposition.trend
-            df[f'{col}_seasonal'] = decomposition.seasonal
-            df[f'{col}_residual'] = decomposition.resid
+            if f"{col}_trend" in selected_columns:
+                df[f'{col}_trend'] = decomposition.trend
+            if f"{col}_seasonal" in selected_columns:
+                df[f'{col}_seasonal'] = decomposition.seasonal
+            if f"{col}_residual" in selected_columns:
+                df[f'{col}_residual'] = decomposition.resid
         except Exception as e:
             print(f"STL failed for {col}: {e}")
 
-    # Anomaly detection (3-sigma on residuals)
-    for col in anomaly_columns:
+    # Anomaly detection (3-sigma on residuals, only for needed columns)
+    for col in anomaly_base:
         resid_col = f'{col}_residual'
         if resid_col not in df.columns:
             continue
@@ -488,9 +500,10 @@ def time_series_feature_eng():
         std_resid = residuals.std() if residuals.std() != 0 else 1e-6
         lower = mean_resid - 3 * std_resid
         upper = mean_resid + 3 * std_resid
-        df[f'{col}_anomaly'] = ((df[resid_col] < lower) | (df[resid_col] > upper)).astype(int)
+        if f"{col}_anomaly" in selected_columns:
+            df[f'{col}_anomaly'] = ((df[resid_col] < lower) | (df[resid_col] > upper)).astype(int)
 
-    # ACF features
+    # ACF features (only for needed columns)
     def compute_acf_features(series, max_lags=10):
         if len(series.dropna()) < max_lags + 5:
             return {}
@@ -532,14 +545,20 @@ def time_series_feature_eng():
             print(f"ACF failed: {e}")
             return {}
 
-    for col in acf_columns:
+    for col in acf_base:
         if col not in df.columns:
             continue
         acf_feats = compute_acf_features(df[col])
         for feat_name, feat_val in acf_feats.items():
-            df[f'{col}_{feat_name}'] = feat_val
+            full_feat_name = f'{col}_{feat_name}'
+            if full_feat_name in selected_columns:
+                df[full_feat_name] = feat_val
 
-    return df
+    # Only keep selected columns (plus 'date' if not already included)
+    keep_cols = [col for col in selected_columns if col in df.columns]
+    if 'date' not in keep_cols and 'date' in df.columns:
+        keep_cols = ['date'] + keep_cols
+    return df[keep_cols].copy()
 
 
 def time_series_feature_reduction(input_df=None, dataset_type='test'):
@@ -548,6 +567,9 @@ def time_series_feature_reduction(input_df=None, dataset_type='test'):
     If input_df is provided, returns only the selected columns.
     Otherwise, loads the reduced test/train set from CSV.
     """
+    import pandas as pd
+    import os
+
     # List of selected columns after feature reduction (from your output)
     selected_columns = [
         "date",
@@ -589,6 +611,9 @@ def time_series_feature_reduction(input_df=None, dataset_type='test'):
 
     # If input_df is provided, just select the columns
     if input_df is not None:
+        # If input_df is raw, run feature engineering only for needed columns
+        if not set(selected_columns).issubset(set(input_df.columns)):
+            return time_series_feature_eng(selected_columns=selected_columns)
         return input_df[selected_columns].copy()
 
     # Otherwise, load from CSV
