@@ -21,7 +21,7 @@ def load_model(model_path):
 
 def load_reg_models():
     if os.path.exists('../models'):
-        base_model = load_model('../models/recession_chain_model.pkl')
+        base_model = load_model('../models/catboost_recession_chain_model.pkl')
         one_three_month_model = load_model('../models/lgbm_recession_chain_model.pkl')
         six_month_model = load_model('../models/lgbm_recession_6m_model.pkl')
     else:

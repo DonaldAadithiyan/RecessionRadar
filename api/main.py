@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from pydantic import BaseModel
-from ML_pipe import load_models, time_series_prediction, regresstion_feature_engineering, regression_prediction
+from ML_pipe import load_reg_models, time_series_prediction, regresstion_feature_engineering, regression_prediction
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
