@@ -467,7 +467,7 @@ def time_series_feature_eng(selected_columns=None):
     # Identify which ACF features are needed
     acf_suffixes = ['first_acf_original', 'sumsq_acf_original', 'first_acf_diff1', 'sumsq_acf_diff1', 'first_acf_diff2', 'sumsq_acf_diff2', 'seasonal_acf']
     acf_needed = [col for col in selected_columns if any(col.endswith('_' + suf) for suf in acf_suffixes)]
-    acf_base = set([col[:-(len(suf)+1)] for col in acf_suffixes for col in acf_needed if col.endswith('_' + suf)])
+    acf_base = set([col[:-(len(suffix)+1)] for col in acf_needed for suffix in acf_suffixes if col.endswith('_' + suffix)])
 
     # STL decomposition (only for needed columns)
     for col in stl_base:
