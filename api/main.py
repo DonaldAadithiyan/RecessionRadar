@@ -241,13 +241,7 @@ async def get_recession_probabilities():
 @app.get("/api/current-prediction", response_model=RecessionPrediction)
 async def get_current_prediction():
     return RecessionPrediction(**latest_predictions)
-    # return RecessionPrediction(
-    #     # forcast=1/100,
-    #     one_month=0.5/100,
-    #     three_month = 12/100,
-    #     six_month = 80/100,
-    #     updated_at=datetime.now().isoformat()
-    # )
+
 
 # Custom Prediction endpoint
 @app.post("/api/custom-prediction", response_model=RecessionPrediction)
@@ -255,7 +249,8 @@ async def create_custom_prediction(request: CustomPredictionRequest):
     inputs = request.indicators
     
     base_pred, one_month, three_month, six_month = regression_prediction(inputs)
-
+    print(inputs)
+    print(f"Custom Prediction - Base: {base_pred}, 1m: {one_month}, 3m: {three_month}, 6m: {six_month}")
     return RecessionPrediction(
         base_pred = min(max(base_pred, 0), 1),
         one_month=min(max(one_month, 0), 1),

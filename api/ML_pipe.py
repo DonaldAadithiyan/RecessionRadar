@@ -215,7 +215,9 @@ def regression_prediction(input_data=None):
 
 
 if __name__ == "__main__":
-    base_pred, one_month_pred, three_month_pred, six_month_pred = regression_prediction()
+    input_ = {'1-Year Rate': 99.54, '3-Month Rate': 3.89, '6-Month Rate': 3.75, '10-Year Rate': 4.18, 'CPI': 393.364, 'PPI': 262.443, 'Industrial Production': 103.9203, 'Share Price': 6643.7, 'Unemployment Rate': 4.3, 'OECD CLI Index': 98.3101894908785, 'CSI Index': 58.2}
+    base_pred, one_month_pred, three_month_pred, six_month_pred = regression_prediction(input_)
+    # base_pred, one_month_pred, three_month_pred, six_month_pred = regression_prediction()
     print(f"Base Prediction: {base_pred}")
     print(f"1-Month Prediction: {one_month_pred}")
     print(f"3-Month Prediction: {three_month_pred}")
