@@ -91,11 +91,18 @@ latest_predictions = {
     "updated_at": None
 }
 
+yields = {}
+indicators = {}
+recession_data = None
+
 def run_ml_pipeline_periodically():
-    global latest_predictions
+    global latest_predictions, yields, indicators, recession_data
     while True:
+        ## ML PIPELINE
+        time_series_prediction()
+        fe_data = regresstion_feature_engineering()
         try:
-            base, one_month, three_month, six_month= regression_prediction()
+            base, one_month, three_month, six_month= regression_prediction(fe_data)
             latest_predictions = {
                 "base_pred": base,
                 "one_month": one_month,
@@ -106,13 +113,51 @@ def run_ml_pipeline_periodically():
             print("ML pipeline updated predictions:", latest_predictions)
         except Exception as e:
             print("Error in ML pipeline:", e)
-            latest_predictions = {
-                "base_pred": 0.45,
-                "one_month": 0.33,
-                "three_month": 0.56,
-                "six_month": 0.9,
-                "updated_at": datetime.now().isoformat()
-            }
+        
+        ## Fetch Treasury Yields and Economic Indicators
+        if not FRED_API_KEY:
+            raise HTTPException(status_code=500, detail="FRED API key not set in environment variable FRED_API_KEY")
+
+        def fetch(label_series):
+            label, series_id = label_series
+            value = fetch_latest_fred_value(series_id)
+            value = float(value) if value is not None else None
+            return (label, value)
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            results = list(executor.map(fetch, FRED_SERIES.items()))
+            for label, value in results:
+                yields[label] = value
+            
+            results = list(executor.map(fetch, ECON_FRED_SERIES.items()))
+            for label, value in results:
+                indicators[label] = value
+        print("Updated yields:", yields)
+        print("Updated indicators:", indicators)
+        
+        ## recesstion dataset
+        if os.path.exists('../data/fix'):
+            train_df = pd.read_csv('../data/fix/feature_selected_recession_train.csv')
+            test_df = pd.read_csv('../data/fix/feature_selected_recession_test.csv')
+        else:
+            train_df = pd.read_csv('data/fix/feature_selected_recession_train.csv')
+            test_df = pd.read_csv('data/fix/feature_selected_recession_test.csv')
+
+        # Ensure 'date' is datetime
+        train_df['date'] = pd.to_datetime(train_df['date'])
+        test_df['date'] = pd.to_datetime(test_df['date'])
+
+        # Combine into one DataFrame
+        full_df = pd.concat([train_df, test_df], axis=0).reset_index(drop=True)
+        full_df = full_df.sort_values('date').reset_index(drop=True)
+        
+        # Replace NaN, inf, -inf with 0.0
+        full_df = full_df.replace([np.nan, np.inf, -np.inf], 0.0)
+        
+        recession_data = full_df[["date", "recession_probability", "1_month_recession_probability", 
+                                  "3_month_recession_probability", "6_month_recession_probability"]].copy() 
+        print("Updated recession data:")  
+        
         time.sleep(300)  # 5 minutes
 
 def fetch_latest_fred_value(series_id):
@@ -151,23 +196,6 @@ app.router.lifespan_context = lifespan
 # Get Treasury Yields
 @app.get("/api/treasury-yields", response_model=TreasuryYields)
 async def get_treasury_yields():
-    if not FRED_API_KEY:
-        raise HTTPException(status_code=500, detail="FRED API key not set in environment variable FRED_API_KEY")
-
-    yields = {}
-    
-    def fetch(label_series):
-        label, series_id = label_series
-        value = fetch_latest_fred_value(series_id)
-        value = float(value) if value is not None else None
-        return (label, value)
-
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        results = list(executor.map(fetch, FRED_SERIES.items()))
-        for label, value in results:
-            yields[label] = value
-            
-    print(yields)
     return TreasuryYields(
         yields=yields,
         updated_at=datetime.now().isoformat()
@@ -175,25 +203,7 @@ async def get_treasury_yields():
 
 # Get Economic Indicators
 @app.get("/api/economic-indicators", response_model=EconomicIndicators)
-async def get_economic_indicators():
-    if not FRED_API_KEY:
-        raise HTTPException(status_code=500, detail="FRED API key not set in environment variable FRED_API_KEY")
-
-    indicators = {}
-
-    def fetch(label_series):
-        label, series_id = label_series
-        value = fetch_latest_fred_value(series_id)
-        value = float(value) if value is not None else None
-        return (label, value)
-
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        results = list(executor.map(fetch, ECON_FRED_SERIES.items()))
-        for label, value in results:
-            indicators[label] = value
-            
-    print(indicators)
-    
+async def get_economic_indicators():    
     return EconomicIndicators(
         indicators=indicators,
         updated_at=datetime.now().isoformat()
@@ -202,40 +212,14 @@ async def get_economic_indicators():
 # Get Recession Probabilities from FRED API and generate shifted columns
 @app.get("/api/recession-probabilities", response_model=RecessionProbabilities)
 async def get_recession_probabilities():
-    if not FRED_API_KEY:
-        raise HTTPException(status_code=500, detail="FRED API key not set in environment variable FRED_API_KEY")
-    # Fetch the RECPROUSM156N series from FRED
-    url = "https://api.stlouisfed.org/fred/series/observations"
-    params = {
-        "series_id": "RECPROUSM156N",
-        "api_key": FRED_API_KEY,
-        "file_type": "json"
-    }
-    resp = requests.get(url, params=params)
-    if resp.status_code != 200:
-        raise HTTPException(status_code=500, detail="Failed to fetch data from FRED API.")
-    data = resp.json()
-    if "observations" not in data:
-        raise HTTPException(status_code=500, detail="FRED API response missing observations.")
-    # Convert to DataFrame
-    df = pd.DataFrame(data["observations"])
-    if "date" not in df.columns or "value" not in df.columns:
-        raise HTTPException(status_code=500, detail="FRED data missing required columns.")
-    df = df[["date", "value"]].copy()
-    df["recession_probability"] = pd.to_numeric(df["value"], errors="coerce")
-    # Create shifted columns
-    df["1_month_recession_probability"] = df["recession_probability"].shift(-1)
-    df["3_month_recession_probability"] = df["recession_probability"].shift(-3)
-    df["6_month_recession_probability"] = df["recession_probability"].shift(-6)
-    # Calculate the range (min, max) for each probability column
-    # Drop rows with NaN in any probability column
-    df = df.dropna(subset=["1_month_recession_probability", "3_month_recession_probability", "6_month_recession_probability"])
     return RecessionProbabilities(
-        dates=df["date"].tolist(),
-        one_month=df["1_month_recession_probability"].tolist(),
-        three_month=df["3_month_recession_probability"].tolist(),
-        six_month=df["6_month_recession_probability"].tolist()
+        dates = [d.strftime("%Y-%m-%d") for d in recession_data["date"]],
+        base = recession_data["recession_probability"].tolist(),
+        one_month = recession_data["1_month_recession_probability"].tolist(),
+        three_month = recession_data["3_month_recession_probability"].tolist(),
+        six_month = recession_data["6_month_recession_probability"].tolist()
     )
+
 
 # Get Current Recession Prediction
 @app.get("/api/current-prediction", response_model=RecessionPrediction)
@@ -248,7 +232,8 @@ async def get_current_prediction():
 async def create_custom_prediction(request: CustomPredictionRequest):
     inputs = request.indicators
     
-    base_pred, one_month, three_month, six_month = regression_prediction(inputs)
+    custom_data = regresstion_feature_engineering(inputs)
+    base_pred, one_month, three_month, six_month = regression_prediction(custom_data)
     print(inputs)
     print(f"Custom Prediction - Base: {base_pred}, 1m: {one_month}, 3m: {three_month}, 6m: {six_month}")
     return RecessionPrediction(
@@ -258,6 +243,7 @@ async def create_custom_prediction(request: CustomPredictionRequest):
         six_month=min(max(six_month, 0), 1),
         updated_at=datetime.now().isoformat()
     )
+
 
 # For development testing
 if __name__ == "__main__":

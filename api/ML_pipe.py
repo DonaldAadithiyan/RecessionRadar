@@ -176,10 +176,7 @@ def regresstion_feature_engineering(input_data = None):
 def time_series_prediction():
     pass
 
-def regression_prediction(input_data=None):
-    # Feature engineering
-    fe_data = regresstion_feature_engineering(input_data)
-    
+def regression_prediction(fe_data):
     # Load models
     base_model, one_three_month_model, six_month_model = load_reg_models()
     
