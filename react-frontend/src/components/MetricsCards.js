@@ -30,7 +30,7 @@ function ProbabilityCard({ title, value, timeframe }) {
         </Box>
         
         <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color }}>
-          {Math.round(value * 100)}%
+          {Math.round(value * 100).toFixed(2)}%
         </Typography>
         
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
@@ -50,15 +50,15 @@ function MetricsCards({ predictions }) {
       
       <Box sx={{ 
         display: 'grid', 
-        gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, 
+        gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr 1fr' }, 
         gap: 2,
         mt: 2
       }}>
-        {/* <ProbabilityCard 
+        <ProbabilityCard 
           title="Recession Forecast" 
-          value={predictions.forcast} 
+          value={predictions.base_pred} 
           timeframe="next month" 
-        /> */}
+        />
         <ProbabilityCard 
           title="1-Month Forecast" 
           value={predictions.one_month} 

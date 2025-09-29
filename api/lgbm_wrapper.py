@@ -1,5 +1,5 @@
-from sklearn.base import BaseEstimator, RegressorMixin
 import lightgbm as lgb
+from sklearn.base import BaseEstimator, RegressorMixin
 
 class LGBMWrapper(BaseEstimator, RegressorMixin):
     def __init__(self, params=None, num_boost_round=500):
