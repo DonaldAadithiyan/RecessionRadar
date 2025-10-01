@@ -1,19 +1,19 @@
 import pandas as pd
 import numpy as np
 from pydantic import BaseModel
-from ML_pipe import time_series_prediction, regresstion_feature_engineering, regression_prediction
+from ML_pipe import time_series_prediction, time_series_feature_eng, regresstion_feature_engineering, regression_prediction
 from data_collection import fetch_and_combine_fred_series
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-import os, time, random
+import os, time
 import json, requests
 import dotenv
 import threading, concurrent.futures
 from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 dotenv.load_dotenv()
@@ -100,8 +100,17 @@ def run_ml_pipeline_periodically():
     global latest_predictions, yields, indicators, recession_data
     while True:
         ## ML PIPELINE
-        rec_dataset = fetch_and_combine_fred_series(output_path="../data/combined/recession_probability_new.csv")
-        # time_series_prediction()
+        start = datetime.now()
+        print(datetime.now().strftime("%H:%M:%S.%f")[:-3] ,"Running ML pipeline...")
+        fetch_and_combine_fred_series(output_path="../data/combined/recession_probability_new.csv")
+        print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Fetched latest FRED data.")
+        
+        print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Running time series prediction...")
+        time_series_feature_eng()
+        time_series_prediction()
+        print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Time series prediction completed.")
+        
+        print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Running regression prediction...")
         fe_data = regresstion_feature_engineering()
         try:
             base, one_month, three_month, six_month= regression_prediction(fe_data)
@@ -115,8 +124,10 @@ def run_ml_pipeline_periodically():
             print("ML pipeline updated predictions:", latest_predictions)
         except Exception as e:
             print("Error in ML pipeline:", e)
+        print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Regression prediction completed.")
         
         ## Fetch Treasury Yields and Economic Indicators
+        print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Fetching Treasury Yields and Economic Indicators...")
         if not FRED_API_KEY:
             raise HTTPException(status_code=500, detail="FRED API key not set in environment variable FRED_API_KEY")
 
@@ -136,6 +147,7 @@ def run_ml_pipeline_periodically():
                 indicators[label] = value
         print("Updated yields:", yields)
         print("Updated indicators:", indicators)
+        print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Fetch completed.")
         
         ## recesstion dataset
         if os.path.exists('../data/fix'):
@@ -158,7 +170,8 @@ def run_ml_pipeline_periodically():
         
         recession_data = full_df[["date", "recession_probability", "1_month_recession_probability", 
                                   "3_month_recession_probability", "6_month_recession_probability"]].copy() 
-        print("Updated recession data:")  
+        print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Updated recession data:")  
+        print("pipeline duration:", datetime.now() - start)
         
         time.sleep(300)  # 5 minutes
 
