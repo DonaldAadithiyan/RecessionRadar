@@ -100,8 +100,8 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
     Strategy: Use iterative forecasting approach similar to your training
     """
     
-    print(f"Production Forecasting Pipeline - {forecast_steps} steps ahead")
-    print("="*60)
+    # print(f"Production Forecasting Pipeline - {forecast_steps} steps ahead")
+    # print("="*60)
     
     # Recession targets to exclude (from your training code)
     recession_targets = [
@@ -146,21 +146,21 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
         else:
             arima_models[indicator] = model  # Default to ARIMA treatment
     
-    print(f"ARIMA models: {list(arima_models.keys())}")
-    print(f"Prophet models: {list(prophet_models.keys())}")
+    # print(f"ARIMA models: {list(arima_models.keys())}")
+    # print(f"Prophet models: {list(prophet_models.keys())}")
     
     # 3. Forecast ARIMA models first (they need exogenous variables)
-    print(f"\nStep 1: Forecasting ARIMA models...")
+    # print(f"\nStep 1: Forecasting ARIMA models...")
     
     for indicator, model in arima_models.items():
         try:
-            print(f"  Processing ARIMA: {indicator}...")
+            # print(f"  Processing ARIMA: {indicator}...")
             
             # Prepare exogenous variables for ARIMA (same as training)
             features_to_exclude = [date_col] + recession_targets + [indicator]
             available_features = [c for c in input_data.columns if c not in features_to_exclude]
             
-            print(f"    Available exog features: {len(available_features)}")
+            # print(f"    Available exog features: {len(available_features)}")
             
             if len(available_features) == 0:
                 # No exogenous variables - simple ARIMA
@@ -179,7 +179,7 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
                 varying_cols = [c for c in exog_data.columns if exog_data[c].nunique() > 1]
                 exog_data = exog_data[varying_cols]
                 
-                print(f"    Using {len(varying_cols)} exog variables")
+                # print(f"    Using {len(varying_cols)} exog variables")
                 
                 if len(varying_cols) == 0:
                     # No varying exogenous variables
@@ -193,18 +193,18 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
                     expected_exog_count = getattr(model.model, 'k_exog', 0)
                     
                     if expected_exog_count > 0 and len(varying_cols) != expected_exog_count:
-                        print(f"    Warning: Model expects {expected_exog_count} exog vars, but have {len(varying_cols)}")
+                        # print(f"    Warning: Model expects {expected_exog_count} exog vars, but have {len(varying_cols)}")
                         
                         if len(varying_cols) < expected_exog_count:
                             # Pad with zeros to match expected shape
                             missing_cols = expected_exog_count - len(varying_cols)
                             for i in range(missing_cols):
                                 future_exog[f'missing_exog_{i}'] = 0.0
-                            print(f"    Padded with {missing_cols} zero columns")
+                            # print(f"    Padded with {missing_cols} zero columns")
                         else:
                             # Take only the first expected_exog_count columns
                             future_exog = future_exog.iloc[:, :expected_exog_count]
-                            print(f"    Truncated to {expected_exog_count} columns")
+                            # print(f"    Truncated to {expected_exog_count} columns")
                     
                     # Make forecast with exogenous variables
                     predictions = model.forecast(steps=forecast_steps, exog=future_exog)
@@ -221,21 +221,21 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
                     predictions = list(predictions) + [last_val] * (forecast_steps - len(predictions))
             
             result_data[indicator] = predictions
-            print(f"    ✓ ARIMA forecast: {indicator} ({len(predictions)} values)")
+            # print(f"    ✓ ARIMA forecast: {indicator} ({len(predictions)} values)")
             
         except Exception as e:
-            print(f"    ✗ ARIMA failed for {indicator}: {str(e)}")
+            # print(f"    ✗ ARIMA failed for {indicator}: {str(e)}")
             # Use trend-based fallback
             predictions = trend_based_forecast(input_data, indicator, forecast_steps)
             result_data[indicator] = predictions
-            print(f"    ✓ Fallback forecast: {indicator}")
+            # print(f"    ✓ Fallback forecast: {indicator}")
     
     # 4. Now forecast Prophet models (they need ALL features as regressors)
-    print(f"\nStep 2: Forecasting Prophet models...")
+    # print(f"\nStep 2: Forecasting Prophet models...")
     
     for indicator, model in prophet_models.items():
         try:
-            print(f"  Processing Prophet: {indicator}...")
+            # print(f"  Processing Prophet: {indicator}...")
             
             # Create future dataframe for Prophet
             future_df = model.make_future_dataframe(periods=forecast_steps, freq=freq)
@@ -245,8 +245,8 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
             if hasattr(model, 'extra_regressors'):
                 regressors = list(model.extra_regressors.keys())
             
-            print(f"    Model needs {len(regressors)} regressors")
-            print(f"    Sample regressors: {regressors[:5]}..." if len(regressors) > 5 else f"    Regressors: {regressors}")
+            # print(f"    Model needs {len(regressors)} regressors")
+            # print(f"    Sample regressors: {regressors[:5]}..." if len(regressors) > 5 else f"    Regressors: {regressors}")
             
             # Prepare regressor values for the entire future_df
             historical_length = len(future_df) - forecast_steps
@@ -295,7 +295,7 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
                         future_df[regressor] = [0.0] * len(future_df)
                         
                 except Exception as reg_error:
-                    print(f"      Warning: Error with regressor {regressor}: {str(reg_error)}")
+                    # print(f"      Warning: Error with regressor {regressor}: {str(reg_error)}")
                     future_df[regressor] = [0.0] * len(future_df)
             
             # Make Prophet prediction
@@ -303,17 +303,17 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
             predictions = forecast_result['yhat'].tail(forecast_steps).values
             
             result_data[indicator] = predictions
-            print(f"    ✓ Prophet forecast: {indicator} ({len(predictions)} values)")
+            # print(f"    ✓ Prophet forecast: {indicator} ({len(predictions)} values)")
             
         except Exception as e:
-            print(f"    ✗ Prophet failed for {indicator}: {str(e)}")
+            # print(f"    ✗ Prophet failed for {indicator}: {str(e)}")
             # Use trend-based fallback
             predictions = trend_based_forecast(input_data, indicator, forecast_steps)
             result_data[indicator] = predictions
-            print(f"    ✓ Fallback forecast: {indicator}")
+            # print(f"    ✓ Fallback forecast: {indicator}")
     
     # 5. Apply STL decomposition (same as your training)
-    print(f"\nStep 3: Applying STL decomposition...")
+    # print(f"\nStep 3: Applying STL decomposition...")
     
     indicators = list(models_dict.keys())
     for indicator in indicators:
@@ -345,10 +345,10 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
                     result_data[f'{indicator}_trend'] = [mean_val] * forecast_steps
                     result_data[f'{indicator}_residual'] = (series - mean_val).values
                 
-                print(f"  ✓ STL: {indicator}")
+                # print(f"  ✓ STL: {indicator}")
                 
             except Exception as e:
-                print(f"  ✗ STL failed for {indicator}: {str(e)}")
+                # print(f"  ✗ STL failed for {indicator}: {str(e)}")
                 # Simple fallback
                 result_data[f'{indicator}_trend'] = result_data[indicator].values
                 result_data[f'{indicator}_residual'] = [0.0] * forecast_steps
@@ -387,15 +387,15 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
         if feature not in final_data.columns:
             final_data[feature] = [0.0] * forecast_steps
     
-    print(f"\n" + "="*60)
-    print(f"PRODUCTION FORECASTING COMPLETE")
-    print(f"="*60)
-    print(f"Final shape: {final_data.shape}")
-    if date_col in final_data.columns:
-        print(f"Forecast period: {final_data[date_col].min()} to {final_data[date_col].max()}")
-    print(f"Generated {len(financial_indicators)} financial indicators + {len(required_features)} engineered features")
-    print(f"Financial indicators: {financial_indicators}")
-    print(f"Sample features: {required_features[:5]}...")
+    # print(f"\n" + "="*60)
+    # print(f"PRODUCTION FORECASTING COMPLETE")
+    # print(f"="*60)
+    # print(f"Final shape: {final_data.shape}")
+    # if date_col in final_data.columns:
+    #     print(f"Forecast period: {final_data[date_col].min()} to {final_data[date_col].max()}")
+    # print(f"Generated {len(financial_indicators)} financial indicators + {len(required_features)} engineered features")
+    # print(f"Financial indicators: {financial_indicators}")
+    # print(f"Sample features: {required_features[:5]}...")
     
     return final_data
 
@@ -718,30 +718,52 @@ def regresstion_feature_engineering(input_data = None):
                 transformed, _ = boxcox([share_price_val])
                 input_data['share_price'] = transformed[0]
                 
+        # for col in input_data:
+        #     if col in full_df.columns:
+        #         full_df.at[full_df.index[-1], col] = input_data[col]
+                
+        new_row = {col: None for col in full_df.columns}
+
+        # Fill only the provided values
         for col in input_data:
             if col in full_df.columns:
-                full_df.at[full_df.index[-1], col] = input_data[col]
+                new_row[col] = input_data[col]
+                
+        full_df = pd.concat([full_df, pd.DataFrame([new_row])], ignore_index=True)
  
     # Interaction features
-    full_df['CPI_unemployment_interaction'] = full_df['CPI'] * full_df['unemployment_rate']
-    full_df['INDPRO_CPI_ratio'] = full_df['INDPRO'] / (full_df['CPI'] + 1e-6)
-    full_df['share_gdp_ratio'] = full_df['share_price'] / (full_df['gdp_per_capita'] + 1e-6)
-    full_df['PPI_CPI_diff'] = full_df['PPI'] - full_df['CPI']
-    full_df['interest_spread'] = full_df['10_year_rate'] - full_df['3_months_rate']
+    if 'CPI_unemployment_interaction' in selected_features:
+        full_df['CPI_unemployment_interaction'] = full_df['CPI'] * full_df['unemployment_rate']
+    if 'INDPRO_CPI_ratio' in selected_features:
+        full_df['INDPRO_CPI_ratio'] = full_df['INDPRO'] / (full_df['CPI'] + 1e-6)
+    if 'share_gdp_ratio' in selected_features:
+        full_df['share_gdp_ratio'] = full_df['share_price'] / (full_df['gdp_per_capita'] + 1e-6)
+    if 'PPI_CPI_diff' in selected_features:
+        full_df['PPI_CPI_diff'] = full_df['PPI'] - full_df['CPI']
+    if 'interest_spread' in selected_features:
+        full_df['interest_spread'] = full_df['10_year_rate'] - full_df['3_months_rate']
     
     for col in indicators:
         for lag in lags:
-            full_df[f"{col}_lag{lag}"] = full_df[col].shift(lag)
+            if f"{col}_lag{lag}" in selected_features:
+                full_df[f"{col}_lag{lag}"] = full_df[col].shift(lag)
             
         for window in windows:
-            full_df[f"{col}_rollmean{window}"] = full_df[col].shift(1).rolling(window).mean()
-            full_df[f"{col}_rollstd{window}"]  = full_df[col].shift(1).rolling(window).std()
-            full_df[f"{col}_rollmax{window}"]  = full_df[col].shift(1).rolling(window).max()
-            full_df[f"{col}_rollmin{window}"]  = full_df[col].shift(1).rolling(window).min()
-
-        full_df[f"{col}_diff1"] = full_df[col] - full_df[col].shift(1)
-        full_df[f"{col}_diff3"] = full_df[col] - full_df[col].shift(3)
-        full_df[f"{col}_pct_change1"] = full_df[col].pct_change(1)
+            if f"{col}_rollmean{window}" in selected_features:
+                full_df[f"{col}_rollmean{window}"] = full_df[col].shift(1).rolling(window).mean()
+            if f"{col}_rollstd{window}" in selected_features:
+                full_df[f"{col}_rollstd{window}"]  = full_df[col].shift(1).rolling(window).std()
+            if f"{col}_rollmax{window}" in selected_features:
+                full_df[f"{col}_rollmax{window}"]  = full_df[col].shift(1).rolling(window).max()
+            if f"{col}_rollmin{window}" in selected_features:
+                full_df[f"{col}_rollmin{window}"]  = full_df[col].shift(1).rolling(window).min()
+        
+        if f"{col}_diff1" in selected_features:
+            full_df[f"{col}_diff1"] = full_df[col] - full_df[col].shift(1)
+        if f"{col}_diff3" in selected_features:
+            full_df[f"{col}_diff3"] = full_df[col] - full_df[col].shift(3)
+        if f"{col}_pct_change1" in selected_features:
+            full_df[f"{col}_pct_change1"] = full_df[col].pct_change(1)
         
     df_reduced = full_df[selected_features + recession_targets + ["date"]].copy()
     
@@ -769,8 +791,8 @@ def time_series_prediction():
         'INDPRO': models['indpro_prophet_model'], 
         'share_price': models['share_price_prophet_model']
     }
-    data_dir = '../data' if os.path.exists('../data') else 'data'
-    input_data = pd.reaa_cd_csv(os.path.join(data_dir, 'fix', 'feature_selected_recession_test.csv'))
+    data_dir = '../data/fix' if os.path.exists('../data/fix') else 'data/fix'
+    input_data = pd.read_csv(os.path.join(data_dir, 'feature_selected_recession_full.csv'))
     
     prediction = production_forecasting_pipeline(
         input_data=input_data, 
@@ -819,8 +841,15 @@ def regression_prediction(fe_data):
 
 
 if __name__ == "__main__":
-    df = time_series_feature_eng()
+    # df = time_series_feature_eng()
+    # print(df.tail().T)
+    # print(df.shape)
+    # print(df.columns)
     
-    print(df.tail().T)
-    print(df.shape)
-    print(df.columns)
+    # df = regresstion_feature_engineering()
+    # print(df.tail().T)
+    # print(df.shape)
+    # print(df.columns)
+    
+    preds = time_series_prediction()
+    print(preds.tail().T)
