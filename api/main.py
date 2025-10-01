@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from pydantic import BaseModel
 from ML_pipe import time_series_prediction, regresstion_feature_engineering, regression_prediction
+from data_collection import fetch_and_combine_fred_series
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -99,6 +100,7 @@ def run_ml_pipeline_periodically():
     global latest_predictions, yields, indicators, recession_data
     while True:
         ## ML PIPELINE
+        rec_dataset = fetch_and_combine_fred_series(output_path="../data/combined/recession_probability_new.csv")
         # time_series_prediction()
         fe_data = regresstion_feature_engineering()
         try:

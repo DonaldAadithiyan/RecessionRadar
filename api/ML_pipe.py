@@ -431,146 +431,14 @@ def trend_based_forecast(input_data, indicator, forecast_steps):
         return [series.iloc[-1]] * forecast_steps
 
 
-def time_series_feature_eng(selected_columns=None):
+def time_series_feature_eng():
     """
     Feature engineering pipeline for time series data.
     Only computes features that are in selected_columns (if provided).
     Returns:
         pd.DataFrame: Feature engineered DataFrame
     """
-    import pandas as pd
-    import numpy as np
-    from statsmodels.tsa.seasonal import STL
-    from statsmodels.tsa.stattools import acf
-    import os
-
-    # Load data
-    if os.path.exists('../data/combined/'):
-        df = pd.read_csv('../data/combined/recession_probability.csv')
-    else:
-        df = pd.read_csv('data/combined/recession_probability.csv')
-    df['date'] = pd.to_datetime(df['date'])
-    df = df.sort_values('date').reset_index(drop=True)
-
-    # If no selected_columns provided, compute all features as before
-    if selected_columns is None:
-        selected_columns = df.columns.tolist()  # fallback: keep all
-
-    # Identify which STL, residual, and trend features are needed
-    stl_needed = [col for col in selected_columns if col.endswith('_trend') or col.endswith('_residual') or col.endswith('_seasonal')]
-    stl_base = set([col.replace('_trend', '').replace('_residual', '').replace('_seasonal', '') for col in stl_needed])
-
-    # Identify which anomaly features are needed
-    anomaly_needed = [col for col in selected_columns if col.endswith('_anomaly')]
-    anomaly_base = set([col.replace('_anomaly', '') for col in anomaly_needed])
-
-    # Identify which ACF features are needed
-    acf_suffixes = ['first_acf_original', 'sumsq_acf_original', 'first_acf_diff1', 'sumsq_acf_diff1', 'first_acf_diff2', 'sumsq_acf_diff2', 'seasonal_acf']
-    acf_needed = [col for col in selected_columns if any(col.endswith('_' + suf) for suf in acf_suffixes)]
-    acf_base = set([col[:-(len(suffix)+1)] for col in acf_needed for suffix in acf_suffixes if col.endswith('_' + suffix)])
-
-    # STL decomposition (only for needed columns)
-    for col in stl_base:
-        if col not in df.columns:
-            continue
-        series = df[col].fillna(method='ffill').fillna(method='bfill')
-        if series.isna().all() or len(series.dropna()) < 24:
-            continue
-        try:
-            stl = STL(series, seasonal=13, period=12)
-            decomposition = stl.fit()
-            if f"{col}_trend" in selected_columns:
-                df[f'{col}_trend'] = decomposition.trend
-            if f"{col}_seasonal" in selected_columns:
-                df[f'{col}_seasonal'] = decomposition.seasonal
-            if f"{col}_residual" in selected_columns:
-                df[f'{col}_residual'] = decomposition.resid
-        except Exception as e:
-            print(f"STL failed for {col}: {e}")
-
-    # Anomaly detection (3-sigma on residuals, only for needed columns)
-    for col in anomaly_base:
-        resid_col = f'{col}_residual'
-        if resid_col not in df.columns:
-            continue
-        residuals = df[resid_col].dropna()
-        if len(residuals) < 10:
-            continue
-        mean_resid = residuals.mean()
-        std_resid = residuals.std() if residuals.std() != 0 else 1e-6
-        lower = mean_resid - 3 * std_resid
-        upper = mean_resid + 3 * std_resid
-        if f"{col}_anomaly" in selected_columns:
-            df[f'{col}_anomaly'] = ((df[resid_col] < lower) | (df[resid_col] > upper)).astype(int)
-
-    # ACF features (only for needed columns)
-    def compute_acf_features(series, max_lags=10):
-        if len(series.dropna()) < max_lags + 5:
-            return {}
-        try:
-            clean_series = series.fillna(method='ffill').fillna(method='bfill').dropna()
-            if len(clean_series) < max_lags + 5:
-                return {}
-            acf_original = acf(clean_series, nlags=max_lags, fft=True)
-            first_acf_original = acf_original[1] if len(acf_original) > 1 else 0
-            sumsq_acf_original = np.sum(acf_original[1:] ** 2) if len(acf_original) > 1 else 0
-            diff1_series = clean_series.diff().dropna()
-            if len(diff1_series) >= max_lags + 2:
-                acf_diff1 = acf(diff1_series, nlags=max_lags, fft=True)
-                first_acf_diff1 = acf_diff1[1] if len(acf_diff1) > 1 else 0
-                sumsq_acf_diff1 = np.sum(acf_diff1[1:] ** 2) if len(acf_diff1) > 1 else 0
-            else:
-                first_acf_diff1 = 0
-                sumsq_acf_diff1 = 0
-            diff2_series = diff1_series.diff().dropna()
-            if len(diff2_series) >= max_lags + 2:
-                acf_diff2 = acf(diff2_series, nlags=max_lags, fft=True)
-                first_acf_diff2 = acf_diff2[1] if len(acf_diff2) > 1 else 0
-                sumsq_acf_diff2 = np.sum(acf_diff2[1:] ** 2) if len(acf_diff2) > 1 else 0
-            else:
-                first_acf_diff2 = 0
-                sumsq_acf_diff2 = 0
-            seasonal_lag = min(12, len(acf_original) - 1)
-            seasonal_acf = acf_original[seasonal_lag] if seasonal_lag > 0 else 0
-            return {
-                'first_acf_original': first_acf_original,
-                'sumsq_acf_original': sumsq_acf_original,
-                'first_acf_diff1': first_acf_diff1,
-                'sumsq_acf_diff1': sumsq_acf_diff1,
-                'first_acf_diff2': first_acf_diff2,
-                'sumsq_acf_diff2': sumsq_acf_diff2,
-                'seasonal_acf': seasonal_acf
-            }
-        except Exception as e:
-            print(f"ACF failed: {e}")
-            return {}
-
-    for col in acf_base:
-        if col not in df.columns:
-            continue
-        acf_feats = compute_acf_features(df[col])
-        for feat_name, feat_val in acf_feats.items():
-            full_feat_name = f'{col}_{feat_name}'
-            if full_feat_name in selected_columns:
-                df[full_feat_name] = feat_val
-
-    # Only keep selected columns (plus 'date' if not already included)
-    keep_cols = [col for col in selected_columns if col in df.columns]
-    if 'date' not in keep_cols and 'date' in df.columns:
-        keep_cols = ['date'] + keep_cols
-    return df[keep_cols].copy()
-
-
-def time_series_feature_reduction(input_df=None, dataset_type='test'):
-    """
-    Loads the feature-selected columns from the output of the feature selection pipeline.
-    If input_df is provided, returns only the selected columns.
-    Otherwise, loads the reduced test/train set from CSV.
-    """
-    import pandas as pd
-    import os
-
-    # List of selected columns after feature reduction (from your output)
+    
     selected_columns = [
         "date",
         "recession_probability",
@@ -609,37 +477,202 @@ def time_series_feature_reduction(input_df=None, dataset_type='test'):
         "10_year_rate_residual"
     ]
 
-    # If input_df is provided, just select the columns
-    if input_df is not None:
-        # If input_df is raw, run feature engineering only for needed columns
-        if not set(selected_columns).issubset(set(input_df.columns)):
-            return time_series_feature_eng(selected_columns=selected_columns)
-        return input_df[selected_columns].copy()
-
-    # Otherwise, load from CSV
-    base_path = '../data/fix/' if os.path.exists('../data/fix/') else 'data/fix/'
-    if dataset_type == 'train':
-        csv_path = os.path.join(base_path, 'feature_selected_recession_train.csv')
+    # Load data
+    if os.path.exists('../data/combined/'):
+        df = pd.read_csv('../data/combined/recession_probability.csv')
     else:
-        csv_path = os.path.join(base_path, 'feature_selected_recession_test.csv')
-    df = pd.read_csv(csv_path)
-    return df[selected_columns].copy()
+        df = pd.read_csv('data/combined/recession_probability.csv')
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.sort_values('date').reset_index(drop=True)
+    
+    train_fe = df[df['date'].dt.year < 2020].copy()
+    test_fe = df[df['date'].dt.year >= 2020].copy()
+
+    # Identify which STL, residual, and trend features are needed
+    stl_needed = [col for col in selected_columns if col.endswith('_trend') or col.endswith('_residual') or col.endswith('_seasonal')]
+    stl_base = set([col.replace('_trend', '').replace('_residual', '').replace('_seasonal', '') for col in stl_needed])
+
+    # Identify which anomaly features are needed
+    anomaly_needed = [col for col in selected_columns if col.endswith('_anomaly')]
+    anomaly_base = set([col.replace('_anomaly', '') for col in anomaly_needed])
+
+    # Identify which ACF features are needed
+    acf_suffixes = ['first_acf_original', 'sumsq_acf_original', 'first_acf_diff1', 'sumsq_acf_diff1', 'first_acf_diff2', 'sumsq_acf_diff2', 'seasonal_acf']
+    acf_needed = [col for col in selected_columns if any(col.endswith('_' + suf) for suf in acf_suffixes)]
+    acf_base = set([col[:-(len(suffix)+1)] for col in acf_needed for suffix in acf_suffixes if col.endswith('_' + suffix)])
+
+    # STL decomposition (only for needed columns)
+    stl_params = {}
+    # for train
+    for col in stl_base:
+        if col not in df.columns:
+            continue
+        train_series = train_fe[col].fillna(method='ffill').fillna(method='bfill')
+        if train_series.isna().all() or len(train_series.dropna()) < 24:
+            continue
+        try:
+            stl = STL(train_series, seasonal=13, period=12)
+            decomposition = stl.fit()
+            if f"{col}_trend" in selected_columns:
+                train_fe[f'{col}_trend'] = decomposition.trend
+            if f"{col}_seasonal" in selected_columns:
+                train_fe[f'{col}_seasonal'] = decomposition.seasonal
+            if f"{col}_residual" in selected_columns:
+                train_fe[f'{col}_residual'] = decomposition.resid
+                
+            stl_params[col] = {
+                'trend': decomposition.trend,
+                'seasonal': decomposition.seasonal,
+                'residual': decomposition.resid,
+                'last_trend': decomposition.trend.iloc[-1],
+                'seasonal_pattern': decomposition.seasonal.iloc[-12:].values,  # Last year pattern
+                'residual_mean': decomposition.resid.mean(),
+                'residual_std': decomposition.resid.std()
+            }
+        except Exception as e:
+            print(f"STL failed for {col}: {e}")
+            continue
+    # for test
+    for col in stl_base:
+        if col not in df.columns:
+            continue
+        try:
+            test_series = test_fe[col].fillna(method='ffill').fillna(method='bfill')
+            
+            last_trend = stl_params[col]['last_trend']
+            if f"{col}_trend" in selected_columns:
+                test_fe[f'{col}_trend'] = last_trend
+                
+            seasonal_pattern = stl_params[col]['seasonal_pattern']
+            n_test = len(test_fe)
+            seasonal_test = np.tile(seasonal_pattern, (n_test // 12) + 1)[:n_test]
+            if f"{col}_seasonal" in selected_columns:
+                test_fe[f'{col}_seasonal'] = seasonal_test
+                
+            expected = last_trend + seasonal_test
+            if f"{col}_residual" in selected_columns:
+                test_fe[f'{col}_residual'] = test_series - expected
+                
+        except Exception as e:
+            print(f"STL failed for {col}: {e}")
+            continue
+
+    # Anomaly detection (3-sigma on residuals, only for needed columns)
+    anomaly_params = {}
+    # train
+    for col in anomaly_base:
+        resid_col = f'{col}_residual'
+        if resid_col not in df.columns:
+            continue
+        
+        residuals = train_fe[resid_col].dropna()
+        if len(residuals) < 10:
+            continue
+        mean_resid = residuals.mean()
+        std_resid = residuals.std() if residuals.std() != 0 else 1e-6
+        
+        anomaly_params[col] = {
+            'mean': mean_resid,
+            'std': std_resid,
+            'lower_threshold': mean_resid - 3 * std_resid,
+            'upper_threshold': mean_resid + 3 * std_resid
+        }
+        
+        # Apply to training data
+        train_fe[f'{col}_anomaly'] = (
+            (train_fe[f'{col}_residual'] < anomaly_params[col]['lower_threshold']) |
+            (train_fe[f'{col}_residual'] > anomaly_params[col]['upper_threshold'])
+        ).astype(int)
+        
+        # Apply to test data using training thresholds
+        if f'{col}_residual' in test_fe.columns:
+            test_fe[f'{col}_anomaly'] = (
+                (test_fe[f'{col}_residual'] < anomaly_params[col]['lower_threshold']) |
+                (test_fe[f'{col}_residual'] > anomaly_params[col]['upper_threshold'])
+            ).astype(int)
+            
+    # ACF features (only for needed columns)
+    acf_params = {}
+    def compute_acf_features(series, max_lags=10):
+        if len(series.dropna()) < max_lags + 5:
+            return None
+        
+        try:
+            clean_series = series.fillna(method='ffill').fillna(method='bfill').dropna()
+            if len(clean_series) < max_lags + 5:
+                return None
+            acf_original = acf(clean_series, nlags=max_lags, fft=True)
+            first_acf_original = acf_original[1] if len(acf_original) > 1 else 0
+            sumsq_acf_original = np.sum(acf_original[1:] ** 2) if len(acf_original) > 1 else 0
+            diff1_series = clean_series.diff().dropna()
+            if len(diff1_series) >= max_lags + 2:
+                acf_diff1 = acf(diff1_series, nlags=max_lags, fft=True)
+                first_acf_diff1 = acf_diff1[1] if len(acf_diff1) > 1 else 0
+                sumsq_acf_diff1 = np.sum(acf_diff1[1:] ** 2) if len(acf_diff1) > 1 else 0
+            else:
+                first_acf_diff1 = 0
+                sumsq_acf_diff1 = 0
+            diff2_series = diff1_series.diff().dropna()
+            if len(diff2_series) >= max_lags + 2:
+                acf_diff2 = acf(diff2_series, nlags=max_lags, fft=True)
+                first_acf_diff2 = acf_diff2[1] if len(acf_diff2) > 1 else 0
+                sumsq_acf_diff2 = np.sum(acf_diff2[1:] ** 2) if len(acf_diff2) > 1 else 0
+            else:
+                first_acf_diff2 = 0
+                sumsq_acf_diff2 = 0
+            seasonal_lag = min(12, len(acf_original) - 1)
+            seasonal_acf = acf_original[seasonal_lag] if seasonal_lag > 0 else 0
+            return {
+                'first_acf_original': first_acf_original,
+                'sumsq_acf_original': sumsq_acf_original,
+                'first_acf_diff1': first_acf_diff1,
+                'sumsq_acf_diff1': sumsq_acf_diff1,
+                'first_acf_diff2': first_acf_diff2,
+                'sumsq_acf_diff2': sumsq_acf_diff2,
+                'seasonal_acf': seasonal_acf
+            }
+        except Exception as e:
+            print(f"ACF failed: {e}")
+            return None
+
+    for col in acf_base:
+        if col not in df.columns:
+            continue
+        train_series = train_fe[col]
+        acf_features = compute_acf_features(train_series)
+        if acf_features is None:
+            continue
+        acf_params[col] = acf_features
+        for feat_name, feat_val in acf_features.items():
+            full_feat_name = f'{col}_{feat_name}'
+            if full_feat_name in selected_columns:
+                train_fe[full_feat_name] = feat_val
+                
+        for feat_name, feat_val in acf_features.items():
+            full_feat_name = f'{col}_{feat_name}'
+            if full_feat_name in selected_columns:
+                test_fe[full_feat_name] = feat_val
+
+    # Only keep selected columns (plus 'date' if not already included)
+    full_df = pd.concat([train_fe, test_fe], axis=0).reset_index(drop=True)
+    full_df = full_df.sort_values('date').reset_index(drop=True)
+
+    final_df = full_df[selected_columns].copy()
+    if os.path.exists('../data/fix'):
+        final_df.to_csv('../data/fix/feature_selected_recession_full.csv', index=False)
+    else:
+        final_df.to_csv('data/fix/feature_selected_recession_full.csv', index=False)
+    return final_df
 
 
 def regresstion_feature_engineering(input_data = None):
     if os.path.exists('../data/fix'):
-        train_df = pd.read_csv('../data/fix/feature_selected_recession_train.csv')
-        test_df = pd.read_csv('../data/fix/feature_selected_recession_test.csv')
+        full_df = pd.read_csv('../data/fix/feature_selected_recession_full.csv')
     else:
-        train_df = pd.read_csv('data/fix/feature_selected_recession_train.csv')
-        test_df = pd.read_csv('data/fix/feature_selected_recession_test.csv')
+        full_df = pd.read_csv('data/fix/feature_selected_recession_full.csv')
 
     # Ensure 'date' is datetime
-    train_df['date'] = pd.to_datetime(train_df['date'])
-    test_df['date'] = pd.to_datetime(test_df['date'])
-
-    # Combine into one DataFrame
-    full_df = pd.concat([train_df, test_df], axis=0).reset_index(drop=True)
+    full_df['date'] = pd.to_datetime(full_df['date'])
     full_df = full_df.sort_values('date').reset_index(drop=True)
     
     ######
@@ -749,6 +782,7 @@ def time_series_prediction():
     
     return prediction
 
+
 def regression_prediction(fe_data):
     # Load models
     base_model, one_three_month_model, six_month_model = load_reg_models()
@@ -785,10 +819,8 @@ def regression_prediction(fe_data):
 
 
 if __name__ == "__main__":
-    input_ = {'1-Year Rate': 99.54, '3-Month Rate': 3.89, '6-Month Rate': 3.75, '10-Year Rate': 4.18, 'CPI': 393.364, 'PPI': 262.443, 'Industrial Production': 103.9203, 'Share Price': 6643.7, 'Unemployment Rate': 4.3, 'OECD CLI Index': 98.3101894908785, 'CSI Index': 58.2}
-    base_pred, one_month_pred, three_month_pred, six_month_pred = regression_prediction(input_)
-    # base_pred, one_month_pred, three_month_pred, six_month_pred = regression_prediction()
-    print(f"Base Prediction: {base_pred}")
-    print(f"1-Month Prediction: {one_month_pred}")
-    print(f"3-Month Prediction: {three_month_pred}")
-    print(f"6-Month Prediction: {six_month_pred}")
+    df = time_series_feature_eng()
+    
+    print(df.tail().T)
+    print(df.shape)
+    print(df.columns)
