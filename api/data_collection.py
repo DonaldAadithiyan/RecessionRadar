@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 
 from concurrent.futures import ThreadPoolExecutor
+from scipy.stats import boxcox
 
 import os
 import requests
@@ -65,22 +66,19 @@ def fetch_and_combine_fred_series(output_path=None):
     
     dataset = data_frames['RECPROUSM156N'].copy()
     dataset.rename(columns={value_col: 'recession_probability'}, inplace=True)
+    dataset['recession_probability'] = pd.to_numeric(dataset['recession_probability'], errors='coerce')
 
     ###### average monthly
-    df = data_frames["DTB6"].copy()
-    # Convert date column to datetime
-    df[date_col] = pd.to_datetime(df[date_col])
-    df[value_col] = pd.to_numeric(df[value_col], errors='coerce')  # convert to float
-    
-    # Create a new column representing the first day of the month
-    df['month'] = df[date_col].dt.to_period('M').dt.to_timestamp()
-    
-    # Group by month and calculate average
-    monthly_avg = df.groupby('month')[value_col].mean().reset_index()
-    
-    # Rename columns to match original format
-    monthly_avg.rename(columns={'month': date_col}, inplace=True)
-    data_frames["DTB6"] = monthly_avg
+    def average_monthly(df, date_col, value_col):
+        df[date_col] = pd.to_datetime(df[date_col])
+        df[value_col] = pd.to_numeric(df[value_col], errors='coerce')  # convert to float
+        # Create a new column representing the first day of the month
+        df['month'] = df[date_col].dt.to_period('M').dt.to_timestamp()
+        # Group by month and calculate average
+        monthly_avg = df.groupby('month')[value_col].mean().reset_index()
+        # Rename columns to match original format
+        monthly_avg.rename(columns={'month': date_col}, inplace=True)
+        return monthly_avg
     
     # Create new columns by shifting recession_probability column
     dataset["1_month_recession_probability"] = dataset["recession_probability"].shift(-1)
@@ -88,9 +86,9 @@ def fetch_and_combine_fred_series(output_path=None):
     dataset["6_month_recession_probability"] = dataset["recession_probability"].shift(-6)
     
     ## rates
-    dataset_1yr_bond = data_frames["DTB1YR"].copy()
-    dataset_3m_bill = data_frames["DTB3"].copy()
-    dataset_6m_bill = data_frames["DTB6"].copy()
+    dataset_1yr_bond = average_monthly(data_frames["DTB1YR"].copy(), date_col, value_col)
+    dataset_3m_bill = average_monthly(data_frames["DTB3"].copy(), date_col, value_col)
+    dataset_6m_bill = average_monthly(data_frames["DTB6"].copy(), date_col, value_col)
     
     dataset_1yr_bond = dataset_1yr_bond.rename(columns={"value": "1_year_rate"})
     dataset_3m_bill = dataset_3m_bill.rename(columns={"value": "3_months_rate"})
@@ -100,35 +98,55 @@ def fetch_and_combine_fred_series(output_path=None):
     dataset = dataset.merge(dataset_3m_bill, on="date", how="left") 
     dataset = dataset.merge(dataset_6m_bill, on="date", how="left")
     
-    ## other indicators
+    ## CPI
     dataset_CPI = data_frames["CPIAUCSL"].copy()
     dataset_CPI = dataset_CPI.rename(columns={"value": "CPI"})
+    dataset_CPI["CPI"] = pd.to_numeric(dataset_CPI["CPI"], errors='coerce')
     dataset = dataset.merge(dataset_CPI, on="date", how="left")
     
+    ## industrial production
     dataset_INDPRO = data_frames["INDPRO"].copy()
     dataset_INDPRO = dataset_INDPRO.rename(columns={"value": "INDPRO"})
+    dataset_INDPRO["INDPRO"] = pd.to_numeric(dataset_INDPRO["INDPRO"], errors='coerce')
     dataset = dataset.merge(dataset_INDPRO, on="date", how="left")
     
+    ## 10 year rate
     dataset_10yr = data_frames["IRLTLT01USM156N"].copy()
     dataset_10yr = dataset_10yr.rename(columns={"value": "10_year_rate"})
+    dataset_10yr["10_year_rate"] = pd.to_numeric(dataset_10yr["10_year_rate"], errors='coerce')
     dataset = dataset.merge(dataset_10yr, on="date", how="left")
     
+    ## share price
     dataset_share_price = data_frames["SPASTT01USM661N"].copy()
     dataset_share_price = dataset_share_price.rename(columns={"value": "share_price"})
+    dataset_share_price["share_price"] = pd.to_numeric(dataset_share_price["share_price"], errors='coerce')
+    # # Make sure share_price > 0
+    # if (dataset_share_price['share_price'] <= 0).any():
+    #     min_val = dataset_share_price['share_price'].min()
+    #     dataset_share_price['share_price'] = dataset_share_price['share_price'] + abs(min_val) + 1
+    # # Apply Box-Cox transformation
+    # dataset_share_price['share_price'], lambda_val = boxcox(dataset_share_price['share_price'])
     dataset = dataset.merge(dataset_share_price, on="date", how="left")
     
+    ## unemployment rate
     dataset_unemployment = data_frames["UNRATE"].copy()
     dataset_unemployment = dataset_unemployment.rename(columns={"value": "unemployment_rate"})
+    dataset_unemployment["unemployment_rate"] = pd.to_numeric(dataset_unemployment["unemployment_rate"], errors='coerce')
     dataset = dataset.merge(dataset_unemployment, on="date", how="left")
     
+    ## PPI
     dataset_PPI = data_frames["PCU3312103312100"].copy()
     dataset_PPI = dataset_PPI.rename(columns={"value": "PPI"})
+    dataset_PPI["PPI"] = pd.to_numeric(dataset_PPI["PPI"], errors='coerce')
     dataset = dataset.merge(dataset_PPI, on="date", how="left")
     
+    ## OECD CLI
     dataset_OECD = data_frames["USALOLITOAASTSAM"].copy()
     dataset_OECD = dataset_OECD.rename(columns={"value": "OECD_CLI_index"})
+    dataset_OECD["OECD_CLI_index"] = pd.to_numeric(dataset_OECD["OECD_CLI_index"], errors='coerce')
     dataset = dataset.merge(dataset_OECD, on="date", how="left")
     
+    ## consumer sentiment index
     dataset_CSI = data_frames["UMCSENT"].copy()
     dataset_CSI = dataset_CSI.rename(columns={"value": "CSI_index"})
     # Replace '.' with NaN and convert column to numeric
@@ -171,4 +189,8 @@ def fetch_and_combine_fred_series(output_path=None):
 
     
 if __name__ == "__main__":
-    fetch_and_combine_fred_series()
+    df = fetch_and_combine_fred_series()
+    print(df.info())
+    
+    # df = pd.read_csv('data/combined/recession_probability.csv')
+    # print(df.info())

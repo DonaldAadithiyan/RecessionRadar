@@ -95,23 +95,26 @@ latest_predictions = {
 yields = {}
 indicators = {}
 recession_data = None
+ts_prediction = None
 
 def run_ml_pipeline_periodically():
-    global latest_predictions, yields, indicators, recession_data
+    global latest_predictions, yields, indicators, recession_data, ts_prediction
     while True:
         ## ML PIPELINE
         start = datetime.now()
         print(datetime.now().strftime("%H:%M:%S.%f")[:-3] ,"Running ML pipeline...")
-        fetch_and_combine_fred_series(output_path="../data/combined/recession_probability_new.csv")
+        fetched_data = fetch_and_combine_fred_series()
+        print(f"Data fetched from {fetched_data.iloc[0]['date']} to {fetched_data.iloc[-1]['date']}, total {len(fetched_data)} records.")
         print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Fetched latest FRED data.")
         
         print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Running time series prediction...")
-        time_series_feature_eng()
-        time_series_prediction()
+        ts_fe_data = time_series_feature_eng(fetched_data)
+        ts_prediction = time_series_prediction(ts_fe_data)
+        print("Time series predictions:", ts_prediction.T)
         print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Time series prediction completed.")
         
         print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Running regression prediction...")
-        fe_data = regresstion_feature_engineering()
+        fe_data = regresstion_feature_engineering(ts_prediction)
         try:
             base, one_month, three_month, six_month= regression_prediction(fe_data)
             latest_predictions = {
@@ -121,7 +124,8 @@ def run_ml_pipeline_periodically():
                 "six_month": six_month,
                 "updated_at": datetime.now().isoformat()
             }
-            print("ML pipeline updated predictions:", latest_predictions)
+            print(f"Base: {base}, 1m: {one_month}, 3m: {three_month}, 6m: {six_month}")
+
         except Exception as e:
             print("Error in ML pipeline:", e)
         print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Regression prediction completed.")
@@ -145,24 +149,24 @@ def run_ml_pipeline_periodically():
             results = list(executor.map(fetch, ECON_FRED_SERIES.items()))
             for label, value in results:
                 indicators[label] = value
-        print("Updated yields:", yields)
-        print("Updated indicators:", indicators)
+        print("Updated yields:")
+        print("Updated indicators:")
         print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Fetch completed.")
         
         ## recesstion dataset
-        if os.path.exists('../data/fix'):
-            train_df = pd.read_csv('../data/fix/feature_selected_recession_train.csv')
-            test_df = pd.read_csv('../data/fix/feature_selected_recession_test.csv')
-        else:
-            train_df = pd.read_csv('data/fix/feature_selected_recession_train.csv')
-            test_df = pd.read_csv('data/fix/feature_selected_recession_test.csv')
+        # if os.path.exists('../data/fix'):
+        #     train_df = pd.read_csv('../data/fix/feature_selected_recession_train.csv')
+        #     test_df = pd.read_csv('../data/fix/feature_selected_recession_test.csv')
+        # else:
+        #     train_df = pd.read_csv('data/fix/feature_selected_recession_train.csv')
+        #     test_df = pd.read_csv('data/fix/feature_selected_recession_test.csv')
 
-        # Ensure 'date' is datetime
-        train_df['date'] = pd.to_datetime(train_df['date'])
-        test_df['date'] = pd.to_datetime(test_df['date'])
+        # # Ensure 'date' is datetime
+        # train_df['date'] = pd.to_datetime(train_df['date'])
+        # test_df['date'] = pd.to_datetime(test_df['date'])
 
         # Combine into one DataFrame
-        full_df = pd.concat([train_df, test_df], axis=0).reset_index(drop=True)
+        full_df = fetched_data.copy().reset_index(drop=True)
         full_df = full_df.sort_values('date').reset_index(drop=True)
         
         # Replace NaN, inf, -inf with 0.0
@@ -245,9 +249,10 @@ async def get_current_prediction():
 # Custom Prediction endpoint
 @app.post("/api/custom-prediction", response_model=RecessionPrediction)
 async def create_custom_prediction(request: CustomPredictionRequest):
+    global ts_prediction
     inputs = request.indicators
     
-    custom_data = regresstion_feature_engineering(inputs)
+    custom_data = regresstion_feature_engineering(ts_prediction, inputs)
     base_pred, one_month, three_month, six_month = regression_prediction(custom_data)
     print(inputs)
     print(f"Custom Prediction - Base: {base_pred}, 1m: {one_month}, 3m: {three_month}, 6m: {six_month}")
@@ -264,4 +269,3 @@ async def create_custom_prediction(request: CustomPredictionRequest):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
-    # print(load_models)

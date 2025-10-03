@@ -1,13 +1,10 @@
 import pandas as pd
 import numpy as np
 
-# from sklearn.base import BaseEstimator, RegressorMixin
-# from sklearn.multioutput import RegressorChain
 from statsmodels.tsa.seasonal import STL
 from statsmodels.tsa.stattools import acf
-# from lgbm_wrapper import LGBMWrapper
 from scipy.stats import boxcox
-# import lightgbm, catboost
+from datetime import datetime
 
 import pickle
 import os
@@ -431,7 +428,7 @@ def trend_based_forecast(input_data, indicator, forecast_steps):
         return [series.iloc[-1]] * forecast_steps
 
 
-def time_series_feature_eng():
+def time_series_feature_eng(df):
     """
     Feature engineering pipeline for time series data.
     Only computes features that are in selected_columns (if provided).
@@ -477,11 +474,12 @@ def time_series_feature_eng():
         "10_year_rate_residual"
     ]
 
-    # Load data
-    if os.path.exists('../data/combined/'):
-        df = pd.read_csv('../data/combined/recession_probability.csv')
-    else:
-        df = pd.read_csv('data/combined/recession_probability.csv')
+    # # Load data
+    # if os.path.exists('../data/combined/'):
+    #     df = pd.read_csv('../data/combined/recession_probability.csv')
+    # else:
+    #     df = pd.read_csv('data/combined/recession_probability.csv')
+    df = df.copy()
     df['date'] = pd.to_datetime(df['date'])
     df = df.sort_values('date').reset_index(drop=True)
     
@@ -658,19 +656,20 @@ def time_series_feature_eng():
     full_df = full_df.sort_values('date').reset_index(drop=True)
 
     final_df = full_df[selected_columns].copy()
-    if os.path.exists('../data/fix'):
-        final_df.to_csv('../data/fix/feature_selected_recession_full.csv', index=False)
-    else:
-        final_df.to_csv('data/fix/feature_selected_recession_full.csv', index=False)
+    # if os.path.exists('../data/fix'):
+    #     final_df.to_csv('../data/fix/feature_selected_recession_full.csv', index=False)
+    # else:
+    #     final_df.to_csv('data/fix/feature_selected_recession_full.csv', index=False)
     return final_df
 
 
-def regresstion_feature_engineering(input_data = None):
-    if os.path.exists('../data/fix'):
-        full_df = pd.read_csv('../data/fix/feature_selected_recession_full.csv')
-    else:
-        full_df = pd.read_csv('data/fix/feature_selected_recession_full.csv')
+def regresstion_feature_engineering(ts_prediction, input_data = None):
+    # if os.path.exists('../data/fix'):
+    #     full_df = pd.read_csv('../data/fix/feature_selected_recession_full.csv')
+    # else:
+    #     full_df = pd.read_csv('data/fix/feature_selected_recession_full.csv')
 
+    full_df = ts_prediction.copy()
     # Ensure 'date' is datetime
     full_df['date'] = pd.to_datetime(full_df['date'])
     full_df = full_df.sort_values('date').reset_index(drop=True)
@@ -712,24 +711,16 @@ def regresstion_feature_engineering(input_data = None):
     ########
     
     if input_data:      # apply boxcox transform to share_price if provided
-        if 'share_price' in input_data:
-            share_price_val = input_data['share_price']
-            if share_price_val > 0:
-                transformed, _ = boxcox([share_price_val])
-                input_data['share_price'] = transformed[0]
+        # if 'share_price' in input_data:
+        #     share_price_val = input_data['share_price']
+        #     if share_price_val > 0:
+        #         transformed, _ = boxcox([share_price_val])
+        #         input_data['share_price'] = transformed[0]
                 
-        # for col in input_data:
-        #     if col in full_df.columns:
-        #         full_df.at[full_df.index[-1], col] = input_data[col]
-                
-        new_row = {col: None for col in full_df.columns}
-
-        # Fill only the provided values
         for col in input_data:
             if col in full_df.columns:
-                new_row[col] = input_data[col]
+                full_df.at[full_df.index[-1], col] = input_data[col]
                 
-        full_df = pd.concat([full_df, pd.DataFrame([new_row])], ignore_index=True)
  
     # Interaction features
     if 'CPI_unemployment_interaction' in selected_features:
@@ -765,7 +756,10 @@ def regresstion_feature_engineering(input_data = None):
         if f"{col}_pct_change1" in selected_features:
             full_df[f"{col}_pct_change1"] = full_df[col].pct_change(1)
         
-    df_reduced = full_df[selected_features + recession_targets + ["date"]].copy()
+    # for col in recession_targets:
+    #     full_df[col] = 0
+    # df_reduced = full_df[selected_features + recession_targets + ["date"]].copy()
+    df_reduced = full_df[selected_features + ["date"]].copy()
     
     for col in anomaly_cols:
         df_reduced[f"{col}_anomaly"] = full_df[col].apply(lambda x: is_anomaly(col, x, anomaly_stats)).astype(int)
@@ -774,7 +768,7 @@ def regresstion_feature_engineering(input_data = None):
     return df_reduced
 
 
-def time_series_prediction():
+def time_series_prediction(input_data):
     models = load_ts_models()
     
     models_dict = {
@@ -791,18 +785,23 @@ def time_series_prediction():
         'INDPRO': models['indpro_prophet_model'], 
         'share_price': models['share_price_prophet_model']
     }
-    data_dir = '../data/fix' if os.path.exists('../data/fix') else 'data/fix'
-    input_data = pd.read_csv(os.path.join(data_dir, 'feature_selected_recession_full.csv'))
+    # data_dir = '../data/fix' if os.path.exists('../data/fix') else 'data/fix'
+    # input_data = pd.read_csv(os.path.join(data_dir, 'feature_selected_recession_full.csv'))
+    
+    ## calculate how many months to forecast
+    last_date = pd.to_datetime(input_data.iloc[-1]['date'])
+    now = datetime.now()
+    month_diff = (now.year - last_date.year) * 12 + (now.month - last_date.month)
     
     prediction = production_forecasting_pipeline(
         input_data=input_data, 
         models_dict=models_dict, 
-        forecast_steps=4, 
+        forecast_steps=month_diff, 
         date_col='date', 
         freq='M'
     )
     
-    return prediction
+    return prediction.iloc[[-1]]
 
 
 def regression_prediction(fe_data):
@@ -833,11 +832,8 @@ def regression_prediction(fe_data):
     X_6m[chain_targets] = [base_pred, one_month_pred, three_month_pred]
     
     six_month_pred = inv_logit_transform(six_month_model.predict(X_6m)).clip(0, 100)[-1]
-    
-    
-    print(f"Base: {base_pred}, 1m: {one_month_pred}, 3m: {three_month_pred}, 6m: {six_month_pred}")
-    
-    return base_pred/100, one_month_pred/100, three_month_pred/100, six_month_pred/100
+        
+    return base_pred, one_month_pred, three_month_pred, six_month_pred
 
 
 if __name__ == "__main__":
@@ -852,4 +848,4 @@ if __name__ == "__main__":
     # print(df.columns)
     
     preds = time_series_prediction()
-    print(preds.tail().T)
+    print(preds)
