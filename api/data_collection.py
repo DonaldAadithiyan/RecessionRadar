@@ -41,7 +41,7 @@ def fetch_latest_fred_value(series_id):
     return df
 
 
-def fetch_and_combine_fred_series(output_path=None):
+def fetch_and_combine_fred_series():
     data_labels = [
         "A939RX0Q048SBEA",
         "CPIAUCSL",
@@ -181,10 +181,10 @@ def fetch_and_combine_fred_series(output_path=None):
     gdp_monthly_df = gdp_monthly_df.reset_index()
     dataset = dataset.merge(gdp_monthly_df, on="date", how="left")
     
-    if output_path:
-        dataset.to_csv(output_path, index=False)
-        print(f"Combined dataset saved to {output_path}")
-        
+    if os.path.exists('../data'):
+        dataset.to_csv('../data/recession_probability.csv', index=False)
+    elif os.path.exists('data'):
+        dataset.to_csv('data/recession_probability.csv', index=False)
     return dataset
 
     
