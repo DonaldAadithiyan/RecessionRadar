@@ -765,8 +765,9 @@ def time_series_prediction(input_data):
     now = datetime.now()
     month_diff = (now.year - last_date.year) * 12 + (now.month - last_date.month)
     
+    input_data_ = input_data[input_data['date'].dt.year >= 2020].copy()
     prediction = production_forecasting_pipeline(
-        input_data=input_data, 
+        input_data=input_data_, 
         models_dict=models_dict, 
         forecast_steps=month_diff, 
         date_col='date', 

@@ -120,10 +120,10 @@ def run_ml_pipeline_periodically():
         try:
             base, one_month, three_month, six_month= regression_prediction(fe_data)
             latest_predictions = {
-                "base_pred": base,
-                "one_month": one_month,
-                "three_month": three_month,
-                "six_month": six_month,
+                "base_pred": base/100,
+                "one_month": one_month/100,
+                "three_month": three_month/100,
+                "six_month": six_month/100,
                 "updated_at": datetime.now().isoformat()
             }
             print(f"Base: {base}, 1m: {one_month}, 3m: {three_month}, 6m: {six_month}")
