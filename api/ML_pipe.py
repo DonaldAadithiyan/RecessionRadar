@@ -474,11 +474,6 @@ def time_series_feature_eng(df):
         "10_year_rate_residual"
     ]
 
-    # # Load data
-    # if os.path.exists('../data/combined/'):
-    #     df = pd.read_csv('../data/combined/recession_probability.csv')
-    # else:
-    #     df = pd.read_csv('data/combined/recession_probability.csv')
     df = df.copy()
     df['date'] = pd.to_datetime(df['date'])
     df = df.sort_values('date').reset_index(drop=True)
@@ -656,20 +651,12 @@ def time_series_feature_eng(df):
     full_df = full_df.sort_values('date').reset_index(drop=True)
 
     final_df = full_df[selected_columns].copy()
-    # if os.path.exists('../data/fix'):
-    #     final_df.to_csv('../data/fix/feature_selected_recession_full.csv', index=False)
-    # else:
-    #     final_df.to_csv('data/fix/feature_selected_recession_full.csv', index=False)
     return final_df
 
 
-def regresstion_feature_engineering(ts_prediction, input_data = None):
-    # if os.path.exists('../data/fix'):
-    #     full_df = pd.read_csv('../data/fix/feature_selected_recession_full.csv')
-    # else:
-    #     full_df = pd.read_csv('data/fix/feature_selected_recession_full.csv')
-
-    full_df = ts_prediction.copy()
+def regresstion_feature_engineering(ts_fe_data, ts_prediction):
+    full_df = pd.concat([ts_fe_data, ts_prediction], axis=0).reset_index(drop=True)
+    print(f"Feature Engineering Input Shape: {full_df.shape}")
     # Ensure 'date' is datetime
     full_df['date'] = pd.to_datetime(full_df['date'])
     full_df = full_df.sort_values('date').reset_index(drop=True)
@@ -710,18 +697,6 @@ def regresstion_feature_engineering(ts_prediction, input_data = None):
     ]
     ########
     
-    if input_data:      # apply boxcox transform to share_price if provided
-        # if 'share_price' in input_data:
-        #     share_price_val = input_data['share_price']
-        #     if share_price_val > 0:
-        #         transformed, _ = boxcox([share_price_val])
-        #         input_data['share_price'] = transformed[0]
-                
-        for col in input_data:
-            if col in full_df.columns:
-                full_df.at[full_df.index[-1], col] = input_data[col]
-                
- 
     # Interaction features
     if 'CPI_unemployment_interaction' in selected_features:
         full_df['CPI_unemployment_interaction'] = full_df['CPI'] * full_df['unemployment_rate']
@@ -756,16 +731,13 @@ def regresstion_feature_engineering(ts_prediction, input_data = None):
         if f"{col}_pct_change1" in selected_features:
             full_df[f"{col}_pct_change1"] = full_df[col].pct_change(1)
         
-    # for col in recession_targets:
-    #     full_df[col] = 0
-    # df_reduced = full_df[selected_features + recession_targets + ["date"]].copy()
     df_reduced = full_df[selected_features + ["date"]].copy()
     
     for col in anomaly_cols:
         df_reduced[f"{col}_anomaly"] = full_df[col].apply(lambda x: is_anomaly(col, x, anomaly_stats)).astype(int)
                 
 
-    return df_reduced
+    return df_reduced.iloc[[-1]]
 
 
 def time_series_prediction(input_data):
@@ -801,7 +773,7 @@ def time_series_prediction(input_data):
         freq='M'
     )
     
-    return prediction.iloc[[-1]]
+    return prediction
 
 
 def regression_prediction(fe_data):
