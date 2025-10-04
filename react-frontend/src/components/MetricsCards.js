@@ -57,7 +57,7 @@ function MetricsCards({ predictions }) {
         <ProbabilityCard 
           title="Recession Forecast" 
           value={predictions.base_pred} 
-          timeframe="next month" 
+          timeframe="this month" 
         />
         <ProbabilityCard 
           title="1-Month Forecast" 

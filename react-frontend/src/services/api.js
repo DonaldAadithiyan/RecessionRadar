@@ -46,6 +46,17 @@ export const getCurrentPrediction = async () => {
   }
 };
 
+// Historical Economic Data API
+export const getHistoricalEconomicData = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/historical-economic-data`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching historical economic data:', error);
+    throw error;
+  }
+};
+
 // Custom Prediction API
 export const getCustomPrediction = async (indicators) => {
   try {

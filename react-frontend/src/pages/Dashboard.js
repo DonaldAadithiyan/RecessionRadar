@@ -7,7 +7,6 @@ import {
   Box, 
   CircularProgress,
   Alert,
-  Chip,
   Divider
 } from '@mui/material';
 
@@ -16,6 +15,8 @@ import MetricsCards from '../components/MetricsCards';
 import RecessionProbabilityChart from '../components/RecessionProbabilityChart';
 import YieldCurveChart from '../components/YieldCurveChart';
 import YieldCurveAnalysis from '../components/YieldCurveAnalysis';
+import EconomicIndicatorsChart from '../components/EconomicIndicatorsChart';
+import InterestRatesChart from '../components/InterestRatesChart';
 
 // Import services
 import { 
@@ -43,92 +44,41 @@ function Dashboard() {
         setLoading(true);
         setError(null);
         
-        // HARDCODED VALUES FOR DISPLAY TESTING
-        // These would normally come from the API endpoints
+        // Fetch real data from API endpoints
+        console.log('Fetching live data from APIs...');
         
-        // Sample treasury yields data - create an inverted yield curve for demonstration
-        const yields = {
-          yields: {
-            '1-Month Rate': 4.35,
-            '3-Month Rate': 4.52,
-            '6-Month Rate': 4.65,
-            '1-Year Rate': 4.86,
-            '2-Year Rate': 4.65,
-            '5-Year Rate': 4.25,
-            '10-Year Rate': 3.81,
-            '30-Year Rate': 3.95
-          },
-          updated_at: new Date().toISOString()
-        };
+        // Fetch data with individual error handling
+        const treasuryData = await getTreasuryYields().catch(err => {
+          console.warn('Treasury yields API failed:', err);
+          return null;
+        });
         
-        // Sample recession probabilities data
-        const probabilities = {
-          dates: [
-            '2023-01-01', '2023-02-01', '2023-03-01', '2023-04-01', 
-            '2023-05-01', '2023-06-01', '2023-07-01', '2023-08-01',
-            '2023-09-01', '2023-10-01', '2023-11-01', '2023-12-01'
-          ],
-          one_month: [0.05, 0.08, 0.12, 0.18, 0.25, 0.35, 0.42, 0.48, 0.52, 0.58, 0.62, 0.65],
-          three_month: [0.15, 0.22, 0.28, 0.35, 0.42, 0.48, 0.55, 0.62, 0.68, 0.72, 0.75, 0.78],
-          six_month: [0.25, 0.32, 0.38, 0.45, 0.52, 0.58, 0.65, 0.72, 0.76, 0.80, 0.83, 0.85]
-        };
+        const probabilitiesData = await getRecessionProbabilities().catch(err => {
+          console.warn('Recession probabilities API failed:', err);
+          return null;
+        });
         
-        // Sample current prediction data
-        const prediction = {
-          probabilities: {
-            '1-Month': 0.65,
-            '3-Month': 0.78,
-            '6-Month': 0.85
-          },
-          previous_probabilities: {
-            '1-Month': 0.62,
-            '3-Month': 0.75,
-            '6-Month': 0.83
-          },
-          updated_at: new Date().toISOString()
-        };
+        const predictionData = await getCurrentPrediction().catch(err => {
+          console.warn('Current prediction API failed:', err);
+          return null;
+        });
         
-        // Sample economic indicators data
-        const indicators = {
-          indicators: {
-            'CPI': 3.7,
-            'PPI': 4.2,
-            'Unemployment Rate': 4.8,
-            'Industrial Production': 97.5,
-            'Share Price': 4285.3,
-            'OECD CLI Index': 98.7,
-            'CSI Index': 68.5,
-            'GDP Growth': 2.1,
-            'Retail Sales': 0.8,
-            'Housing Starts': -3.2,
-            'Manufacturing PMI': 48.2,
-            'Services PMI': 51.8
-          },
-          updated_at: new Date().toISOString()
-        };
+        const indicatorsData = await getEconomicIndicators().catch(err => {
+          console.warn('Economic indicators API failed:', err);
+          return null;
+        });
         
-        // Try using real API data but fall back to hardcoded if it fails
-        try {
-          const realData = await Promise.all([
-            getTreasuryYields(),
-            getRecessionProbabilities(),
-            getCurrentPrediction(),
-            getEconomicIndicators()
-          ]);
-          
-          setTreasuryYields(realData[0]);
-          setRecessionProbabilities(realData[1]);
-          setCurrentPrediction(realData[2]);
-          setEconomicIndicators(realData[3]);
-          
-        } catch (apiError) {
-          console.log('Using hardcoded data instead of API data:', apiError);
-          // Fall back to hardcoded data
-          setTreasuryYields(yields);
-          setRecessionProbabilities(probabilities);
-          setCurrentPrediction(prediction);
-          setEconomicIndicators(indicators);
-        }
+        console.log('Live data fetched successfully:');
+        console.log('- Treasury yields:', treasuryData);
+        console.log('- Recession probabilities:', probabilitiesData);
+        console.log('- Current prediction:', predictionData);
+        console.log('- Economic indicators:', indicatorsData);
+        
+        // Set data only if successfully fetched
+        if (treasuryData) setTreasuryYields(treasuryData);
+        if (probabilitiesData) setRecessionProbabilities(probabilitiesData);
+        if (predictionData) setCurrentPrediction(predictionData);
+        if (indicatorsData) setEconomicIndicators(indicatorsData);
         
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -139,6 +89,12 @@ function Dashboard() {
     };
     
     fetchData();
+    
+    // Set up auto-refresh every 5 minutes for live data
+    const refreshInterval = setInterval(fetchData, 5 * 60 * 1000);
+    
+    // Cleanup interval on unmount
+    return () => clearInterval(refreshInterval);
   }, []);
 
 
@@ -195,12 +151,6 @@ function Dashboard() {
             {recessionProbabilities ? (
               <Box>
                 <RecessionProbabilityChart data={recessionProbabilities} />
-                <Paper sx={{ p: 2, mb: 4, bgcolor: '#212121' }}>
-                  <Typography variant="body2" color="white">
-                    The chart shows the recession probability trends over time. A probability above 50% indicates 
-                    a higher likelihood of a recession occurring within the specified time frame.
-                  </Typography>
-                </Paper>
               </Box>
             ) : (
               <Paper sx={{ p: 3, mb: 4, textAlign: 'center' }}>
@@ -254,7 +204,6 @@ function Dashboard() {
                         </Typography>
                         <Typography variant="h6" component="div" sx={{ mt: 1 }}>
                           {value.toFixed(2)}
-                          {renderIndicatorChip(name, value)}
                         </Typography>
                       </Paper>
                     </Grid>
@@ -271,90 +220,20 @@ function Dashboard() {
               </Typography>
             </Paper>
           </Grid>
+          
+          {/* Economic Indicators Historical Chart */}
+          <Grid item xs={12}>
+            <EconomicIndicatorsChart />
+          </Grid>
+          
+          {/* Interest Rates Historical Chart */}
+          <Grid item xs={12}>
+            <InterestRatesChart />
+          </Grid>
         </Grid>
       </Box>
     </Container>
   );
-  
-  // Helper function to add status chips to indicators
-  function renderIndicatorChip(name, value) {
-    // Define thresholds for indicators
-    if (name === 'CPI' || name === 'PPI') {
-      if (value > 4.0) {
-        return (
-          <Chip 
-            label="High" 
-            size="small" 
-            color="error" 
-            sx={{ position: 'absolute', top: 8, right: 8, fontSize: '0.7rem' }}
-          />
-        );
-      } else if (value > 2.5) {
-        return (
-          <Chip 
-            label="Elevated" 
-            size="small" 
-            color="warning" 
-            sx={{ position: 'absolute', top: 8, right: 8, fontSize: '0.7rem' }}
-          />
-        );
-      }
-    } else if (name === 'Unemployment Rate') {
-      if (value > 6.0) {
-        return (
-          <Chip 
-            label="High" 
-            size="small" 
-            color="error" 
-            sx={{ position: 'absolute', top: 8, right: 8, fontSize: '0.7rem' }}
-          />
-        );
-      } else if (value > 4.5) {
-        return (
-          <Chip 
-            label="Elevated" 
-            size="small" 
-            color="warning" 
-            sx={{ position: 'absolute', top: 8, right: 8, fontSize: '0.7rem' }}
-          />
-        );
-      }
-    } else if (name === 'CSI Index') {
-      if (value < 70.0) {
-        return (
-          <Chip 
-            label="Low" 
-            size="small" 
-            color="error" 
-            sx={{ position: 'absolute', top: 8, right: 8, fontSize: '0.7rem' }}
-          />
-        );
-      }
-    } else if (name === 'OECD CLI Index') {
-      if (value < 99.0) {
-        return (
-          <Chip 
-            label="Below Trend" 
-            size="small" 
-            color="warning" 
-            sx={{ position: 'absolute', top: 8, right: 8, fontSize: '0.7rem', maxWidth: '90px' }}
-          />
-        );
-      }
-    } else if (name === 'Industrial Production') {
-      if (value < 100.0) {
-        return (
-          <Chip 
-            label="Below Avg" 
-            size="small" 
-            color="warning" 
-            sx={{ position: 'absolute', top: 8, right: 8, fontSize: '0.7rem' }}
-          />
-        );
-      }
-    }
-    return null;
-  }
 }
 
 export default Dashboard;

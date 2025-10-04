@@ -43,6 +43,21 @@ class EconomicIndicators(BaseModel):
     indicators: Dict[str, float]
     updated_at: str
 
+class HistoricalEconomicData(BaseModel):
+    dates: List[str]
+    cpi: List[float]
+    ppi: List[float]
+    industrial_production: List[float]
+    unemployment_rate: List[float]
+    share_price: List[float]
+    gdp_per_capita: List[float]
+    oecd_cli_index: List[float]
+    csi_index: List[float]
+    ten_year_rate: List[float]
+    three_months_rate: List[float]
+    six_months_rate: List[float]
+    one_year_rate: List[float]
+
 class RecessionProbabilities(BaseModel):
     dates: List[str]
     one_month: List[float]
@@ -102,72 +117,77 @@ fetched_data = None
 def run_ml_pipeline_periodically():
     global latest_predictions, yields, indicators, recession_data, ts_prediction, ts_fe_data, fetched_data
     while True:
-        ## ML PIPELINE
-        start = datetime.now()
-        print(datetime.now().strftime("%H:%M:%S.%f")[:-3] ,"Running ML pipeline...")
-        fetched_data = fetch_and_combine_fred_series()
-        print(f"Data fetched from {fetched_data.iloc[0]['date']} to {fetched_data.iloc[-1]['date']}, total {len(fetched_data)} records.")
-        print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Fetched latest FRED data.")
-        
-        print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Running time series prediction...")
-        ts_fe_data = time_series_feature_eng(fetched_data)
-        ts_prediction = time_series_prediction(ts_fe_data)
-        print("Time series predictions:", ts_prediction.T)
-        print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Time series prediction completed.")
-        
-        print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Running regression prediction...")
-        fe_data = regresstion_feature_engineering(ts_fe_data, ts_prediction)
         try:
-            base, one_month, three_month, six_month= regression_prediction(fe_data)
-            latest_predictions = {
-                "base_pred": base/100,
-                "one_month": one_month/100,
-                "three_month": three_month/100,
-                "six_month": six_month/100,
-                "updated_at": datetime.now().isoformat()
-            }
-            print(f"Base: {base}, 1m: {one_month}, 3m: {three_month}, 6m: {six_month}")
-
-        except Exception as e:
-            print("Error in ML pipeline:", e)
-        print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Regression prediction completed.")
-        
-        ## Fetch Treasury Yields and Economic Indicators
-        print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Fetching Treasury Yields and Economic Indicators...")
-        if not FRED_API_KEY:
-            raise HTTPException(status_code=500, detail="FRED API key not set in environment variable FRED_API_KEY")
-
-        def fetch(label_series):
-            label, series_id = label_series
-            value = fetch_latest_fred_value(series_id)
-            value = float(value) if value is not None else None
-            return (label, value)
-
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            results = list(executor.map(fetch, FRED_SERIES.items()))
-            for label, value in results:
-                yields[label] = value
+            ## ML PIPELINE
+            start = datetime.now()
+            print(datetime.now().strftime("%H:%M:%S.%f")[:-3] ,"Running ML pipeline...")
+            fetched_data = fetch_and_combine_fred_series()
+            print(f"Data fetched from {fetched_data.iloc[0]['date']} to {fetched_data.iloc[-1]['date']}, total {len(fetched_data)} records.")
+            print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Fetched latest FRED data.")
             
-            results = list(executor.map(fetch, ECON_FRED_SERIES.items()))
-            for label, value in results:
-                indicators[label] = value
-        print("Updated yields:")
-        print("Updated indicators:")
-        print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Fetch completed.")
-        
-        ## recesstion dataset
-        full_df = fetched_data.copy().reset_index(drop=True)
-        full_df = full_df.sort_values('date').reset_index(drop=True)
-        
-        # Replace NaN, inf, -inf with 0.0
-        full_df = full_df.replace([np.nan, np.inf, -np.inf], 0.0)
-        
-        recession_data = full_df[["date", "recession_probability", "1_month_recession_probability", 
-                                  "3_month_recession_probability", "6_month_recession_probability"]].copy() 
-        print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Updated recession data:")  
-        print("pipeline duration:", datetime.now() - start)
-        
-        time.sleep(300)  # 5 minutes
+            print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Running time series prediction...")
+            ts_fe_data = time_series_feature_eng(fetched_data)
+            ts_prediction = time_series_prediction(ts_fe_data)
+            print("Time series predictions:", ts_prediction.T)
+            print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Time series prediction completed.")
+            
+            print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Running regression prediction...")
+            fe_data = regresstion_feature_engineering(ts_fe_data, ts_prediction)
+            try:
+                base, one_month, three_month, six_month= regression_prediction(fe_data)
+                latest_predictions = {
+                    "base_pred": base/100,
+                    "one_month": one_month/100,
+                    "three_month": three_month/100,
+                    "six_month": six_month/100,
+                    "updated_at": datetime.now().isoformat()
+                }
+                print(f"Base: {base}, 1m: {one_month}, 3m: {three_month}, 6m: {six_month}")
+
+            except Exception as e:
+                print("Error in ML pipeline:", e)
+            print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Regression prediction completed.")
+            
+            ## Fetch Treasury Yields and Economic Indicators
+            print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Fetching Treasury Yields and Economic Indicators...")
+            if not FRED_API_KEY:
+                raise HTTPException(status_code=500, detail="FRED API key not set in environment variable FRED_API_KEY")
+
+            def fetch(label_series):
+                label, series_id = label_series
+                value = fetch_latest_fred_value(series_id)
+                value = float(value) if value is not None else None
+                return (label, value)
+
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                results = list(executor.map(fetch, FRED_SERIES.items()))
+                for label, value in results:
+                    yields[label] = value
+                
+                results = list(executor.map(fetch, ECON_FRED_SERIES.items()))
+                for label, value in results:
+                    indicators[label] = value
+            print("Updated yields:")
+            print("Updated indicators:")
+            print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Fetch completed.")
+            
+            ## recession dataset
+            full_df = fetched_data.copy().reset_index(drop=True)
+            full_df = full_df.sort_values('date').reset_index(drop=True)
+            
+            # Replace NaN, inf, -inf with 0.0
+            full_df = full_df.replace([np.nan, np.inf, -np.inf], 0.0)
+            
+            recession_data = full_df[["date", "recession_probability", "1_month_recession_probability", 
+                                      "3_month_recession_probability", "6_month_recession_probability"]].copy() 
+            print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Updated recession data:")
+            print("pipeline duration:", datetime.now() - start)
+            
+            time.sleep(300)  # 5 minutes
+        except Exception as e:
+            print(f"Error in ML pipeline: {e}")
+            print("Continuing with next iteration...")
+            time.sleep(60)  # Wait 1 minute before retrying on error
 
 def fetch_latest_fred_value(series_id):
     url = f"https://api.stlouisfed.org/fred/series/observations"
@@ -188,19 +208,19 @@ def fetch_latest_fred_value(series_id):
             return None
     return None
 
+# Startup event to start ML pipeline
+@app.on_event("startup")
+async def startup_event():
+    thread = threading.Thread(target=run_ml_pipeline_periodically, daemon=True)
+    thread.start()
+
 # Root endpoint
 @app.get("/")
 async def root():
     return {"message": "Welcome to RecessionRadar API"}
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    thread = threading.Thread(target=run_ml_pipeline_periodically, daemon=True)
-    thread.start()
-    yield
 
-app.router.lifespan_context = lifespan
 
 # Get Treasury Yields
 @app.get("/api/treasury-yields", response_model=TreasuryYields)
@@ -228,6 +248,41 @@ async def get_recession_probabilities():
         three_month = recession_data["3_month_recession_probability"].tolist(),
         six_month = recession_data["6_month_recession_probability"].tolist()
     )
+
+# Get Historical Economic Indicators Data
+@app.get("/api/historical-economic-data", response_model=HistoricalEconomicData)
+async def get_historical_economic_data():
+    try:
+        # Read the CSV file directly
+        import pandas as pd
+        import os
+        
+        # Get the correct path to the CSV file
+        csv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'recession_probability.csv')
+        if not os.path.exists(csv_path):
+            raise HTTPException(status_code=404, detail="Data file not found")
+        
+        df = pd.read_csv(csv_path)
+        df['date'] = pd.to_datetime(df['date'])
+        df = df.fillna(0)  # Replace NaN with 0
+        
+        return HistoricalEconomicData(
+            dates=[d.strftime("%Y-%m-%d") for d in df["date"]],
+            cpi=df["CPI"].tolist(),
+            ppi=df["PPI"].tolist(),
+            industrial_production=df["INDPRO"].tolist(),
+            unemployment_rate=df["unemployment_rate"].tolist(),
+            share_price=df["share_price"].tolist(),
+            gdp_per_capita=df["gdp_per_capita"].tolist(),
+            oecd_cli_index=df["OECD_CLI_index"].tolist(),
+            csi_index=df["CSI_index"].tolist(),
+            ten_year_rate=df["10_year_rate"].tolist(),
+            three_months_rate=df["3_months_rate"].tolist(),
+            six_months_rate=df["6_months_rate"].tolist(),
+            one_year_rate=df["1_year_rate"].tolist()
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading economic data: {str(e)}")
 
 
 # Get Current Recession Prediction

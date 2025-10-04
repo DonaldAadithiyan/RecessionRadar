@@ -47,26 +47,12 @@ function CustomPrediction() {
         setTreasuryYields(yields);
         setEconomicIndicators(indicators);
         
-        // Define the specific treasury rates we need based on our dataset columns
-        // Matching the Streamlit implementation
-        const requiredRates = {
-          '1-Year Rate': 4.86,  // Default values if real-time data isn't available
-          '3-Month Rate': 4.52,
-          '6-Month Rate': 4.65,
-          '10-Year Rate': 3.81
-        };
-        
-        // Update with any real values we have from API
+        // Use only live API data - no hardcoded defaults
         const treasuryRates = yields.yields || {};
-        Object.keys(requiredRates).forEach(rate => {
-          if (rate in treasuryRates) {
-            requiredRates[rate] = treasuryRates[rate];
-          }
-        });
         
-        // Initialize form values with current data
+        // Initialize form values with current live data only
         const initialValues = {
-          ...requiredRates,
+          ...treasuryRates,
           ...indicators.indicators
         };
         
@@ -581,27 +567,7 @@ function CustomPrediction() {
               </Grid>
             </Grid>
             
-            {/* Indicator ranges info */}
-            <Box sx={{ mt: 4, mb: 3, p: 2, bgcolor: '#2D2D2D', borderRadius: 1, border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-              <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', color: 'white' }}>
-                Typical ranges for indicators:
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={4}>
-                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>• Treasury Rates: 0-10%</Typography>
-                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>• CPI/PPI: -2 to 10%</Typography>
-                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>• Unemployment: 2-15%</Typography>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>• Industrial Production: 80-120</Typography>
-                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>• Share Price Index: 3000-5500</Typography>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>• OECD CLI: 95-105</Typography>
-                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>• Consumer Sentiment: 50-110</Typography>
-                </Grid>
-              </Grid>
-            </Box>
+
             
             {/* Form Buttons */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
