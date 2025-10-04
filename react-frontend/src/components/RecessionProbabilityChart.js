@@ -272,12 +272,18 @@ function RecessionProbabilityChart({ data }) {
           displayFormats: {
             day: 'MMM dd',
             week: 'MMM dd',
-            month: selectedRange <= 12 ? 'MMM yyyy' : 'MMM yy',
+            month: 'MMM yyyy',
             quarter: 'MMM yyyy',
             year: 'yyyy'
           },
           tooltipFormat: 'MMM dd, yyyy',
-          unit: selectedRange <= 6 ? 'month' : selectedRange <= 24 ? 'month' : 'year'
+          unit: (() => {
+            if (selectedRange === 'ALL') return 'year';
+            const numRange = typeof selectedRange === 'number' ? selectedRange : 
+              (selectedRange === '6M' ? 6 : selectedRange === '1Y' ? 12 : 
+               selectedRange === '2Y' ? 24 : selectedRange === '5Y' ? 60 : 120);
+            return numRange <= 6 ? 'month' : numRange <= 24 ? 'month' : 'year';
+          })()
         },
         title: {
           display: true,
@@ -290,15 +296,18 @@ function RecessionProbabilityChart({ data }) {
         },
         ticks: {
           color: 'white',
-          maxTicksLimit: 12,
+          maxTicksLimit: selectedRange === 'ALL' ? 15 : 12,
           maxRotation: 45,
           minRotation: 0,
           font: {
             size: 11
           },
           autoSkip: true,
-          autoSkipPadding: 20,
-          source: 'auto'
+          autoSkipPadding: selectedRange === 'ALL' ? 30 : 20,
+          source: 'auto',
+          major: {
+            enabled: true
+          }
         },
         grid: {
           color: 'rgba(255, 255, 255, 0.1)',
@@ -418,8 +427,7 @@ function RecessionProbabilityChart({ data }) {
     },
   };
 
-  // Calculate dynamic minWidth for horizontal scrolling (e.g., 40px per data point, min 1200px)
-  const minWidth = chartData && chartData.labels ? Math.max(chartData.labels.length * 40, 1200) : 1200;
+  // Remove minWidth calculation to make chart responsive and fit within frame
 
   const getTimeRangeDisplay = () => {
     if (selectedRange === 'CUSTOM' && customDateRange.startDate && customDateRange.endDate) {
@@ -703,12 +711,9 @@ function RecessionProbabilityChart({ data }) {
 
       {chartData ? (
         <Box sx={{ 
-          height: showCustomRange ? 'calc(100% - 250px)' : 'calc(100% - 180px)', 
-          overflowX: 'auto' 
+          height: showCustomRange ? 'calc(100% - 250px)' : 'calc(100% - 180px)'
         }}>
-          <Box sx={{ minWidth: minWidth, height: '100%' }}>
-            <Line ref={chartRef} options={options} data={chartData} />
-          </Box>
+          <Line ref={chartRef} options={options} data={chartData} />
         </Box>
       ) : (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
