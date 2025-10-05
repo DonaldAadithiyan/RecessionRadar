@@ -316,7 +316,7 @@ async def create_custom_prediction(request: CustomPredictionRequest):
     fetched_data_ = pd.concat([fetched_data_, pd.DataFrame([new_row])], ignore_index=True)
     inputs = time_series_feature_eng(fetched_data_).iloc[[-1]]
     custom_data = regresstion_feature_engineering(ts_fe_data, inputs)
-    print(custom_data.T)
+    # print(custom_data.T)
     base_pred, one_month, three_month, six_month = regression_prediction(custom_data)
     print(f"Custom Prediction - Base: {base_pred}, 1m: {one_month}, 3m: {three_month}, 6m: {six_month}")
     return RecessionPrediction(

@@ -7,9 +7,10 @@ from scipy.stats import boxcox
 from datetime import datetime
 
 import pickle
-import os
+import os, sys
 import warnings
 import re
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 warnings.filterwarnings("ignore")
 
 def load_model(model_path):
@@ -656,7 +657,7 @@ def time_series_feature_eng(df):
 
 def regresstion_feature_engineering(ts_fe_data, ts_prediction):
     full_df = pd.concat([ts_fe_data, ts_prediction], axis=0).reset_index(drop=True)
-    print(f"Feature Engineering Input Shape: {full_df.shape}")
+    # print(f"Feature Engineering Input Shape: {full_df.shape}")
     # Ensure 'date' is datetime
     full_df['date'] = pd.to_datetime(full_df['date'])
     full_df = full_df.sort_values('date').reset_index(drop=True)
