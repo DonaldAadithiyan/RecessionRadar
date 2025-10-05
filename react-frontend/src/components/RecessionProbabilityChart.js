@@ -427,7 +427,6 @@ function RecessionProbabilityChart({ data }) {
     },
   };
 
-  // Remove minWidth calculation to make chart responsive and fit within frame
 
   const getTimeRangeDisplay = () => {
     if (selectedRange === 'CUSTOM' && customDateRange.startDate && customDateRange.endDate) {
