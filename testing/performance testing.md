@@ -11,29 +11,33 @@ pip install pytest locust memory-profiler psutil line-profiler
 pip install snakeviz
 ```
 
-## API Response Timing with curl
+## A. Measure Response Time (API-level Profiling)
 
 ```bash
 curl -w "@curl-format.txt" -o /dev/null -s "http://127.0.0.1:8000/api/current-prediction"
 python performance_test.py
 ```
 
-## CPU Profiling with cProfile and Visualization
+## B. Profile Backend Code (Function-level Profiling)
 
 ```bash
 python -m cProfile -o profile_results.prof "../api/main.py"
 snakeviz profile_results.prof
 ```
 
-## Function-Level Profiling
-
 ```bash
 python fuction_profile.py
 ```
 
-## Memory Profiling with memory_profiler
+## C. Memory Usage Profiling
 
 ```bash
 mprof run memory_profile.py
 mprof plot
+```
+
+## D. Concurrency Profiling (with Locust)
+
+```bash
+locust -f locustfile.py
 ```
