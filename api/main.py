@@ -14,6 +14,7 @@ import dotenv
 import threading, concurrent.futures
 from typing import Dict, List, Optional, Any
 from datetime import datetime
+import asyncio
 
 
 dotenv.load_dotenv()
@@ -114,39 +115,46 @@ ts_prediction = None
 ts_fe_data = None
 fetched_data = None
 
+
+def run_ml_pipe():
+    global fetched_data, ts_fe_data, ts_prediction, latest_predictions, fe_data
+    
+    print(datetime.now().strftime("%H:%M:%S.%f")[:-3] ,"Running ML pipeline...")
+    fetched_data = fetch_and_combine_fred_series()
+    print(f"Data fetched from {fetched_data.iloc[0]['date']} to {fetched_data.iloc[-1]['date']}, total {len(fetched_data)} records.")
+    print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Fetched latest FRED data.")
+    
+    print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Running time series prediction...")
+    ts_fe_data = time_series_feature_eng(fetched_data)
+    ts_prediction = time_series_prediction(ts_fe_data)
+    print("Time series predictions:", ts_prediction.T)
+    print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Time series prediction completed.")
+    
+    print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Running regression prediction...")
+    fe_data = regresstion_feature_engineering(ts_fe_data, ts_prediction)
+    try:
+        base, one_month, three_month, six_month= regression_prediction(fe_data)
+        latest_predictions = {
+            "base_pred": base/100,
+            "one_month": one_month/100,
+            "three_month": three_month/100,
+            "six_month": six_month/100,
+            "updated_at": datetime.now().isoformat()
+        }
+        print(f"Base: {base}, 1m: {one_month}, 3m: {three_month}, 6m: {six_month}")
+
+    except Exception as e:
+        print("Error in ML pipeline:", e)
+    print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Regression prediction completed.")
+
+
 def run_ml_pipeline_periodically():
     global latest_predictions, yields, indicators, recession_data, ts_prediction, ts_fe_data, fetched_data
     while True:
         try:
             ## ML PIPELINE
             start = datetime.now()
-            print(datetime.now().strftime("%H:%M:%S.%f")[:-3] ,"Running ML pipeline...")
-            fetched_data = fetch_and_combine_fred_series()
-            print(f"Data fetched from {fetched_data.iloc[0]['date']} to {fetched_data.iloc[-1]['date']}, total {len(fetched_data)} records.")
-            print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Fetched latest FRED data.")
-            
-            print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Running time series prediction...")
-            ts_fe_data = time_series_feature_eng(fetched_data)
-            ts_prediction = time_series_prediction(ts_fe_data)
-            print("Time series predictions:", ts_prediction.T)
-            print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Time series prediction completed.")
-            
-            print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Running regression prediction...")
-            fe_data = regresstion_feature_engineering(ts_fe_data, ts_prediction)
-            try:
-                base, one_month, three_month, six_month= regression_prediction(fe_data)
-                latest_predictions = {
-                    "base_pred": base/100,
-                    "one_month": one_month/100,
-                    "three_month": three_month/100,
-                    "six_month": six_month/100,
-                    "updated_at": datetime.now().isoformat()
-                }
-                print(f"Base: {base}, 1m: {one_month}, 3m: {three_month}, 6m: {six_month}")
-
-            except Exception as e:
-                print("Error in ML pipeline:", e)
-            print(datetime.now().strftime("%H:%M:%S.%f")[:-3],"Regression prediction completed.")
+            run_ml_pipe()
             
             ## Fetch Treasury Yields and Economic Indicators
             print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Fetching Treasury Yields and Economic Indicators...")
@@ -183,11 +191,12 @@ def run_ml_pipeline_periodically():
             print(datetime.now().strftime("%H:%M:%S.%f")[:-3], "Updated recession data:")
             print("pipeline duration:", datetime.now() - start)
             
-            time.sleep(300)  # 5 minutes
+            time.sleep(6 * 60 * 60)  # 6 hours
         except Exception as e:
             print(f"Error in ML pipeline: {e}")
             print("Continuing with next iteration...")
             time.sleep(60)  # Wait 1 minute before retrying on error
+
 
 def fetch_latest_fred_value(series_id):
     url = f"https://api.stlouisfed.org/fred/series/observations"
@@ -326,6 +335,18 @@ async def create_custom_prediction(request: CustomPredictionRequest):
         six_month=min(max(six_month/100, 0), 1),
         updated_at=datetime.now().isoformat()
     )
+
+
+# Manual trigger endpoint for ML pipeline.
+# Runs run_ml_pipe in a thread and returns success after completion.
+@app.post("/api/run-ml-pipeline")
+async def run_ml_pipeline_manual():
+    try:
+        # Run blocking pipeline in a thread so event loop is not blocked
+        await asyncio.to_thread(run_ml_pipe)
+        return {"status": "success", "message": "ML pipeline executed successfully", "updated_at": datetime.now().isoformat()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error running ML pipeline: {str(e)}")
 
 
 # For development testing
