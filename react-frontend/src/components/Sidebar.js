@@ -13,6 +13,7 @@ import {
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import CalculateIcon from '@mui/icons-material/Calculate';
 import InfoIcon from '@mui/icons-material/Info';
+import MLPipelineButton from './MLPipelineButton';
 
 const drawerWidth = 240;
 
@@ -85,6 +86,10 @@ function Sidebar() {
           </ListItem>
         ))}
       </List>
+      
+      <Divider />
+      
+      <MLPipelineButton />
       
       <Box sx={{ position: 'absolute', bottom: 0, width: '100%', p: 2 }}>
         <Typography variant="caption" color="text.secondary">

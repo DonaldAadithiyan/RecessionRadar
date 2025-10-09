@@ -26,6 +26,9 @@ import {
   getEconomicIndicators
 } from '../services/api';
 
+// Import context
+import { DashboardProvider } from '../contexts/DashboardContext';
+
 function Dashboard() {
   // State for loading status
   const [loading, setLoading] = useState(true);
