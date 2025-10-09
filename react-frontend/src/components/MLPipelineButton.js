@@ -3,7 +3,7 @@ import { Button, Alert, CircularProgress, Box } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import axios from 'axios';
 
-const MLPipelineButton = ({ onPipelineComplete }) => {
+const MLPipelineButton = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -22,16 +22,13 @@ const MLPipelineButton = ({ onPipelineComplete }) => {
         }
       });
       
-      setMessage(response.data.message + ' - Dashboard will refresh automatically!');
+      setMessage(response.data.message + ' - Refreshing dashboard...');
       setError('');
       
-      // Trigger dashboard refresh after successful pipeline execution
-      if (onPipelineComplete) {
-        // Wait a moment for the backend to fully update
-        setTimeout(() => {
-          onPipelineComplete();
-        }, 1000);
-      }
+      // Auto-refresh the dashboard to show updated predictions
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000); // Wait 2 seconds to show success message, then refresh
       
     } catch (err) {
       console.error('ML Pipeline Error:', err);
