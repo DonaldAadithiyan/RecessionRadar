@@ -21,6 +21,7 @@ venv/
 
 # Pickle files
 *.pkl
+*.pt
 
 # Data
 
