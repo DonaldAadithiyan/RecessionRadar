@@ -1,0 +1,8 @@
+/*
+ * This is a placeholder robots.txt file.
+ * It instructs web crawlers how to navigate your site.
+ */
+
+# Allow all crawlers
+User-agent: *
+Allow: /

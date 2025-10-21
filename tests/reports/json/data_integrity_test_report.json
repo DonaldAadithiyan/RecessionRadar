@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-10-05T16:12:39.122904",
+  "summary": {
+    "total_tests": 5,
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0,
+    "success_rate": 100.0
+  },
+  "detailed_results": {
+    "csv_exists": "PASSED",
+    "data_validation": "PASSED",
+    "imports": "PASSED",
+    "models": "PASSED",
+    "env_vars": "PASSED"
+  }
+}
