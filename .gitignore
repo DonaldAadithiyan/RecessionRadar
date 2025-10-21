@@ -1,3 +1,9 @@
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+data_integrity_test.log
+
 # Python - API dependencies
 __pycache__/
 *.py[cod]
