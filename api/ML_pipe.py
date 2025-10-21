@@ -199,7 +199,9 @@ def create_residual_features_enhanced(residuals, exog_df, series, lag_periods=5)
                 feature_dict[f'{col}_lag_{lag}'] = np.concatenate([[np.nan] * lag, exog_df[col].values[:-lag]])
             except:
                 pass
-    
+    min_len = min(len(v) for v in feature_dict.values())
+    for k in feature_dict:
+        feature_dict[k] = feature_dict[k][-min_len:]
     return pd.DataFrame(feature_dict)
 
 def create_residual_features(residuals, exog_features, series, lag_periods=5):
@@ -232,8 +234,13 @@ def create_residual_features(residuals, exog_features, series, lag_periods=5):
                 feature_dict[f'{col}_lag_{lag}'] = np.concatenate([[np.nan] * lag, exog_features[col].values[:-lag]])
             except:
                 pass
-    
-    return pd.DataFrame(feature_dict)
+
+    min_len = min(len(v) for v in feature_dict.values())
+    for k in feature_dict:
+        feature_dict[k] = feature_dict[k][-min_len:]
+    df = pd.DataFrame(feature_dict).reset_index(drop=True)
+    return df
+
 
 def new_production_forecasting_pipeline(input_data, models_dict, forecast_steps, date_col='date', freq='M'):
     """
@@ -299,6 +306,10 @@ def new_production_forecasting_pipeline(input_data, models_dict, forecast_steps,
             arima_model = model_pack.get('arima_model', None)
             xgb_model = model_pack.get('xgb_model', None)
             
+            exog_data = input_data[available_features].copy()
+            exog_data = exog_data.fillna(method='ffill').fillna(method='bfill')
+            exog_data = exog_data.replace([np.inf, -np.inf], np.nan).fillna(method='ffill').fillna(method='bfill')
+            
             if len(available_features) == 0:
                 # No exogenous variables - simple ARIMA
                 predictions = arima_model.forecast(steps=forecast_steps)
@@ -316,45 +327,58 @@ def new_production_forecasting_pipeline(input_data, models_dict, forecast_steps,
                 varying_cols = [c for c in exog_data.columns if exog_data[c].nunique() > 1]
                 exog_data = exog_data[varying_cols]
                 
-                if len(varying_cols) == 0:
-                    # No varying exogenous variables
+                if len(exog_data.columns) == 0:
                     predictions = arima_model.forecast(steps=forecast_steps)
-                else:
-                    # Create future exogenous variables (forward fill last values)
-                    last_exog_values = exog_data.iloc[-1:].copy()
-                    future_exog = pd.concat([last_exog_values] * forecast_steps, ignore_index=True)
-                    
-                    # Check if model expects more exogenous variables than we have
-                    expected_exog_count = getattr(arima_model.model, 'k_exog', 0)
-                    
-                    if expected_exog_count > 0 and len(varying_cols) != expected_exog_count:
-                        if len(varying_cols) < expected_exog_count:
-                            # Pad with zeros to match expected shape
-                            missing_cols = expected_exog_count - len(varying_cols)
-                            for i in range(missing_cols):
-                                future_exog[f'missing_exog_{i}'] = 0.0
-                        else:
-                            # Take only the first expected_exog_count columns
-                            future_exog = future_exog.iloc[:, :expected_exog_count]
+                    result_data[indicator] = predictions
+                    continue
+                
+                # Create future exogenous variables (forward fill last values)
+                last_exog_values = exog_data.iloc[-1:].copy()
+                future_exog = pd.concat([last_exog_values] * forecast_steps, ignore_index=True)
+                
+                # # Check if model expects more exogenous variables than we have
+                expected_exog_count = getattr(arima_model.model, 'k_exog', 0)
+                
+                if expected_exog_count > 0 and len(varying_cols) != expected_exog_count:
+                    if len(varying_cols) < expected_exog_count:
+                        # Pad with zeros to match expected shape
+                        missing_cols = expected_exog_count - len(varying_cols)
+                        for i in range(missing_cols):
+                            future_exog[f'missing_exog_{i}'] = 0.0
+                    else:
+                        # Take only the first expected_exog_count columns
+                        future_exog = future_exog.iloc[:, :expected_exog_count]
+                
                             
-                    # Make forecast with exogenous variables
-                    # xgb forcast
-                    # exog = future_exog.copy().reset_index(drop=True)
-                    # try:
-                    #     exog = exog[varying_cols]
-                    # except Exception:
-                    #     # if something unexpected, forward-fill and keep whatever columns exist
-                    #     exog = exog.fillna(method='ffill').fillna(method='bfill')
-                    # test_residuals_placeholder = np.zeros(len(exog))
-                    # xgb_feats = create_residual_features(test_residuals_placeholder, exog.iloc[:forecast_steps], input_data.iloc[:forecast_steps])
-                    # xgb_feats_valid = xgb_feats.dropna()
-                    # X_test = xgb_feats_valid.values
-                    # residual_pred_test = xgb_model.predict(X_test)
-                    
-                    # arima_forecast = arima_model.forecast(steps=forecast_steps, exog=future_exog)
-                    predictions = arima_model.forecast(steps=forecast_steps, exog=future_exog)
+                # Get number of exog features model expects
+                expected_cols = arima_model.model.exog.shape[1] if arima_model.model.exog is not None else 0
 
-                    # predictions = arima_forecast + residual_pred_test
+                
+                arima_forecast = arima_model.forecast(steps=forecast_steps, exog=future_exog)
+                arima_pred = np.array(arima_forecast)
+                
+                test_residuals_placeholder = np.zeros(forecast_steps)
+                xgb_feats = create_residual_features(test_residuals_placeholder, 
+                                                        future_exog,
+                                                        pd.Series(arima_pred),
+                                                        lag_periods=5
+                                                )
+                # Drop NaNs from first few rows due to lags
+                X_test_xgb = xgb_feats.dropna().values
+
+
+                # Align length if some rows dropped
+                if len(X_test_xgb) == 0:
+                    residual_pred = np.zeros(forecast_steps)
+                else:
+                    residual_pred = xgb_model.predict(X_test_xgb)
+                    # Pad start if needed
+                    if len(residual_pred) < forecast_steps:
+                        pad = forecast_steps - len(residual_pred)
+                        residual_pred = np.concatenate([np.zeros(pad), residual_pred])
+                
+                # Hybrid forecast = ARIMA + XGB residuals
+                predictions = arima_pred + residual_pred
                      
                 if hasattr(predictions, 'values'):
                     predictions = predictions.values
@@ -436,31 +460,30 @@ def new_production_forecasting_pipeline(input_data, models_dict, forecast_steps,
                 except Exception as reg_error:
                     future_df[regressor] = [0.0] * len(future_df)
             
-            # Make Prophet prediction
-            # xgb prediction
-            # test_prophet, varying_features = prepare_prophet_data(input_data, indicator)
-            # test_exog_df = test_prophet[varying_features].copy()
-            # test_exog_df = add_temporal_features(test_exog_df, test_prophet['ds'])
-            
-            # test_residuals_placeholder = np.zeros(len(test_prophet))
-            # xgb_features_test = create_residual_features_enhanced(
-            #     test_residuals_placeholder, test_exog_df, 
-            #     test_prophet['y'], lag_periods=5
-            # )
-            # X_test_xgb = xgb_features_test.values
-            # residual_pred = xgb_model.predict(X_test_xgb)
-
-            # prophet prediction
+            # --- Prophet forecast ---
             forecast_result = prophet_model.predict(future_df)
-            # prophet_predictions = forecast_result['yhat'].tail(forecast_steps).values
             predictions = forecast_result['yhat'].tail(forecast_steps).values
-            
-            # predictions = prophet_predictions + residual_pred
-            
+
+            # --- Hybrid correction (if XGBoost exists) ---
+            if xgb_model is not None:
+                try:
+                    exog_df = future_df[regressors].copy() if regressors else pd.DataFrame()
+                    exog_df = add_temporal_features(exog_df, future_df['ds'])
+                    residual_placeholder = np.zeros(len(exog_df))
+                    xgb_features = create_residual_features_enhanced(
+                        residual_placeholder, exog_df, predictions, lag_periods=5
+                    )
+                    residual_pred = xgb_model.predict(xgb_features.values)
+                    predictions = predictions + residual_pred[-forecast_steps:]
+                except Exception as hybrid_err:
+                    print(f"[WARN] Hybrid correction failed for {indicator}: {hybrid_err}")
+
+            # Store final results
             result_data[indicator] = predictions
             
         except Exception as e:
             # Use trend-based fallback
+            raise e
             predictions = trend_based_forecast(input_data, indicator, forecast_steps)
             result_data[indicator] = predictions
     
@@ -1085,11 +1108,11 @@ def regresstion_feature_engineering(ts_fe_data, ts_prediction):
         'share_price_trend', 'CSI_index_lag6', 'unemployment_rate_rollstd6', 'PPI_rollstd6', 'OECD_CLI_index_rollmax12', 'CSI_index_rollmax6', 
         'INDPRO_diff3', 'unemployment_rate_diff3', 'CSI_index_rollmin6', 'OECD_CLI_index_pct_change1', '10_year_rate_residual'
     ]
-    if os.path.exists('../anomaly_models'):
-        with open('../anomaly_models/anomaly_stats.pkl', 'rb') as f:
+    if os.path.exists('../models/anomaly_models'):
+        with open('../models/anomaly_models/anomaly_stats.pkl', 'rb') as f:
             anomaly_stats = pickle.load(f)
     else:
-        with open('anomaly_models/anomaly_stats.pkl', 'rb') as f:
+        with open('models/anomaly_models/anomaly_stats.pkl', 'rb') as f:
             anomaly_stats = pickle.load(f)
             
     lags = [1, 3, 6]  # months
@@ -1228,6 +1251,7 @@ if __name__ == "__main__":
     df = pd.read_csv('data/recession_probability.csv')
     df_fe = time_series_feature_eng(df)
     df_ts = time_series_prediction(df_fe)
+    print(df_ts.T)
     df_reg_fe = regresstion_feature_engineering(df_fe, df_ts)
     base, one_m, three_m, six_m = regression_prediction(df_reg_fe)
     
