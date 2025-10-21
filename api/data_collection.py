@@ -120,12 +120,12 @@ def fetch_and_combine_fred_series():
     dataset_share_price = data_frames["SPASTT01USM661N"].copy()
     dataset_share_price = dataset_share_price.rename(columns={"value": "share_price"})
     dataset_share_price["share_price"] = pd.to_numeric(dataset_share_price["share_price"], errors='coerce')
-    # # Make sure share_price > 0
-    # if (dataset_share_price['share_price'] <= 0).any():
-    #     min_val = dataset_share_price['share_price'].min()
-    #     dataset_share_price['share_price'] = dataset_share_price['share_price'] + abs(min_val) + 1
-    # # Apply Box-Cox transformation
-    # dataset_share_price['share_price'], lambda_val = boxcox(dataset_share_price['share_price'])
+    # Make sure share_price > 0
+    if (dataset_share_price['share_price'] <= 0).any():
+        min_val = dataset_share_price['share_price'].min()
+        dataset_share_price['share_price'] = dataset_share_price['share_price'] + abs(min_val) + 1
+    # Apply Box-Cox transformation
+    dataset_share_price['share_price'], lambda_val = boxcox(dataset_share_price['share_price'])
     dataset = dataset.merge(dataset_share_price, on="date", how="left")
     
     ## unemployment rate
@@ -191,6 +191,3 @@ def fetch_and_combine_fred_series():
 if __name__ == "__main__":
     df = fetch_and_combine_fred_series()
     print(df.info())
-    
-    # df = pd.read_csv('data/combined/recession_probability.csv')
-    # print(df.info())

@@ -28,22 +28,19 @@ def load_reg_models():
 
 def load_ts_models():
     models_dict = {}
-    model_dir = '../models/ts_models/' if os.path.exists('../models/ts_models/') else 'models/ts_models/'
     
-    models_dict['csi_index_prophet_model'] = load_model(os.path.join(model_dir, 'CSI_index_prophet_model.pkl'))
-    models_dict['ten_year_rate_prophet_model'] = load_model(os.path.join(model_dir, '10_year_rate_prophet_model.pkl'))
-    models_dict['three_months_rate_arima_model'] = load_model(os.path.join(model_dir, '3_months_rate_arima_model.pkl'))
-    models_dict['one_year_rate_prophet_model'] = load_model(os.path.join(model_dir, '1_year_rate_prophet_model.pkl'))
-    models_dict['unemployment_rate_arima_model'] = load_model(os.path.join(model_dir, 'unemployment_rate_arima_model.pkl'))
-    models_dict['six_months_rate_arima_model'] = load_model(os.path.join(model_dir, '6_months_rate_arima_model.pkl'))
-    models_dict['ppi_prophet_model'] = load_model(os.path.join(model_dir, 'PPI_prophet_model.pkl'))
-    models_dict['cpi_prophet_model'] = load_model(os.path.join(model_dir, 'CPI_prophet_model.pkl'))
-    models_dict['gdp_per_capita_arima_model'] = load_model(os.path.join(model_dir, 'gdp_per_capita_arima_model.pkl'))
-    models_dict['oecd_cli_index_prophet_model'] = load_model(os.path.join(model_dir, 'OECD_CLI_index_prophet_model.pkl'))
-    models_dict['indpro_prophet_model'] = load_model(os.path.join(model_dir, 'INDPRO_prophet_model.pkl'))
-    models_dict['share_price_prophet_model'] = load_model(os.path.join(model_dir, 'share_price_prophet_model.pkl'))
-    
-    
+    model_dir = '../models/enhanced_hybrid_ARIMA_models/' if os.path.exists('../models/enhanced_hybrid_ARIMA_models/') else 'models/enhanced_hybrid_ARIMA_models/'
+    for file in os.listdir(model_dir):
+        if not file.endswith('.pkl'):
+            continue
+        models_dict[f'{os.path.splitext(file)[0]}_arima'] = load_model(os.path.join(model_dir, file))
+
+    models_dir = '../models/enhanced_hybrid_prophet_models/' if os.path.exists('../models/enhanced_hybrid_prophet_models/') else 'models/enhanced_hybrid_prophet_models/'
+    for file in os.listdir(models_dir):
+        if not file.endswith('.pkl'):
+            continue
+        models_dict[f'{os.path.splitext(file)[0]}_prophet'] = load_model(os.path.join(models_dir, file))
+
     return models_dict
 
 def is_anomaly(col_name: str, value: float, stats_dict) -> bool:
@@ -97,9 +94,6 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
     Strategy: Use iterative forecasting approach similar to your training
     """
     
-    # print(f"Production Forecasting Pipeline - {forecast_steps} steps ahead")
-    # print("="*60)
-    
     # Recession targets to exclude (from your training code)
     recession_targets = [
         'recession_probability', '1_month_recession_probability',
@@ -143,21 +137,13 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
         else:
             arima_models[indicator] = model  # Default to ARIMA treatment
     
-    # print(f"ARIMA models: {list(arima_models.keys())}")
-    # print(f"Prophet models: {list(prophet_models.keys())}")
     
     # 3. Forecast ARIMA models first (they need exogenous variables)
-    # print(f"\nStep 1: Forecasting ARIMA models...")
-    
     for indicator, model in arima_models.items():
         try:
-            # print(f"  Processing ARIMA: {indicator}...")
-            
             # Prepare exogenous variables for ARIMA (same as training)
             features_to_exclude = [date_col] + recession_targets + [indicator]
             available_features = [c for c in input_data.columns if c not in features_to_exclude]
-            
-            # print(f"    Available exog features: {len(available_features)}")
             
             if len(available_features) == 0:
                 # No exogenous variables - simple ARIMA
@@ -176,8 +162,6 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
                 varying_cols = [c for c in exog_data.columns if exog_data[c].nunique() > 1]
                 exog_data = exog_data[varying_cols]
                 
-                # print(f"    Using {len(varying_cols)} exog variables")
-                
                 if len(varying_cols) == 0:
                     # No varying exogenous variables
                     predictions = model.forecast(steps=forecast_steps)
@@ -190,18 +174,14 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
                     expected_exog_count = getattr(model.model, 'k_exog', 0)
                     
                     if expected_exog_count > 0 and len(varying_cols) != expected_exog_count:
-                        # print(f"    Warning: Model expects {expected_exog_count} exog vars, but have {len(varying_cols)}")
-                        
                         if len(varying_cols) < expected_exog_count:
                             # Pad with zeros to match expected shape
                             missing_cols = expected_exog_count - len(varying_cols)
                             for i in range(missing_cols):
                                 future_exog[f'missing_exog_{i}'] = 0.0
-                            # print(f"    Padded with {missing_cols} zero columns")
                         else:
                             # Take only the first expected_exog_count columns
                             future_exog = future_exog.iloc[:, :expected_exog_count]
-                            # print(f"    Truncated to {expected_exog_count} columns")
                     
                     # Make forecast with exogenous variables
                     predictions = model.forecast(steps=forecast_steps, exog=future_exog)
@@ -218,22 +198,15 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
                     predictions = list(predictions) + [last_val] * (forecast_steps - len(predictions))
             
             result_data[indicator] = predictions
-            # print(f"    ✓ ARIMA forecast: {indicator} ({len(predictions)} values)")
             
         except Exception as e:
-            # print(f"    ✗ ARIMA failed for {indicator}: {str(e)}")
             # Use trend-based fallback
             predictions = trend_based_forecast(input_data, indicator, forecast_steps)
             result_data[indicator] = predictions
-            # print(f"    ✓ Fallback forecast: {indicator}")
     
     # 4. Now forecast Prophet models (they need ALL features as regressors)
-    # print(f"\nStep 2: Forecasting Prophet models...")
-    
     for indicator, model in prophet_models.items():
         try:
-            # print(f"  Processing Prophet: {indicator}...")
-            
             # Create future dataframe for Prophet
             future_df = model.make_future_dataframe(periods=forecast_steps, freq=freq)
             
@@ -241,9 +214,6 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
             regressors = []
             if hasattr(model, 'extra_regressors'):
                 regressors = list(model.extra_regressors.keys())
-            
-            # print(f"    Model needs {len(regressors)} regressors")
-            # print(f"    Sample regressors: {regressors[:5]}..." if len(regressors) > 5 else f"    Regressors: {regressors}")
             
             # Prepare regressor values for the entire future_df
             historical_length = len(future_df) - forecast_steps
@@ -292,7 +262,6 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
                         future_df[regressor] = [0.0] * len(future_df)
                         
                 except Exception as reg_error:
-                    # print(f"      Warning: Error with regressor {regressor}: {str(reg_error)}")
                     future_df[regressor] = [0.0] * len(future_df)
             
             # Make Prophet prediction
@@ -300,18 +269,13 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
             predictions = forecast_result['yhat'].tail(forecast_steps).values
             
             result_data[indicator] = predictions
-            # print(f"    ✓ Prophet forecast: {indicator} ({len(predictions)} values)")
             
         except Exception as e:
-            # print(f"    ✗ Prophet failed for {indicator}: {str(e)}")
             # Use trend-based fallback
             predictions = trend_based_forecast(input_data, indicator, forecast_steps)
             result_data[indicator] = predictions
-            # print(f"    ✓ Fallback forecast: {indicator}")
     
     # 5. Apply STL decomposition (same as your training)
-    # print(f"\nStep 3: Applying STL decomposition...")
-    
     indicators = list(models_dict.keys())
     for indicator in indicators:
         if indicator in result_data.columns:
@@ -342,10 +306,7 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
                     result_data[f'{indicator}_trend'] = [mean_val] * forecast_steps
                     result_data[f'{indicator}_residual'] = (series - mean_val).values
                 
-                # print(f"  ✓ STL: {indicator}")
-                
             except Exception as e:
-                # print(f"  ✗ STL failed for {indicator}: {str(e)}")
                 # Simple fallback
                 result_data[f'{indicator}_trend'] = result_data[indicator].values
                 result_data[f'{indicator}_residual'] = [0.0] * forecast_steps
@@ -383,16 +344,6 @@ def production_forecasting_pipeline(input_data, models_dict, forecast_steps, dat
     for feature in required_features:
         if feature not in final_data.columns:
             final_data[feature] = [0.0] * forecast_steps
-    
-    # print(f"\n" + "="*60)
-    # print(f"PRODUCTION FORECASTING COMPLETE")
-    # print(f"="*60)
-    # print(f"Final shape: {final_data.shape}")
-    # if date_col in final_data.columns:
-    #     print(f"Forecast period: {final_data[date_col].min()} to {final_data[date_col].max()}")
-    # print(f"Generated {len(financial_indicators)} financial indicators + {len(required_features)} engineered features")
-    # print(f"Financial indicators: {financial_indicators}")
-    # print(f"Sample features: {required_features[:5]}...")
     
     return final_data
 
@@ -744,27 +695,24 @@ def time_series_prediction(input_data):
     models = load_ts_models()
     
     models_dict = {
-        'CSI_index': models['csi_index_prophet_model'], 
-        '10_year_rate': models['ten_year_rate_prophet_model'], 
-        '3_months_rate': models['three_months_rate_arima_model'], 
-        '1_year_rate': models['one_year_rate_prophet_model'],
-        'unemployment_rate': models['unemployment_rate_arima_model'], 
-        '6_months_rate': models['six_months_rate_arima_model'], 
-        'PPI': models['ppi_prophet_model'], 
-        'CPI': models['cpi_prophet_model'], 
-        'gdp_per_capita': models['gdp_per_capita_arima_model'], 
-        'OECD_CLI_index': models['oecd_cli_index_prophet_model'], 
-        'INDPRO': models['indpro_prophet_model'], 
-        'share_price': models['share_price_prophet_model']
+        'CSI_index': models['CSI_index_hybrid_prophet'], 
+        '10_year_rate': models['10_year_rate_hybrid_prophet'], 
+        '3_months_rate': models['3_months_rate_hybrid_arima'], 
+        '1_year_rate': models['1_year_rate_hybrid_prophet'],
+        'unemployment_rate': models['unemployment_rate_hybrid_arima'], 
+        '6_months_rate': models['6_months_rate_hybrid_prophet'], 
+        'PPI': models['PPI_hybrid_arima'], 
+        'CPI': models['CPI_hybrid_prophet'], 
+        'gdp_per_capita': models['gdp_per_capita_hybrid_prophet'], 
+        'OECD_CLI_index': models['OECD_CLI_index_hybrid_prophet'], 
+        'INDPRO': models['INDPRO_hybrid_arima'], 
+        'share_price': models['share_price_hybrid_prophet']
     }
-    # data_dir = '../data/fix' if os.path.exists('../data/fix') else 'data/fix'
-    # input_data = pd.read_csv(os.path.join(data_dir, 'feature_selected_recession_full.csv'))
     
     ## calculate how many months to forecast
     last_date = pd.to_datetime(input_data.iloc[-1]['date'])
     now = datetime.now()
     month_diff = (now.year - last_date.year) * 12 + (now.month - last_date.month)
-    
     input_data_ = input_data[input_data['date'].dt.year >= 2020].copy()
     prediction = production_forecasting_pipeline(
         input_data=input_data_, 
@@ -810,15 +758,4 @@ def regression_prediction(fe_data):
 
 
 if __name__ == "__main__":
-    # df = time_series_feature_eng()
-    # print(df.tail().T)
-    # print(df.shape)
-    # print(df.columns)
-    
-    # df = regresstion_feature_engineering()
-    # print(df.tail().T)
-    # print(df.shape)
-    # print(df.columns)
-    
-    preds = time_series_prediction()
-    print(preds)
+    time_series_prediction(None)
