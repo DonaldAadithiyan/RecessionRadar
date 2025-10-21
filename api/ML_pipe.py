@@ -10,6 +10,8 @@ import pickle
 import os
 import warnings
 import re
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 warnings.filterwarnings("ignore")
 
 def load_model(model_path):
@@ -97,10 +99,23 @@ def sanitize_columns(df):
     df.columns = [re.sub(r'[^A-Za-z0-9_]+', '_', col) for col in df.columns]
     return df
 
+# def clean_data(X_or_y):
+#     X_or_y = X_or_y.replace([np.inf, -np.inf], np.nan)
+#     X_or_y = X_or_y.ffill().bfill()
+#     X_or_y = X_or_y.fillna(0)
+#     return X_or_y
 def clean_data(X_or_y):
+    """Handle missing values and infinities"""
     X_or_y = X_or_y.replace([np.inf, -np.inf], np.nan)
     X_or_y = X_or_y.ffill().bfill()
+    
+    if hasattr(X_or_y, 'select_dtypes'):
+        numeric_cols = X_or_y.select_dtypes(include=[np.number]).columns
+        X_or_y[numeric_cols] = X_or_y[numeric_cols].fillna(X_or_y[numeric_cols].median())
+    else:
+        X_or_y = X_or_y.fillna(X_or_y.median())
     X_or_y = X_or_y.fillna(0)
+    
     return X_or_y
 
 def prepare_prophet_data(test_df, target_indicator):
@@ -1045,7 +1060,7 @@ def time_series_feature_eng(df):
 
 def regresstion_feature_engineering(ts_fe_data, ts_prediction):
     full_df = pd.concat([ts_fe_data, ts_prediction], axis=0).reset_index(drop=True)
-    print(f"Feature Engineering Input Shape: {full_df.shape}")
+    # print(f"Feature Engineering Input Shape: {full_df.shape}")
     # Ensure 'date' is datetime
     full_df['date'] = pd.to_datetime(full_df['date'])
     full_df = full_df.sort_values('date').reset_index(drop=True)
@@ -1189,8 +1204,8 @@ def time_series_prediction(input_data):
 
 def regression_prediction(fe_data):
     # Load models
-    base_model, one_three_month_model, six_month_model = load_reg_models()
-    
+    chain_model = load_model(f"{'../models' if os.path.exists('../models') else 'models'}/Chain_model_Regression/full_chain_stacking.pkl")
+
     #### prepare x data for base, 1m, 3m
     recession_targets = [
         "recession_probability",
@@ -1199,28 +1214,22 @@ def regression_prediction(fe_data):
         "6_month_recession_probability",
     ]
 
-    chain_targets = recession_targets[:3]
     features = [col for col in fe_data.columns if col not in [*recession_targets,"date"]]
     
     X = fe_data[features].iloc[[-1]]
     X_base = clean_data(X.copy())
-    X_1m_3m = sanitize_columns(clean_data(X.copy()))
     
-    ## base, 1m, 3m prediction
-    base_pred, *_ = inv_logit_transform(base_model.predict(X_base)).clip(0, 100)[-1]
-    _, one_month_pred, three_month_pred = inv_logit_transform(one_three_month_model.predict(X_1m_3m)).clip(0, 100)[-1]
+    base_pred, one_month_pred, three_month_pred, six_month_pred = chain_model.predict(X_base).clip(0, 100)[-1]
     
-    ## prepare x data for 6m
-    X_6m = X_1m_3m.copy()
-    X_6m[chain_targets] = [base_pred, one_month_pred, three_month_pred]
-    
-    six_month_pred = inv_logit_transform(six_month_model.predict(X_6m)).clip(0, 100)[-1]
-        
     return base_pred, one_month_pred, three_month_pred, six_month_pred
 
 
 if __name__ == "__main__":
     df = pd.read_csv('data/recession_probability.csv')
     df_fe = time_series_feature_eng(df)
+    df_ts = time_series_prediction(df_fe)
+    df_reg_fe = regresstion_feature_engineering(df_fe, df_ts)
+    base, one_m, three_m, six_m = regression_prediction(df_reg_fe)
     
-    print(time_series_prediction(df_fe).T)
+    print(f"Recession Predictions - Base: {base}, 1 Month: {one_m}, 3 Months: {three_m}, 6 Months: {six_m}")
+    
