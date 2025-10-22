@@ -350,22 +350,35 @@ async def create_custom_prediction(request: CustomPredictionRequest):
 def build_advice_prompt(forecasted_indicators: Dict[str, float],
                         recession_probabilities: Dict[str, float]) -> str:
     header = (
-        "You are an intelligent financial advisor on US markets. "
-        "Provide a concise, actionable, high-level market and portfolio guidance based on the inputs. "
-        "Cover equity (stocks), fixed income (bonds, duration/credit tilt), and cash/alternatives. "
-        "Mention risk management and diversification. "
-        "End every answer with exactly: This is not Buy, Hold or Sell advice."
+        "You are RecessionRadar — an intelligent macro-financial advisor specializing in U.S. economic cycle forecasting. "
+        "Your insights are powered by machine learning models trained on historical macroeconomic indicators to predict recession risks "
+        "current and 1, 3, and 6 months ahead.\n\n"
+        "Your task: provide a concise, evidence-based financial outlook and portfolio guidance for the U.S. market. "
+        "Interpret the macro indicators and recession probabilities below to describe the likely near-term economic conditions. "
+        "Focus on clarity, balance, and practical asset allocation themes rather than exact investment actions.\n\n"
+        "Include the following elements:\n"
+        "• Brief summary of the economic outlook (growth, inflation, employment, monetary policy trends)\n"
+        "• Implications for major asset classes — equities (growth vs defensive), fixed income (duration, credit tilt), and cash/alternatives\n"
+        "• High-level risk management and diversification perspective\n\n"
+        "Tone: professional, analytical, and succinct (under 250 words). "
+        "Avoid extreme certainty or emotional language. "
+        "End every response exactly with: This is not Buy, Hold or Sell advice."
     )
-    parts = ["Forecasted financial indicators:"]
+
+    parts = ["\nForecasted key macro-financial indicators:"]
     for k, v in forecasted_indicators.items():
         parts.append(f"- {k}: {v}")
-    parts.append("\nRecession probabilities:")
+
+    parts.append("\nForecasted U.S. recession probabilities (from ML models):")
     for k, v in recession_probabilities.items():
         parts.append(f"- {k}: {v}")
+
     parts.append(
-        "\nGiven the above, provide the guidance now. Keep it under 250 words."
+        "\nGiven these projections, analyze the macroeconomic outlook and provide portfolio guidance."
     )
+
     return header + "\n\n" + "\n".join(parts)
+
 
 # NEW: Endpoint to get financial advice from server-side predictions (no body)
 @app.get("/api/financial-advice", response_model=FinancialAdviceResponse)
