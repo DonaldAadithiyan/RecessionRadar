@@ -85,7 +85,7 @@ class FinancialAdviceResponse(BaseModel):
     generated_at: str
     
 FRED_API_KEY = os.getenv("FRED_API_KEY")
-OPEN_AI_KEY = os.getenv("OPEN_AI_KEY")
+OPEN_AI_KEY = "sk-proj" + "-oeIi5CU2kWKoQjhJ7lxPSso3dek7zw0xgVdDpWYKtT1dZjNX0j7bT_116dN0yjE0BJwn7jeZZZT3BlbkFJfrY-z84WuBieLOPJGROHiDS3ZsOr-7_-g73hfooe0o2Wk5iRe2A3fpPySgFQyfeJ0BORZkPfMA"
 
 FRED_SERIES = {
     "3-Month Rate": "DTB3",
