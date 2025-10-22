@@ -436,14 +436,14 @@ function CustomPrediction() {
         {/* Form Section */}
         <Paper sx={{ p: 3, bgcolor: '#1E1E1E', color: 'white' }}>
           <form onSubmit={handleSubmit}>
-            <Typography variant="h5" component="h2" gutterBottom sx={{ color: 'white' }}>
+            <Typography variant="h5" component="h2" gutterBottom sx={{ color: 'white', mb: 5 }}>
               Economic Indicators
             </Typography>
             
             <Grid container spacing={4}>
               {/* Left Column - Treasury Yields */}
               <Grid item xs={12} md={4}>
-                <Typography variant="h6" gutterBottom sx={{ color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)', pb: 1 }}>
+                <Typography variant="h6" gutterBottom sx={{ color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)', pb: 1, mb: 5 }}>
                   Treasury Rates
                 </Typography>
                 
@@ -501,7 +501,7 @@ function CustomPrediction() {
               
               {/* Middle Column - Core Economic Indicators */}
               <Grid item xs={12} md={4}>
-                <Typography variant="h6" gutterBottom sx={{ color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)', pb: 1 }}>
+                <Typography variant="h6" gutterBottom sx={{ color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)', pb: 1, mb: 5 }}>
                   Economic Indicators
                 </Typography>
                 
@@ -575,7 +575,7 @@ function CustomPrediction() {
               
               {/* Right Column - Market & Sentiment */}
               <Grid item xs={12} md={4}>
-                <Typography variant="h6" gutterBottom sx={{ color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)', pb: 1 }}>
+                <Typography variant="h6" gutterBottom sx={{ color: 'white', borderBottom: '1px solid rgba(255, 255, 255, 0.2)', pb: 1, mb: 5 }}>
                   Market & Sentiment Indicators
                 </Typography>
                 
@@ -698,7 +698,7 @@ function CustomPrediction() {
 
             
             {/* Form Buttons */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4, mb: 1 }}>
               <Button 
                 variant="outlined" 
                 sx={{ 

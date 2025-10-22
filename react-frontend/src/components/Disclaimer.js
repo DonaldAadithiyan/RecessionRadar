@@ -21,14 +21,9 @@ function Disclaimer() {
         </Typography>
       </Box>
       <Typography variant="body2" paragraph>
-        This tool provides recession probability estimates based on economic indicators and is designed for informational purposes only.
+       These forecasts and recession probabilities are for informational purposes only and do not constitute buy, hold, or sell advice. Users should consult a qualified financial advisor before making investment decisions or adjusting their portfolios. 
       </Typography>
-      <Typography variant="body2" paragraph>
-        The predictions should not be interpreted as financial advice or used as the sole basis for investment decisions. Economic forecasting is inherently uncertain, and actual outcomes may differ significantly from predictions.
-      </Typography>
-      <Typography variant="body2">
-        Users should consult with qualified financial professionals before making any financial decisions based on this information.
-      </Typography>
+      
     </Paper>
   );
 }

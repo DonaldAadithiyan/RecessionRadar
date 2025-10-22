@@ -187,19 +187,8 @@ function Information() {
         
         {/* References Section */}
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Disclaimer
-          </Typography>
-          <Typography paragraph>
-            This application provides recession probability forecasts based on economic indicators. 
-            These forecasts are not financial advice and should not be used as the sole basis for financial decisions.
-          </Typography>
-          <Typography paragraph>
-            The predictions are based on historical patterns and current economic conditions, but cannot account for 
-            unforeseen events or structural changes in the economy.
-          </Typography>
-          
-          <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
+      
+          <Typography variant="h6" gutterBottom sx={{ mt: 1 }}>
             Data Sources
           </Typography>
           <Typography paragraph>
