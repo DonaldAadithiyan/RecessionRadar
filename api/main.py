@@ -74,9 +74,18 @@ class RecessionPrediction(BaseModel):
 
 class CustomPredictionRequest(BaseModel):
     indicators: Dict[str, float]
-    
+
+# NEW: Financial advice I/O models
+class FinancialAdviceRequest(BaseModel):
+    forecasted_indicators: Dict[str, float]
+    recession_probabilities: Dict[str, float]
+
+class FinancialAdviceResponse(BaseModel):
+    advice: str
+    generated_at: str
     
 FRED_API_KEY = os.getenv("FRED_API_KEY")
+OPEN_AI_KEY = os.getenv("OPEN_AI_KEY")
 
 FRED_SERIES = {
     "3-Month Rate": "DTB3",
@@ -335,6 +344,138 @@ async def create_custom_prediction(request: CustomPredictionRequest):
         six_month=min(max(six_month/100, 0), 1),
         updated_at=datetime.now().isoformat()
     )
+
+
+# Helper to build prompt for OpenAI
+def build_advice_prompt(forecasted_indicators: Dict[str, float],
+                        recession_probabilities: Dict[str, float]) -> str:
+    header = (
+        "You are an intelligent financial advisor on US markets. "
+        "Provide a concise, actionable, high-level market and portfolio guidance based on the inputs. "
+        "Cover equity (stocks), fixed income (bonds, duration/credit tilt), and cash/alternatives. "
+        "Mention risk management and diversification. "
+        "End every answer with exactly: This is not Buy, Hold or Sell advice."
+    )
+    parts = ["Forecasted financial indicators:"]
+    for k, v in forecasted_indicators.items():
+        parts.append(f"- {k}: {v}")
+    parts.append("\nRecession probabilities:")
+    for k, v in recession_probabilities.items():
+        parts.append(f"- {k}: {v}")
+    parts.append(
+        "\nGiven the above, provide the guidance now. Keep it under 250 words."
+    )
+    return header + "\n\n" + "\n".join(parts)
+
+# NEW: Endpoint to get financial advice from server-side predictions (no body)
+@app.get("/api/financial-advice", response_model=FinancialAdviceResponse)
+async def get_financial_advice():
+    global ts_prediction, latest_predictions, indicators, yields
+
+    if not OPEN_AI_KEY:
+        raise HTTPException(status_code=500, detail="OpenAI API key not configured")
+
+    # Ensure ML outputs are available
+    if ts_prediction is None or latest_predictions.get("base_pred") is None:
+        raise HTTPException(status_code=503, detail="Forecasts not available yet. Try again later.")
+
+    # Build forecasted indicators using the in-memory ts_prediction, indicators and yields
+    forecasted_indicators = {}
+
+    # Prefer explicit latest fetched indicators / yields (these are simple scalars)
+    try:
+        # copy known indicator keys
+        for k in ["CPI", "PPI", "Industrial Production", "Share Price", "Unemployment Rate", "OECD CLI Index", "CSI Index"]:
+            if k in indicators and indicators[k] is not None:
+                forecasted_indicators[k] = float(indicators[k])
+        # yields (rates)
+        for k in ["3-Month Rate", "6-Month Rate", "1-Year Rate", "10-Year Rate"]:
+            if k in yields and yields[k] is not None:
+                forecasted_indicators[k] = float(yields[k])
+    except Exception:
+        pass
+
+    # Fallback: try to read numeric columns from ts_prediction last row
+    last_row = None
+    try:
+        if hasattr(ts_prediction, "iloc"):
+            last_row = ts_prediction.iloc[-1]
+        elif isinstance(ts_prediction, dict):
+            last_row = pd.Series(ts_prediction)
+    except Exception:
+        last_row = None
+
+    if last_row is not None:
+        mapping_candidates = {
+            "CPI": ["CPI", "cpi"],
+            "PPI": ["PPI", "ppi"],
+            "Industrial Production": ["INDPRO", "industrial_production", "indpro"],
+            "Share Price": ["share_price", "SP500", "sharePrice"],
+            "Unemployment Rate": ["unemployment_rate", "UNRATE", "unemploymentRate"],
+            "3-Month Rate": ["3_months_rate", "3_months_rate", "3_month_rate", "DTB3"],
+            "6-Month Rate": ["6_months_rate", "6_months_rate", "6_month_rate", "DTB6"],
+            "1-Year Rate": ["1_year_rate", "1_year_rate", "DTB1YR"],
+            "10-Year Rate": ["10_year_rate", "10_year_rate", "DGS10"]
+        }
+        for target, candidates in mapping_candidates.items():
+            if target in forecasted_indicators:
+                continue
+            for col in candidates:
+                if col in last_row and pd.notna(last_row[col]):
+                    try:
+                        forecasted_indicators[target] = float(last_row[col])
+                        break
+                    except Exception:
+                        continue
+
+    # Final guard: ensure at least some indicators exist
+    if not forecasted_indicators:
+        raise HTTPException(status_code=503, detail="No forecasted indicators available to generate advice.")
+
+    # Build recession probabilities from latest_predictions
+    recession_probabilities = {
+        "base_pred": latest_predictions.get("base_pred"),
+        "one_month": latest_predictions.get("one_month"),
+        "three_month": latest_predictions.get("three_month"),
+        "six_month": latest_predictions.get("six_month")
+    }
+
+    prompt = build_advice_prompt(forecasted_indicators, recession_probabilities)
+
+    def _call_openai():
+        url = "https://api.openai.com/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {OPEN_AI_KEY}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": "gpt-4o-mini",
+            "messages": [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt},
+            ],
+            "temperature": 0.7,
+            "max_tokens": 600,
+        }
+        print("Prompt:\n\n", prompt)
+        resp = requests.post(url, headers=headers, json=payload, timeout=60)
+        resp.raise_for_status()
+        return resp.json()
+
+    try:
+        data = await asyncio.to_thread(_call_openai)
+        advice = (data.get("choices", [{}])[0]
+                     .get("message", {})
+                     .get("content", "")
+                     .strip())
+        if "This is not Buy, Hold or Sell advice." not in advice:
+            advice = advice.rstrip() + "\n\nThis is not Buy, Hold or Sell advice."
+        return FinancialAdviceResponse(
+            advice=advice,
+            generated_at=datetime.now().isoformat()
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate advice: {e}")
 
 
 # Manual trigger endpoint for ML pipeline.
