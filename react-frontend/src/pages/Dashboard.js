@@ -17,6 +17,7 @@ import YieldCurveChart from '../components/YieldCurveChart';
 import YieldCurveAnalysis from '../components/YieldCurveAnalysis';
 import EconomicIndicatorsChart from '../components/EconomicIndicatorsChart';
 import InterestRatesChart from '../components/InterestRatesChart';
+import ActualVsForecastChart from '../components/ActualVsForecastChart';
 
 // Import services
 import { 
@@ -164,6 +165,11 @@ function Dashboard() {
             )}
           </Grid>
           
+          {/* Actual vs Forecast Chart (select indicator) */}
+          <Grid item xs={12}>
+            <ActualVsForecastChart />
+          </Grid>
+
           {/* Yield Curve Chart and Analysis */}
           <Grid item xs={12}>
             {treasuryYields ? (
