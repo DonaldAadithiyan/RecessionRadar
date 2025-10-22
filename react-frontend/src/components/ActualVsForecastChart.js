@@ -1,3 +1,4 @@
+// File: react-frontend/src/components/ActualVsForecastChart.js
 import React, { useEffect, useState, useMemo } from 'react';
 import { Box, Paper, Typography, Select, MenuItem, FormControl, InputLabel, CircularProgress } from '@mui/material';
 import { Line } from 'react-chartjs-2';
@@ -16,46 +17,61 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 function ActualVsForecastChart() {
   const [dataRows, setDataRows] = useState(null);
+  const [dataRowsProphet, setDataRowsProphet] = useState(null);
   const [indicators, setIndicators] = useState([]);
   const [selected, setSelected] = useState('gdp_per_capita');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const url = '/data/all_indicators_test_preds.json'; 
+    // Use PUBLIC_URL so fetch works when app is served from root or a subpath
+    const base = (process.env.PUBLIC_URL && process.env.PUBLIC_URL !== '') ? process.env.PUBLIC_URL : '';
+    const urlBase = `${base}/data/all_indicators_test_preds_hybridarima.json`;
+    const urlProphet = `${base}/data/all_indicators_test_preds_hybridprophet.json`;
+
     setLoading(true);
     setError(null);
-    fetch(url)
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then(json => {
-        if (!Array.isArray(json) || json.length === 0) {
-          throw new Error('Empty or invalid JSON');
+
+    // fetch base and prophet in parallel; prophet file is optional
+    const pBase = fetch(urlBase).then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    });
+
+    const pProphet = fetch(urlProphet).then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    }).catch(err => {
+      // prophet is optional locally; continue if missing
+      console.debug('Prophet combined JSON not available at', urlProphet, err.message);
+      return null;
+    });
+
+    Promise.all([pBase, pProphet])
+      .then(([baseJson, prophetJson]) => {
+        if (!Array.isArray(baseJson) || baseJson.length === 0) {
+          throw new Error('Empty or invalid base JSON');
         }
 
-        setDataRows(json);
+        setDataRows(baseJson);
+        setDataRowsProphet(Array.isArray(prophetJson) ? prophetJson : null);
 
-        // find indicators by searching keys that end with _actual
-        const keys = Object.keys(json[0]);
+        // detect indicators via keys ending with _actual
+        const keys = Object.keys(baseJson[0]);
         const found = keys
           .filter(k => k.endsWith('_actual'))
           .map(k => k.replace(/_actual$/, ''))
           .sort();
 
         setIndicators(found);
-  // pick gdp_per_capita if present, else first available indicator
-  setSelected(found.includes('gdp_per_capita') ? 'gdp_per_capita' : (found[0] || ''));
+        setSelected(found.includes('gdp_per_capita') ? 'gdp_per_capita' : (found[0] || ''));
       })
       .catch(err => {
-        console.error('Failed to fetch test predictions JSON:', err);
-        setError(err.message);
+        console.error('Failed to fetch prediction JSONs:', err);
+        setError(err.message || String(err));
       })
       .finally(() => setLoading(false));
   }, []);
-
-  
 
   const categories = useMemo(() => {
     if (!dataRows) return [];
@@ -65,25 +81,93 @@ function ActualVsForecastChart() {
   const chartData = useMemo(() => {
     if (!dataRows || !selected) return null;
 
-    const actualKey = `${selected}_actual`;
-    const forecastedKey = `${selected}_hybrid`;
+    // ---- Indicator -> preferred hybrid model mapping (matches the image provided)
+    // Keys must match indicator names discovered from JSON (case-sensitive, without suffix)
+    // Values: 'arima' to use ARIMA-hybrid, 'prophet' to use Prophet-hybrid
+    const indicatorModelMap = {
+      // From image: 1-year rate -> Prophet-Hybrid
+      '1_year_rate': 'prophet',
+
+      // 3-month rate (JSON key is '3_months_rate') -> ARIMA-Hybrid
+      '3_months_rate': 'arima',
+
+      // 6-month rate -> Prophet-Hybrid
+      '6_months_rate': 'prophet',
+
+      // CPI -> Prophet-Hybrid
+      'CPI': 'prophet',
+
+      // INDPRO -> ARIMA-Hybrid
+      'INDPRO': 'arima',
+
+      // 10-year rate -> Prophet-Hybrid
+      '10_year_rate': 'prophet',
+
+      // Share Price -> Prophet-Hybrid (JSON key: 'share_price')
+      'share_price': 'prophet',
+
+      // Unemployment Rate -> ARIMA-Hybrid
+      'unemployment_rate': 'arima',
+
+      // PPI -> ARIMA-Hybrid
+      'PPI': 'arima',
+
+      // OECD CLI Index -> Prophet-Hybrid (JSON key: 'OECD_CLI_index')
+      'OECD_CLI_index': 'prophet',
+
+      // CSI Index -> Prophet-Hybrid (JSON key: 'CSI_index')
+      'CSI_index': 'prophet',
+
+      // GDP per Capita -> Prophet-Hybrid (JSON key: 'gdp_per_capita')
+      'gdp_per_capita': 'prophet'
+    };
+
+    const preferredModel = indicatorModelMap[selected] || 'arima';
+
+    // build date->row maps for robust joining
+    const arimaMap = {};
+    for (const r of dataRows) if (r && r.date) arimaMap[r.date] = r;
+
+    const prophetMap = {};
+    if (dataRowsProphet) {
+      for (const r of dataRowsProphet) if (r && r.date) prophetMap[r.date] = r;
+    }
 
     const actual = [];
     const forecasted = [];
 
-    for (const row of dataRows) {
-      const a = row[actualKey];
-      // prefer hybrid, fall back to arima or prophet if hybrid missing
-      let h = row[forecastedKey];
-      if (h === undefined) {
-        if (row[`${selected}_arima`] !== undefined) h = row[`${selected}_arima`];
-        else if (row[`${selected}_prophet`] !== undefined) h = row[`${selected}_prophet`];
-        else h = null;
+    for (const date of categories) {
+      const baseRow = arimaMap[date];
+      const propRow = prophetMap[date];
+
+      const a = baseRow ? baseRow[`${selected}_actual`] : null;
+
+      let h = null;
+
+      // If mapped to prophet, try prophet hybrid first
+      if (preferredModel === 'prophet' && propRow) {
+        h = propRow[`${selected}_hybrid`];
+        if (h === undefined) {
+          console.debug(`Prophet hybrid missing for ${selected} on ${date}, falling back`);
+          h = propRow[`${selected}_prophet`];
+        }
+      }
+
+      // Fallback to base hybrid (ARIMA-hybrid), then explicit arima/prophet columns
+      if (h === undefined || h === null) {
+        if (baseRow) h = baseRow[`${selected}_hybrid`];
+        if (h === undefined || h === null) {
+          if (baseRow && baseRow[`${selected}_arima`] !== undefined) h = baseRow[`${selected}_arima`];
+          else if (propRow && propRow[`${selected}_prophet`] !== undefined) h = propRow[`${selected}_prophet`];
+          else h = null;
+        }
       }
 
       actual.push(typeof a === 'number' ? a : (a ? Number(a) : null));
       forecasted.push(typeof h === 'number' ? h : (h ? Number(h) : null));
     }
+
+    const modelLabel = preferredModel === 'prophet' ? 'Prophet-Hybrid' : 'ARIMA-Hybrid';
 
     return {
       labels: categories,
@@ -96,7 +180,7 @@ function ActualVsForecastChart() {
           tension: 0.2,
         },
         {
-          label: `${selected} Forecasted`,
+          label: `${selected} Forecasted (${modelLabel})`,
           data: forecasted,
           borderColor: '#2e7d32',
           backgroundColor: 'rgba(46,125,50,0.08)',
@@ -104,7 +188,7 @@ function ActualVsForecastChart() {
         }
       ]
     };
-  }, [dataRows, categories, selected]);
+  }, [dataRows, categories, selected, dataRowsProphet]);
 
   const options = useMemo(() => ({
     responsive: true,
