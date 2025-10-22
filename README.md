@@ -42,7 +42,7 @@ Prerequisites:
 
    ```powershell
    pip install --upgrade pip
-   pip install -r .\api\requirements.txt
+   pip install -r .\requirements.txt
    ```
 
 2. Run the API / backend:

@@ -1,15 +1,16 @@
 import pandas as pd
 import numpy as np
 import re
+
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.multioutput import RegressorChain
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.metrics import r2_score
 from sklearn.linear_model import ElasticNet
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.preprocessing import StandardScaler, RobustScaler
 import lightgbm as lgb
-from catboost import CatBoostRegressor, Pool
+from catboost import CatBoostRegressor
 import warnings
 warnings.filterwarnings('ignore')
 

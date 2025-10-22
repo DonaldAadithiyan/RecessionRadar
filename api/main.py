@@ -1,3 +1,14 @@
+import os, sys, time
+import requests
+import dotenv
+import asyncio
+import threading, concurrent.futures
+from typing import Dict, List
+from datetime import datetime
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+dotenv.load_dotenv()
+
 import pandas as pd
 import numpy as np
 from pydantic import BaseModel
@@ -6,18 +17,7 @@ from data_collection import fetch_and_combine_fred_series
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
 
-import os, time
-import json, requests
-import dotenv
-import threading, concurrent.futures
-from typing import Dict, List, Optional, Any
-from datetime import datetime
-import asyncio
-
-
-dotenv.load_dotenv()
 
 # Create FastAPI app
 app = FastAPI(

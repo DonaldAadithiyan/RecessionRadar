@@ -31,8 +31,9 @@ from fastapi import status
 try:
     from api.main import app
 except ImportError:
-    import main as api_main
-    app = api_main.app
+    # import main as api_main
+    # app = api_main.app
+    pass
 
 class TestFunctionalAPIEndpoints:
     """Functional tests for all API endpoints"""

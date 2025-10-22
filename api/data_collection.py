@@ -189,5 +189,4 @@ def fetch_and_combine_fred_series():
 
     
 if __name__ == "__main__":
-    df = fetch_and_combine_fred_series()
-    print(df.info())
+    pass
