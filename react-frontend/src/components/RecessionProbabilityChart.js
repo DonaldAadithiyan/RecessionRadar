@@ -446,7 +446,7 @@ function RecessionProbabilityChart({ data }) {
   };
 
   return (
-    <Paper sx={{ p: 3, mb: 4, width: '100%', bgcolor: '#212121', color: 'white', display: 'flex', flexDirection: 'column', minHeight: showCustomRange ? 640 : 480, boxSizing: 'border-box' }}>
+    <Paper sx={{ p: 3, mb: 4, width: '100%', bgcolor: '#212121', color: 'white', display: 'flex', flexDirection: 'column', minHeight: 480, boxSizing: 'border-box' }}>
       <Typography variant="h5" component="h2" gutterBottom color="white" sx={{ mb: 2, textAlign: 'center' }}>
         Historical Recession Probability{getTimeRangeDisplay()}
       </Typography>
@@ -713,8 +713,8 @@ function RecessionProbabilityChart({ data }) {
       )}
 
       {chartData ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: showCustomRange ? 480 : 320 }}>
-          <Box sx={{ flex: 1, minHeight: showCustomRange ? 420 : 260 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 320 }}>
+          <Box sx={{ flex: 1, minHeight: 260 }}>
             <Line ref={chartRef} options={options} data={chartData} />
           </Box>
         </Box>
