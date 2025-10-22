@@ -429,10 +429,14 @@ function RecessionProbabilityChart({ data }) {
 
 
   const getTimeRangeDisplay = () => {
-    if (selectedRange === 'CUSTOM' && customDateRange.startDate && customDateRange.endDate) {
-      const startDate = new Date(customDateRange.startDate);
-      const endDate = new Date(customDateRange.endDate);
-      return ` (${startDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })})`;
+    // If Custom Range toggle is active (or selectedRange is CUSTOM), show Custom Range in the title
+    if (showCustomRange || selectedRange === 'CUSTOM') {
+      if (customDateRange.startDate && customDateRange.endDate) {
+        const startDate = new Date(customDateRange.startDate);
+        const endDate = new Date(customDateRange.endDate);
+        return ` (${startDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })})`;
+      }
+      return ' (Custom Range)';
     }
     if (selectedRange !== 'ALL') {
       return ` (Last ${selectedRange === 6 ? '6 months' : selectedRange === 12 ? '1 year' : 
@@ -442,7 +446,7 @@ function RecessionProbabilityChart({ data }) {
   };
 
   return (
-    <Paper sx={{ p: 2, mb: 4, height: 650, bgcolor: '#212121', color: 'white' }}>
+    <Paper sx={{ p: 3, mb: 4, width: '100%', bgcolor: '#212121', color: 'white', display: 'flex', flexDirection: 'column', minHeight: showCustomRange ? 640 : 480, boxSizing: 'border-box' }}>
       <Typography variant="h5" component="h2" gutterBottom color="white" sx={{ mb: 2, textAlign: 'center' }}>
         Historical Recession Probability{getTimeRangeDisplay()}
       </Typography>
@@ -709,13 +713,13 @@ function RecessionProbabilityChart({ data }) {
       )}
 
       {chartData ? (
-        <Box sx={{ 
-          height: showCustomRange ? 'calc(100% - 250px)' : 'calc(100% - 180px)'
-        }}>
-          <Line ref={chartRef} options={options} data={chartData} />
+        <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: showCustomRange ? 480 : 320 }}>
+          <Box sx={{ flex: 1, minHeight: showCustomRange ? 420 : 260 }}>
+            <Line ref={chartRef} options={options} data={chartData} />
+          </Box>
         </Box>
       ) : (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
           <Typography color="white">Loading chart data...</Typography>
         </Box>
       )}
