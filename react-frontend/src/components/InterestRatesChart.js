@@ -65,7 +65,7 @@ const InterestRatesChart = () => {
     if (chartRef.current) {
       chartRef.current.resetZoom();
     }
-    setSelectedRange('ALL');
+    // Do not change selectedRange here — Reset Zoom should only affect chart transform
   };
 
   if (loading) return <div>Loading interest rates data...</div>;
@@ -272,7 +272,7 @@ const InterestRatesChart = () => {
             }}
           >10Y</Button>
           <Button 
-            onClick={resetZoom} 
+            onClick={() => handleRangeChange('ALL')} 
             sx={{ 
               color: selectedRange === 'ALL' ? '#000000' : '#ffffff', 
               backgroundColor: selectedRange === 'ALL' ? '#ffffff' : 'transparent',
