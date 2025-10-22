@@ -10,6 +10,7 @@ FastAPI backend for RecessionRadar — provides economic data and recession prob
 - FRED API key set in environment variable `FRED_API_KEY` (required for live FRED data)
 
 Example (PowerShell):
+
 ```powershell
 $env:FRED_API_KEY = "your_fred_api_key_here"
 ```
@@ -38,18 +39,21 @@ $env:PYTHONPATH = (Get-Location).Path
 ## Run (development)
 
 From project root:
+
 ```powershell
 uvicorn api.main:app --reload --port 8000
 ```
 
 Or (inside api folder):
+
 ```powershell
 python .\main.py
 ```
 
 Docs available when running:
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+
+- Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs)
+- ReDoc: [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
 ---
 
@@ -80,6 +84,7 @@ Docs available when running:
 - POST /api/custom-prediction  
   - Accepts JSON body with `indicators` (map of input feature names → values). Runs a quick custom prediction using current pipeline state and returns RecessionPrediction (base_pred, one_month, three_month, six_month, updated_at).
   - Example request body:
+
     ```json
     {
       "indicators": {
@@ -103,6 +108,7 @@ Docs available when running:
   - Manually trigger the full ML pipeline (runs synchronously in a background thread and returns status).
 
 Notes:
+
 - The app starts a background thread on startup that periodically (every 6 hours) runs the ML pipeline: it fetches FRED data, computes features, runs time-series and regression predictions, and updates in-memory latest predictions and time series data.
 - If `FRED_API_KEY` is missing, the pipeline will raise an error when attempting live fetches.
 
@@ -113,6 +119,7 @@ Notes:
 - Keep the venv activated and run backend and frontend in separate terminals.
 - Ensure `api/__init__.py` exists if you import `api` from scripts (not required for uvicorn).
 - To test ML pipeline manually:
+
   ```powershell
   & .\venv\Scripts\python.exe .\notebooks\test\test.py
   ```
