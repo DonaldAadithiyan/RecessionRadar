@@ -13,7 +13,6 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
-import WarningIcon from '@mui/icons-material/Warning';
 
 function Information() {
   return (
@@ -50,8 +49,9 @@ function Information() {
             <Typography component="li">Industrial Production</Typography>
             <Typography component="li">Share Prices</Typography>
             <Typography component="li">Unemployment Rate</Typography>
-            <Typography component="li">OECD Composite Leading Indicator</Typography>
-            <Typography component="li">Consumer Sentiment Index</Typography>
+            <Typography component="li">OECD Composite Leading Indicator (OECD CLI)</Typography>
+            <Typography component="li">Consumer Sentiment Index (CSI)</Typography>
+            <Typography component="li">GDP per Capita</Typography>
           </ul>
           <Box sx={{ display: 'flex', alignItems: 'center', mt: 2, p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
             <InfoIcon sx={{ mr: 2, color: 'primary.main' }} />
@@ -74,36 +74,31 @@ function Information() {
             
             <ul>
               <Typography component="li" paragraph>
-                <strong>Yield Curve Inversion</strong> - When short-term interest rates (e.g., 3-Month) exceed long-term rates (e.g., 10-Year), it's historically been a reliable recession predictor
+                <strong>Yield Curve Inversion</strong> - When short-term interest rates (such as the 3-Month Treasury rate) exceed long-term rates (such as the 10-Year rate), it indicates an inverted yield curve. Historically, this has been one of the most reliable predictors of U.S. recessions, often signaling a downturn 6–18 months in advance.
               </Typography>
               <Typography component="li" paragraph>
-                <strong>OECD CLI Index</strong> - The Composite Leading Indicator is designed to provide early signals of turning points in business cycles
+                <strong>OECD Composite Leading Indicator (CLI)</strong> - Designed to provide early signals of turning points in business cycles, the CLI combines multiple economic variables to detect slowdowns or recoveries before they appear in traditional GDP data.
               </Typography>
               <Typography component="li" paragraph>
-                <strong>CSI Index</strong> - Consumer Sentiment Index measures consumer confidence about the economy
+                <strong>Consumer Sentiment Index (CSI)</strong> - Measures consumer confidence in the economy, reflecting household expectations about income, employment, and overall financial conditions. Declining sentiment often precedes reductions in consumer spending, a key driver of economic growth.
               </Typography>
               <Typography component="li" paragraph>
-                <strong>CPI and PPI</strong> - Measure inflation from consumer and producer perspectives
+                <strong>Consumer Price Index (CPI) and Producer Price Index (PPI)</strong> - These indicators measure inflation from different perspectives. CPI tracks changes in prices paid by consumers, while PPI tracks prices received by domestic producers. High or volatile inflation can signal economic imbalances and policy tightening risks.
+              </Typography>
+              <Typography component="li" paragraph>
+                <strong>Industrial Production</strong> - Represents the total output of factories, mines, and utilities. Sustained declines in industrial production are frequently associated with economic contractions and reduced business activity.
+              </Typography>
+              <Typography component="li" paragraph>
+                <strong>Share Prices</strong> - Stock market performance reflects investor expectations about future economic growth and corporate earnings. Falling share prices often coincide with declining confidence and heightened recession risks.
+              </Typography>
+              <Typography component="li" paragraph>
+                <strong>Unemployment Rate</strong> - Tracks the proportion of the labor force that is jobless and seeking employment. A rising unemployment rate indicates weakening labor markets and is a classic signal of recessionary pressure.
+              </Typography>
+              <Typography component="li" paragraph>
+                <strong>GDP per Capita</strong> - Measures total economic output per person, providing a broad indicator of living standards and overall economic health. Declining GDP per capita can suggest reduced productivity and economic stagnation.
               </Typography>
             </ul>
             
-            <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-              Interpretation
-            </Typography>
-            <Typography paragraph>
-              The recession probabilities should be interpreted as follows:
-            </Typography>
-            <ul>
-              <Typography component="li" paragraph>
-                <strong>Less than 30%</strong> - Low recession risk: Economic conditions are generally favorable
-              </Typography>
-              <Typography component="li" paragraph>
-                <strong>30% to 70%</strong> - Moderate recession risk: Some warning signs are present
-              </Typography>
-              <Typography component="li" paragraph>
-                <strong>Above 70%</strong> - High recession risk: Multiple warning signs indicate significant concern
-              </Typography>
-            </ul>
           </AccordionDetails>
         </Accordion>
 
@@ -126,7 +121,7 @@ function Information() {
             <Grid container spacing={3} sx={{ mb: 2 }}>
               <Grid item xs={12} md={6}>
                 <Paper sx={{ p: 2 }}>
-                  <Typography variant="subtitle1" gutterBottom>
+                  <Typography variant="subtitle1" gutterBottom color="success.main">
                     Normal (Upward Sloping)
                   </Typography>
                   <Typography variant="body2">
@@ -148,7 +143,7 @@ function Information() {
               
               <Grid item xs={12} md={6}>
                 <Paper sx={{ p: 2 }}>
-                  <Typography variant="subtitle1" gutterBottom>
+                  <Typography variant="subtitle1" gutterBottom color="warning.main">
                     Flat
                   </Typography>
                   <Typography variant="body2">
@@ -159,7 +154,7 @@ function Information() {
               
               <Grid item xs={12} md={6}>
                 <Paper sx={{ p: 2 }}>
-                  <Typography variant="subtitle1" gutterBottom>
+                  <Typography variant="subtitle1" gutterBottom color="info.main">
                     Steep
                   </Typography>
                   <Typography variant="body2">
@@ -179,9 +174,6 @@ function Information() {
             </Typography>
             
             <Divider sx={{ my: 2 }} />
-            <Typography variant="subtitle2" color="text.secondary">
-              Note: The predictions in this demonstration version are based on simplified models and should not be used for actual economic forecasting.
-            </Typography>
           </AccordionDetails>
         </Accordion>
         

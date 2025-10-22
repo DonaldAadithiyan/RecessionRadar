@@ -7,7 +7,8 @@ import {
   Box, 
   CircularProgress,
   Alert,
-  Divider
+  Divider,
+  Button,
 } from '@mui/material';
 
 // Import components
@@ -26,9 +27,9 @@ import {
   getCurrentPrediction,
   getEconomicIndicators
 } from '../services/api';
+import { getFinancialAdvice } from '../services/api';
 
-// Import context
-import { DashboardProvider } from '../contexts/DashboardContext';
+// Import context (not used here)
 
 function Dashboard() {
   // State for loading status
@@ -40,6 +41,8 @@ function Dashboard() {
   const [recessionProbabilities, setRecessionProbabilities] = useState(null);
   const [currentPrediction, setCurrentPrediction] = useState(null);
   const [economicIndicators, setEconomicIndicators] = useState(null);
+  const [aiAdvice, setAiAdvice] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
   
   // Load data on component mount
   useEffect(() => {
@@ -147,6 +150,69 @@ function Dashboard() {
         {currentPrediction && (
           <MetricsCards predictions={currentPrediction} />
         )}
+
+        {/* Financial Advice (AI) - dashboard level */}
+        <Box sx={{ my: 3 }}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Financial Advice
+            </Typography>
+
+            {aiAdvice ? (
+              (() => {
+                const escapeHtml = (str) =>
+                  str
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+
+                const toHtml = (raw) => {
+                  if (!raw) return '';
+                  let s = String(raw);
+                  s = escapeHtml(s);
+                  s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                  s = s.replace(/\r?\n/g, '<br/>');
+                  return s;
+                };
+
+                const html = toHtml(aiAdvice);
+
+                return (
+                  <Typography variant="body1" paragraph component="div" sx={{ lineHeight: 1.6 }}>
+                    <div dangerouslySetInnerHTML={{ __html: html }} />
+                  </Typography>
+                );
+              })()
+            ) : (
+              <Typography variant="body2" color="text.secondary" paragraph>
+                Click the button to generate financial advice based on current dashboard predictions.
+              </Typography>
+            )}
+
+            <Box>
+              <Button
+                variant="contained"
+                disabled={aiLoading}
+                onClick={async () => {
+                  setAiLoading(true);
+                  try {
+                    const res = await getFinancialAdvice();
+                    setAiAdvice(res.advice || 'No advice returned');
+                  } catch (e) {
+                    console.error('Error fetching AI advice', e);
+                    setAiAdvice('Error generating advice.');
+                  } finally {
+                    setAiLoading(false);
+                  }
+                }}
+              >
+                {aiLoading ? 'Generating...' : 'Generate Financial Advice'}
+              </Button>
+            </Box>
+          </Paper>
+        </Box>
         
         {/* Charts Section */}
         <Grid container spacing={3}>

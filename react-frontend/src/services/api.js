@@ -69,3 +69,14 @@ export const getCustomPrediction = async (indicators) => {
     throw error;
   }
 };
+
+// Financial advice - server-side endpoint (no body)
+export const getFinancialAdvice = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/financial-advice`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching financial advice:', error);
+    throw error;
+  }
+};
