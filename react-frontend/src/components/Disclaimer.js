@@ -21,7 +21,7 @@ function Disclaimer() {
         </Typography>
       </Box>
       <Typography variant="body2" paragraph>
-       These forecasts and recession probabilities are for informational purposes only and do not constitute buy, hold, or sell advice. Users should consult a qualified financial advisor before making investment decisions or adjusting their portfolios. 
+       These forecasts and recession probabilities are for informational purposes only. Users should consult a qualified financial advisor before making investment decisions or adjusting their portfolios. 
       </Typography>
       
     </Paper>
