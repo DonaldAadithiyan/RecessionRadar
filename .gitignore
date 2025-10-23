@@ -142,3 +142,35 @@ frontend/*/__pycache__/
 # Jupyter notebook checkpoints
 notebooks/.ipynb_checkpoints/
 .ipynb_checkpoints/
+
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment
+.env
+.venv/
+env/
+venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# PyCharm/VSCode settings
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Pickle files
+*.pkl
+*.pt
+
+# Data
+
+*.h5
+*.sqlite
+
