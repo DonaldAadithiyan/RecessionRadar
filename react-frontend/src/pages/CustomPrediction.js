@@ -392,44 +392,6 @@ function CustomPrediction() {
                     }}
                   />
                 </Box>
-
-                {/* GDP per Capita */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography gutterBottom sx={{ color: 'white' }}>
-                    GDP per Capita
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    name="gdp_per_capita"
-                    value={formValues["gdp_per_capita"] !== undefined ? formValues["gdp_per_capita"] : (economicIndicators?.indicators?.["gdp_per_capita"] || 0)}
-                    onChange={handleInputChange}
-                    type="number"
-                    InputProps={{
-                      sx: { color: 'white' }
-                    }}
-                    inputProps={{
-                      step: "any"
-                    }}
-                    size="small"
-                    variant="outlined"
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        '& fieldset': {
-                          borderColor: 'rgba(255, 255, 255, 0.3)',
-                        },
-                        '&:hover fieldset': {
-                          borderColor: 'rgba(255, 255, 255, 0.5)',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#90caf9',
-                        },
-                        '& input': { 
-                          color: 'white' 
-                        }
-                      },
-                    }}
-                  />
-                </Box>
               </Grid>
             </Grid>
             
