@@ -1,3 +1,179 @@
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+data_integrity_test.log
+
+# Python - API dependencies
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+notebooks/
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+api/__pycache__/
+api/*.py[cod]
+api/*$py.class
+api/venv/
+api/env/
+
+# Frontend - Node.js dependencies
+node_modules/
+**/node_modules/
+react-frontend/node_modules/
+**/node_modules/**/*
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.pnp/
+.pnp.js
+package-lock.json
+react-frontend/package-lock.json
+yarn.lock
+react-frontend/yarn.lock
+
+# React specific cache/config files
+react-frontend/.eslintcache
+react-frontend/*.json
+!react-frontend/package.json
+!react-frontend/tsconfig.json
+!react-frontend/manifest.json
+react-frontend/*.log
+.cache/
+
+# Specific NPM/React cache files shown in screenshot
+react-frontend/75c8287223.json
+react-frontend/85c0ce5402.json
+react-frontend/6533568b94a.json
+react-frontend/056e06138c3.json
+react-frontend/92c9206337.json
+react-frontend/46f51a93d4.json
+react-frontend/ac6ad2468a4.json
+react-frontend/e2094efc8d6.json
+react-frontend/d4cff510cd5.json
+react-frontend/4a7ca2c3b1d.json
+react-frontend/769048bc754.json
+react-frontend/e96c81dce77.json
+# More general pattern for these files
+react-frontend/[0-9a-f]*.json
+
+# React build outputs
+react-frontend/build/
+react-frontend/dist/
+/build
+/dist
+.cache/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE and Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Misc
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Material-UI Icon files - exclude specific icons 
+react-frontend/node_modules/@mui/
+react-frontend/node_modules/@material-ui/
+react-frontend/node_modules/**/EightPlusRounded.js
+react-frontend/node_modules/**/EightPlusRounded.ts
+react-frontend/node_modules/**/EightPlusSharp.ts
+react-frontend/node_modules/**/EightPlusSharp.js
+react-frontend/node_modules/**/EightPlusTwoTone.ts
+react-frontend/node_modules/**/EightPlusTwoTone.js
+react-frontend/node_modules/**/EightRounded.ts
+react-frontend/node_modules/**/EightRounded.js
+react-frontend/node_modules/**/EightSharp.ts
+react-frontend/node_modules/**/EightSharp.js
+react-frontend/node_modules/**/EightTwoTone.ts
+react-frontend/node_modules/**/EightTwoTone.js
+react-frontend/node_modules/**/EightMp.ts
+
+# Streamlit specific
+frontend/.streamlit/
+frontend/__pycache__/
+frontend/*/__pycache__/
+
+# Data files (adjust according to your needs)
+# Uncomment the following if you want to exclude data files from git
+# data/raw/*
+# data/processed/*
+# data/combined/*
+# !data/raw/.gitkeep
+# !data/processed/.gitkeep
+# !data/combined/.gitkeep
+
+
+# Jupyter notebook checkpoints
+notebooks/.ipynb_checkpoints/
+.ipynb_checkpoints/
+
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment
+.env
+.venv/
+env/
+venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# PyCharm/VSCode settings
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Pickle files
+*.pkl
+*.pt
+
+# Data
+
+*.h5
+*.sqlite
+
 # Python bytecode
 __pycache__/
 *.py[cod]

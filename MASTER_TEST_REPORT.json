@@ -1,0 +1,51 @@
+{
+  "execution_time": "0:00:12.966073",
+  "start_time": "2025-10-19 22:01:52.558000",
+  "end_time": "2025-10-19 22:02:05.524073",
+  "test_suites": {
+    "pkl_model_validation": {
+      "status": "PASSED",
+      "total_models": 16,
+      "validated_models": 16,
+      "success_rate": 100.0,
+      "notes": "All models validated successfully with proper import paths"
+    },
+    "basic_data_integrity": {
+      "status": "PASSED",
+      "total_tests": 5,
+      "passed_tests": 5,
+      "success_rate": 100.0,
+      "tests": [
+        "CSV File Existence and Readability",
+        "Basic Data Validation",
+        "API Module Import Test",
+        "Model Files Existence",
+        "Environment Variables"
+      ]
+    },
+    "comprehensive_pytest": {
+      "status": "PASSED",
+      "total_tests": 8,
+      "passed_tests": 8,
+      "success_rate": 100.0,
+      "test_cases": [
+        "Schema Validation Detailed",
+        "Missing/Duplicate/Infinite Values",
+        "API Error Handling Comprehensive",
+        "Individual Function Validation",
+        "CSV Schema Conformance",
+        "Offline Validation Reproducibility",
+        "Data Pipeline Integration",
+        "PKL Model Files Validation"
+      ]
+    }
+  },
+  "overall_summary": {
+    "total_suites": 3,
+    "passed_suites": 3,
+    "total_tests": 29,
+    "passed_tests": 29,
+    "overall_success_rate": 100.0,
+    "final_status": "SYSTEM READY FOR PRODUCTION"
+  }
+}
