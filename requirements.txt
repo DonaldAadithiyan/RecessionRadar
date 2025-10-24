@@ -20,7 +20,7 @@ statsmodels>=0.14.0
 scipy>=1.9.0
 
 # Time-series / forecasting (models folder may require these)
-pmdarima>=2.0.0
+# pmdarima>=2.0.0
 prophet>=1.1.0
 
 # Gradient-boosting / tree models used by models.py
