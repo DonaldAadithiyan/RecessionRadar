@@ -1,0 +1,29 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment
+.env
+.venv/
+env/
+venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# PyCharm/VSCode settings
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Pickle files
+*.pkl
+*.pt
+
+# Data
+
+*.h5
+*.sqlite

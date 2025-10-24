@@ -1,0 +1,22 @@
+WEIGHTED RECESSION PREDICTION ENSEMBLE v3.0
+============================================================
+
+IMBALANCE HANDLING STRATEGY:
+------------------------------
+• Exponential sample weighting
+• Higher weights for rare high-probability samples
+• Ridge meta-model with alpha=10.0 (high regularization)
+• Stratified 5-fold cross-validation
+• MAE as primary metric (not affected by extreme values)
+
+BASE MODELS:
+------------------------------
+• CatBoost (loss='MAE', iterations=400-500)
+• LightGBM (metric='mae', iterations=400)
+• Random Forest (n_estimators=300)
+
+META-MODEL:
+------------------------------
+• Ridge regression (alpha=10.0)
+• Learns weighted combination of base models
+• Separate model per target

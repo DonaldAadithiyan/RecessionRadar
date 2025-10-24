@@ -1,0 +1,30 @@
+ENHANCED RECESSION PREDICTION ENSEMBLE - DYNAMIC WEIGHTS
+============================================================
+
+Generated: 2025-10-17 09:38:37.868961
+Models saved: 1
+Targets: recession_probability, 1_month_recession_probability, 3_month_recession_probability, 6_month_recession_probability
+
+MODEL DETAILS:
+--------------------
+Enhanced Stacking (Learned Weights):
+  Type: ImprovedStackingEnsemble
+  Size: 17.59 MB
+
+WEIGHT STRATEGY:
+------------------------------
+• NO fixed weights used
+• Weights are learned per target via ElasticNet meta-model
+• Each target has its own optimal weight combination
+• Meta-model coefficients determine final ensemble predictions
+• Weights optimized through nested cross-validation
+
+ENHANCEMENTS IMPLEMENTED:
+------------------------------
+• Improved feature scaling (RobustScaler/StandardScaler)
+• Enhanced hyperparameter tuning with early stopping
+• Stratified cross-validation based on target quantiles
+• Feature engineering for meta-learning
+• ElasticNet meta-models with nested cross-validation
+• Better data cleaning and transformation
+• Early stopping and validation sets

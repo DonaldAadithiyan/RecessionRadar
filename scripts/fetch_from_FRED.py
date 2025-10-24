@@ -8,7 +8,7 @@ load_dotenv()
 
 # Get the FRED API key from environment
 API_KEY = os.getenv("FRED_API_KEY")
-series_id = "UMCSENT"
+series_id = "A939RX0Q048SBEA"
 
 print(API_KEY)
 
