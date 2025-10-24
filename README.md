@@ -91,7 +91,7 @@ Prerequisites:
 ## Common Troubleshooting
 
 - ModuleNotFoundError: ensure you run Python commands from project root or set PYTHONPATH to project root.
-- Missing dependencies: ensure you installed `api/requirements.txt` inside the activated venv.
+- Missing dependencies: ensure you installed `requirements.txt` inside the activated venv.
 - Frontend cannot reach backend: confirm backend is running and CORS/port match; set REACT_APP_API_URL if needed.
 
 ---
