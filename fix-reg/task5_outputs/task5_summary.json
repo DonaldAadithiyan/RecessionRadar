@@ -1,0 +1,157 @@
+{
+  "option_A": {
+    "20pct": {
+      "n_cal": 127,
+      "date_start": "2009-06-01",
+      "date_end": "2019-12-01",
+      "n_recession_months": 1,
+      "cal_mean_err": [
+        0.949,
+        0.907,
+        1.899,
+        1.704
+      ],
+      "coverage": [
+        70.8,
+        72.3,
+        61.5,
+        63.1
+      ],
+      "mean_widths": [
+        2.34,
+        2.21,
+        4.69,
+        8.84
+      ]
+    },
+    "30pct": {
+      "n_cal": 190,
+      "date_start": "2004-03-01",
+      "date_end": "2019-12-01",
+      "n_recession_months": 16,
+      "cal_mean_err": [
+        1.386,
+        1.312,
+        2.935,
+        1.97
+      ],
+      "coverage": [
+        87.7,
+        81.5,
+        87.7,
+        69.2
+      ],
+      "mean_widths": [
+        4.42,
+        3.3,
+        11.45,
+        8.16
+      ]
+    },
+    "40pct": {
+      "n_cal": 254,
+      "date_start": "1998-11-01",
+      "date_end": "2019-12-01",
+      "n_recession_months": 16,
+      "cal_mean_err": [
+        1.411,
+        1.435,
+        2.857,
+        1.997
+      ],
+      "coverage": [
+        89.2,
+        86.2,
+        86.2,
+        70.8
+      ],
+      "mean_widths": [
+        5.21,
+        5.12,
+        10.34,
+        8.37
+      ]
+    },
+    "50pct": {
+      "n_cal": 317,
+      "date_start": "1993-08-01",
+      "date_end": "2019-12-01",
+      "n_recession_months": 16,
+      "cal_mean_err": [
+        1.3,
+        1.311,
+        2.644,
+        1.86
+      ],
+      "coverage": [
+        86.2,
+        86.2,
+        86.2,
+        67.7
+      ],
+      "mean_widths": [
+        3.79,
+        4.11,
+        7.17,
+        7.82
+      ]
+    }
+  },
+  "option_C_regime_aware_40pct": {
+    "coverage": [
+      83.1,
+      84.6,
+      83.1,
+      66.2
+    ],
+    "coverage_recession": [
+      33.3,
+      0.0,
+      33.3,
+      33.3
+    ],
+    "coverage_expansion": [
+      88.1,
+      93.2,
+      88.1,
+      69.5
+    ],
+    "mean_widths": [
+      3.75,
+      5.27,
+      6.83,
+      8.99
+    ],
+    "n_cal": 254,
+    "n_rec_cal": 20,
+    "n_exp_cal": 234,
+    "n_rec_test": 6,
+    "n_exp_test": 59
+  },
+  "best_method": "Option A 40%",
+  "best_coverage": [
+    89.2,
+    86.2,
+    86.2,
+    70.8
+  ],
+  "best_widths": [
+    5.21,
+    5.12,
+    10.34,
+    8.37
+  ],
+  "original_task1_coverage": [
+    70.8,
+    71.9,
+    59.7,
+    59.3
+  ],
+  "original_task1_widths": [
+    2.49,
+    2.41,
+    5.14,
+    12.34
+  ],
+  "regime_threshold_pct": 30.0
+}

@@ -1,0 +1,9 @@
+Feature,SHAP_Baseline,SHAP_-100bps,Difference,Direction
+3_months_rate_diff3,-0.1492,0.218,0.3672,TOWARD recession
+1_year_rate,-0.0564,0.1538,0.2102,TOWARD recession
+PPI,0.561,0.7311,0.1701,TOWARD recession
+OECD_CLI_index_residual,1.0962,0.9477,-0.1485,AWAY from recession
+INDPRO,0.6932,0.831,0.1378,TOWARD recession
+10_year_rate_residual,-0.6127,-0.75,-0.1374,AWAY from recession
+OECD_CLI_index_pct_change1,-0.2407,-0.1119,0.1288,TOWARD recession
+PPI_rollstd6,0.0042,0.1142,0.11,TOWARD recession
