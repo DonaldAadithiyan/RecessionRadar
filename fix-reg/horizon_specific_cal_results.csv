@@ -1,0 +1,5 @@
+Horizon,HorizonSpecific_Cov,HorizonSpecific_Width,Shared_Cov,Shared_Width,Nominal_Coverage
+Current,100.0,96.56,100.0,50.77,90.0
+1-Month,100.0,61.64,100.0,50.77,90.0
+3-Month,100.0,60.47,100.0,50.77,90.0
+6-Month,84.62,57.09,92.31,119.25,90.0

@@ -1,0 +1,17 @@
+Horizon,Model,MAE,CI_lo_95,CI_hi_95
+Current,Ensemble (Ours),6.8292,2.4518,12.3092
+Current,Naive Mean,11.2759,8.7228,15.0934
+Current,Probit (YC),3.3675,0.2827,7.9779
+Current,Single-Stage XGB,2.5127,0.8463,4.6318
+1-Month,Ensemble (Ours),5.6336,2.3765,10.0248
+1-Month,Naive Mean,11.2539,8.6874,15.0693
+1-Month,Probit (YC),3.563,0.4799,8.144
+1-Month,Single-Stage XGB,3.433,0.403,7.8894
+3-Month,Ensemble (Ours),7.7285,3.5789,12.8728
+3-Month,Naive Mean,10.0921,8.7493,12.6794
+3-Month,Probit (YC),2.6401,0.9185,5.8041
+3-Month,Single-Stage XGB,14.7224,9.4947,21.2195
+6-Month,Ensemble (Ours),10.1696,6.3978,15.1079
+6-Month,Naive Mean,8.9156,8.7959,9.0254
+6-Month,Probit (YC),2.3523,1.6524,3.0876
+6-Month,Single-Stage XGB,64.8893,54.7227,74.0915

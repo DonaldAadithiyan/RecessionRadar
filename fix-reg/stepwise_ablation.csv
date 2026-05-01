@@ -1,0 +1,21 @@
+Tier,Horizon,MAE,Delta_MAE,Pct_Gain
+T1: Naive Mean,Current,11.2759,,
+T1: Naive Mean,1-Month,11.2539,,
+T1: Naive Mean,3-Month,10.0921,,
+T1: Naive Mean,6-Month,8.9156,,
+T2: Probit (YC),Current,3.3675,-7.9084,70.14
+T2: Probit (YC),1-Month,3.563,-7.6909,68.34
+T2: Probit (YC),3-Month,2.6401,-7.4521,73.84
+T2: Probit (YC),6-Month,2.3523,-6.5633,73.62
+T3: XGB Independent,Current,2.5127,-0.8549,25.39
+T3: XGB Independent,1-Month,3.433,-0.1299,3.65
+T3: XGB Independent,3-Month,14.7224,12.0824,-457.66
+T3: XGB Independent,6-Month,64.8893,62.537,-2658.6
+T4: XGB Chain,Current,2.5127,0.0,-0.0
+T4: XGB Chain,1-Month,3.2143,-0.2187,6.37
+T4: XGB Chain,3-Month,6.9868,-7.7356,52.54
+T4: XGB Chain,6-Month,55.519,-9.3703,14.44
+T5: Full Ensemble,Current,6.8292,4.3165,-171.79
+T5: Full Ensemble,1-Month,5.6336,2.4193,-75.27
+T5: Full Ensemble,3-Month,7.7285,0.7417,-10.62
+T5: Full Ensemble,6-Month,10.1696,-45.3494,81.68
