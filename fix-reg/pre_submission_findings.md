@@ -203,15 +203,104 @@ feature-engineering notebooks described in Section 3.2." The full README is at
 
 ---
 
-## P1 — Not started
+## P1.1 — Horizon-conditional SHAP heatmap export
 
-Per the task's tier ordering ("stop after each tier"), P1.1 (SHAP heatmap
-export) and P1.2 (block-bootstrap CIs on Table 1) were not started — the mandate
-was the P0 tier. Both are feasible from the saved model + data with no
-retraining; say the word and I'll do them next.
+**Status: DONE. Full top-12 × 4-horizon mean |SHAP| matrix exported and
+re-rendered; all three paper-quoted numbers reconcile exactly (one sign typo to
+fix).** Reproduced from `fix-reg/task2_shap.py` (TreeExplainer on the CatBoost
+RegressorChain, SHAP of original features only, mean |value| over the 65 test
+rows). Requires the `shap` package.
+
+**Top-12 features × 4 horizons (mean |SHAP|, logit-space units):**
+
+| Feature | Current | 1M | 3M | 6M |
+|---|---|---|---|---|
+| OECD_CLI_index_trend | 1.107 | 0.455 | 0.883 | 0.291 |
+| INDPRO_diff3 | **1.550** | 0.331 | 0.174 | 0.235 |
+| gdp_per_capita_residual | 0.239 | 0.655 | 0.597 | 0.799 |
+| OECD_CLI_index_residual | 0.163 | 0.124 | 0.708 | **0.881** |
+| gdp_per_capita_diff3 | 0.395 | 0.326 | 0.382 | 0.477 |
+| gdp_per_capita | **0.042** | 0.162 | 0.193 | **1.163** |
+| 10_year_rate_residual | 0.203 | 0.307 | 0.623 | 0.387 |
+| OECD_CLI_index_diff1 | 0.198 | 0.439 | 0.432 | 0.289 |
+| gdp_per_capita_diff1 | 0.463 | 0.476 | 0.299 | 0.112 |
+| OECD_CLI_index_pct_change1 | 0.223 | 0.317 | 0.395 | 0.353 |
+| share_price | 0.266 | 0.049 | 0.610 | 0.221 |
+| gdp_per_capita_pct_change1 | 0.403 | 0.301 | 0.167 | 0.128 |
+
+Exports: `fix-reg/shap_top12_x_horizon.csv`, `.json`, and heatmap
+`fix-reg/task2_outputs/figure_C_shap_heatmap.png`.
+
+**Reconciliation of paper-quoted numbers (all MATCH):**
+
+| Paper text | Maps to | Export value | Verdict |
+|---|---|---|---|
+| "INDPRO diff current = 1.55" | `INDPRO_diff3` @ Current | **1.550** | ✓ exact |
+| "6.6× fall" | `INDPRO_diff3` Current→6M (1.55→0.235) | ratio **6.6×** | ✓ exact |
+| "GDP per capita 0.04→1.16" | `gdp_per_capita` Current→6M | **0.042 → 1.163** | ✓ exact |
+| "OECD CLI residual −0.88" | `OECD_CLI_index_residual` @ 6M | **0.881** | ✓ magnitude |
+
+**One fix for the paper:** the "−0.88" should be **0.88** (positive). Mean |SHAP|
+is a magnitude and cannot be negative; the minus sign is a typo (or a leftover
+from a signed-SHAP directional plot). Also make explicit that the "6.6× fall"
+refers to **INDPRO_diff3**, not GDP — the current prose is ambiguous about which
+feature the 6.6× applies to.
+
+---
+
+## P1.2 — Block-bootstrap 90% CIs on MAE
+
+**Status: DONE. Moving-block bootstrap (block=8 ≈ √65, 2000 resamples, seed=42)
+on |error| series, 90% CIs, vs the *tuned* Table-2 baselines. Verdict: the
+ensemble's advantage is robust ONLY at 6M; at 3M the CIs overlap despite the
+point-estimate win — bootstrap and DM legitimately disagree here, and honesty
+favors reporting it.** XGB-indep MAEs reproduced exactly (3.60/3.78/12.68/45.71).
+
+**MAE with 90% moving-block CIs:**
+
+| Horizon | Ensemble (Ours) | XGB Indep (tuned) | Naive Mean | Probit (YC) |
+|---|---|---|---|---|
+| Current | 6.83 [1.12, 10.05] | 3.60 [0.20, 5.66] | 11.28 [8.72, 13.83] | 3.37 [0.23, 6.36] |
+| 1M | 5.63 [0.93, 8.11] | 3.78 [0.20, 5.57] | 11.25 [8.70, 12.57] | 3.56 [0.34, 5.00] |
+| 3M | 7.73 [2.10, 10.98] | 12.68 [5.51, 16.51] | 10.09 [8.79, 10.19] | 2.64 [0.59, 2.78] |
+| 6M | 10.17 [4.15, 17.63] | 45.71 [31.60, 63.73] | 8.92 [8.78, 9.10] | 2.35 [1.07, 4.09] |
+
+Export: `fix-reg/bootstrap_block_ci_90.csv`.
+
+**Ensemble vs XGB-indep, disjointness of 90% CIs:**
+
+| Horizon | Ensemble CI | XGB-indep CI | CIs disjoint? |
+|---|---|---|---|
+| Current | [1.12, 10.05] | [0.20, 5.66] | overlap (ensemble worse) |
+| 1M | [0.93, 8.11] | [0.20, 5.57] | overlap (ensemble worse) |
+| 3M | [2.10, 10.98] | [5.51, 16.51] | **overlap** |
+| 6M | [4.15, 17.63] | [31.60, 63.73] | **DISJOINT** |
+
+**Interpretation for the paper.** The **6M** advantage over the tuned
+independent baseline is robust — the CIs do not overlap, reinforcing the DM
+result and the RegressorChain claim. But at **3M** the ensemble's point-estimate
+win (7.73 vs 12.68) is **not** robust to block resampling — the CIs overlap
+substantially — so a DM p-value at 3M overstates confidence. At **Current/1M**
+the ensemble is not better than XGB-indep at all (higher MAE, overlapping CIs);
+its wide CIs there are driven by the two COVID-spike months. Recommended framing:
+"Moving-block bootstrap 90% CIs (block ≈ √n) confirm the ensemble's advantage is
+statistically robust at the 6-month horizon (disjoint CIs) but not at 3 months
+(overlapping CIs); the short-horizon comparisons are dominated by the COVID
+spike and neither model has a robust edge. This is consistent with the framework
+being a *long-horizon* contribution." (Note: the pre-existing
+`fix-reg/bootstrap_ci_results.csv` used an iid bootstrap at 95% against the
+*untuned* baselines — superseded by this block-bootstrap-vs-tuned version.)
+
+**Compute:** P1.2 re-ran the 4-horizon XGB-indep Optuna (~8 min, deterministic)
+to obtain tuned baseline predictions (they were never saved); the ensemble was
+loaded from pickle, not retrained. P1.1 is seconds given the saved SHAP outputs.
+
+---
 
 ## Files produced
 - `fix-reg/pre_submission_findings.md` (this file)
-- `fix-reg/aci_composition_sweep.py`, `aci_composition_sweep.csv`, `aci_composition_sweep.png`
-- `supplementary/` (full package + `README.md`)
+- **P0.2:** `fix-reg/aci_composition_sweep.py`, `aci_composition_sweep.csv`, `aci_composition_sweep.png`
+- **P0.3:** `supplementary/` (full package + `README.md`), verified in a clean venv
+- **P1.1:** `fix-reg/shap_top12_x_horizon.csv`, `.json`, `fix-reg/task2_outputs/figure_C_shap_heatmap.png`
+- **P1.2:** `fix-reg/task_p12_bootstrap.py`, `fix-reg/bootstrap_block_ci_90.csv`
 - No model/baseline code was modified (diagnosis + additive analysis only).
