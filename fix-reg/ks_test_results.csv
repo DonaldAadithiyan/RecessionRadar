@@ -1,0 +1,7 @@
+Horizon_A,Horizon_B,KS_stat,p_value,Significant_5pct
+Current,1-Month,0.4615,0.0071,True
+Current,3-Month,0.7308,0.0,True
+Current,6-Month,0.6923,0.0,True
+1-Month,3-Month,0.7308,0.0,True
+1-Month,6-Month,0.7308,0.0,True
+3-Month,6-Month,0.6154,0.0001,True

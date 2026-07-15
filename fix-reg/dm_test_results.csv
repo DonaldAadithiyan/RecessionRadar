@@ -1,0 +1,13 @@
+Horizon,Baseline,DM_stat,p_value,Significant_10pct,Significant_5pct
+Current,Naive Mean,-0.5726,0.5689,False,False
+Current,Probit (YC),-0.6003,0.5504,False,False
+Current,Single-Stage XGB,-1.8089,0.0752,True,False
+1-Month,Naive Mean,0.3803,0.705,False,False
+1-Month,Probit (YC),0.2219,0.8251,False,False
+1-Month,Single-Stage XGB,0.1386,0.8902,False,False
+3-Month,Naive Mean,-0.7314,0.4672,False,False
+3-Month,Probit (YC),-0.8935,0.3749,False,False
+3-Month,Single-Stage XGB,2.6223,0.0109,True,True
+6-Month,Naive Mean,-1.1751,0.2443,False,False
+6-Month,Probit (YC),-1.3752,0.1738,False,False
+6-Month,Single-Stage XGB,4.0791,0.0001,True,True

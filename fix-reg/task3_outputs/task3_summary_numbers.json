@@ -1,0 +1,9 @@
+{
+  "baseline_6m_pred": 3.581,
+  "neg100bps_6m_pred": 20.2587,
+  "neg100bps_delta_pp": 16.6777,
+  "pos100bps_6m_pred": 4.2009,
+  "pos100bps_delta_pp": 0.6199,
+  "neg100bps_top3_shap_pct": 4.48,
+  "baseline_date": "2025-05-01"
+}

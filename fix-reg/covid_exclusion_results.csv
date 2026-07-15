@@ -1,0 +1,17 @@
+Horizon,Model,MAE_full,MAE_excl,Delta_MAE,N_full,N_excl
+Current,Ensemble (Ours),6.8292,6.8512,0.022,65,63
+Current,Naive Mean,11.2759,8.7433,-2.5326,65,63
+Current,Probit (YC),3.3675,0.3081,-3.0594,65,63
+Current,Single-Stage XGB,2.5127,1.4415,-1.0712,65,63
+1-Month,Ensemble (Ours),5.6336,3.9242,-1.7094,65,63
+1-Month,Naive Mean,11.2539,10.0251,-1.2288,65,63
+1-Month,Probit (YC),3.563,2.0898,-1.4732,65,63
+1-Month,Single-Stage XGB,3.433,1.9842,-1.4489,65,63
+3-Month,Ensemble (Ours),7.7285,5.1927,-2.5359,65,63
+3-Month,Naive Mean,10.0921,10.1258,0.0337,65,63
+3-Month,Probit (YC),2.6401,2.7118,0.0717,65,63
+3-Month,Single-Stage XGB,14.7224,12.0204,-2.7021,65,63
+6-Month,Ensemble (Ours),10.1696,9.5222,-0.6474,65,63
+6-Month,Naive Mean,8.9156,8.9054,-0.0102,65,63
+6-Month,Probit (YC),2.3523,2.4075,0.0553,65,63
+6-Month,Single-Stage XGB,64.8893,66.9116,2.0223,65,63

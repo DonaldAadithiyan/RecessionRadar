@@ -1,0 +1,13 @@
+Feature,Mean_SHAP,Rank_1M,Rank_6M,Rank_Change,Direction
+OECD_CLI_index_trend,0.6838,3,14,-11,DOWN (current-state)
+INDPRO_diff3,0.5725,5,18,-13,DOWN (current-state)
+gdp_per_capita_residual,0.5724,1,3,-2,DOWN (current-state)
+OECD_CLI_index_residual,0.4691,27,2,25,UP (forward-looking)
+gdp_per_capita_diff3,0.3949,6,5,1,UP (forward-looking)
+gdp_per_capita,0.3899,18,1,17,UP (forward-looking)
+10_year_rate_residual,0.3798,8,8,0,STABLE
+OECD_CLI_index_diff1,0.3397,4,15,-11,DOWN (current-state)
+gdp_per_capita_diff1,0.3374,2,32,-30,DOWN (current-state)
+OECD_CLI_index_pct_change1,0.322,7,11,-4,DOWN (current-state)
+share_price,0.2865,37,19,18,UP (forward-looking)
+gdp_per_capita_pct_change1,0.2495,9,27,-18,DOWN (current-state)

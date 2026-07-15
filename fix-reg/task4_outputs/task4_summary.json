@@ -1,0 +1,43 @@
+{
+  "6M_avg_stable": 2.0003,
+  "6M_avg_covid": 15.0802,
+  "6M_avg_tighten": 10.0532,
+  "6M_peak_val": 44.7831,
+  "6M_peak_date": "2022-06-01",
+  "pearson_r_6m": -0.2273,
+  "pearson_p_6m": 0.0686,
+  "by_horizon": {
+    "Current": {
+      "stable": 0.076,
+      "covid": 38.9983,
+      "tighten": 0.2394,
+      "mean": 3.7241,
+      "peak_val": 45.5411,
+      "peak_date": "2020-05-01"
+    },
+    "1M": {
+      "stable": 0.0874,
+      "covid": 39.8796,
+      "tighten": 1.0094,
+      "mean": 4.0726,
+      "peak_val": 46.1871,
+      "peak_date": "2020-05-01"
+    },
+    "3M": {
+      "stable": 0.2573,
+      "covid": 37.9174,
+      "tighten": 2.0415,
+      "mean": 4.3375,
+      "peak_val": 46.8135,
+      "peak_date": "2020-03-01"
+    },
+    "6M": {
+      "stable": 2.0003,
+      "covid": 15.0802,
+      "tighten": 10.0532,
+      "mean": 5.9333,
+      "peak_val": 44.7831,
+      "peak_date": "2022-06-01"
+    }
+  }
+}

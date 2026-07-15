@@ -1,0 +1,5 @@
+Horizon,trailing_cov,trailing_w,fixedabl_cov,fixedabl_w,divopt_cov,divopt_w,divopt_support,divopt_rare
+Current,89.23,7.45,89.23,7.45,92.31,13.16,10.71,49
+1M,85.94,7.35,85.94,7.35,89.06,21.13,14.31,48
+3M,85.48,14.95,85.48,14.95,90.32,25.35,18.91,45
+6M,67.8,10.64,67.8,10.64,81.36,32.58,21.71,41

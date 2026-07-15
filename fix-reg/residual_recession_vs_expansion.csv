@@ -1,0 +1,17 @@
+Horizon,Model,MAE_recession,MAE_expansion,Ratio_rec_exp
+Current,Ensemble (Ours),6.1358,6.8512,0.8956
+Current,Naive Mean,91.0526,8.7433,10.414
+Current,Probit (YC),99.739,0.3081,323.7189
+Current,Single-Stage XGB,36.2547,1.4415,25.1511
+1-Month,Ensemble (Ours),59.4791,3.9242,15.1571
+1-Month,Naive Mean,49.96,10.0251,4.9835
+1-Month,Probit (YC),49.9681,2.0898,23.9105
+1-Month,Single-Stage XGB,49.0721,1.9842,24.7318
+3-Month,Ensemble (Ours),87.6079,5.1927,16.8715
+3-Month,Naive Mean,9.0317,10.1258,0.892
+3-Month,Probit (YC),0.3815,2.7118,0.1407
+3-Month,Single-Stage XGB,99.8377,12.0204,8.3057
+6-Month,Ensemble (Ours),30.5623,9.5222,3.2096
+6-Month,Naive Mean,9.2362,8.9054,1.0371
+6-Month,Probit (YC),0.6118,2.4075,0.2541
+6-Month,Single-Stage XGB,1.1863,66.9116,0.0177

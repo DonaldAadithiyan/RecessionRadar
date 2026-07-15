@@ -1,0 +1,13 @@
+Horizon,Baseline,Baseline_MAE,FullModel_MAE,DM_stat,p_value,Sig_10pct,Sig_5pct,H_step
+Current,Baseline_A (XGB indep),3.5982,6.8292,-1.9778,0.0523,True,False,1
+Current,Baseline_B (MOR-XGB),3.5982,6.8292,-1.9778,0.0523,True,False,1
+Current,Baseline_C (MOR-XGB-joint),3.1304,6.8292,-2.0294,0.0466,True,True,1
+1M,Baseline_A (XGB indep),3.778,5.6336,-0.2703,0.7878,False,False,1
+1M,Baseline_B (MOR-XGB),3.6379,5.6336,-0.71,0.4803,False,False,1
+1M,Baseline_C (MOR-XGB-joint),3.8382,5.6336,-1.1317,0.262,False,False,1
+3M,Baseline_A (XGB indep),12.6796,7.7285,1.8418,0.0701,True,False,3
+3M,Baseline_B (MOR-XGB),9.918,7.7285,1.8078,0.0753,True,False,3
+3M,Baseline_C (MOR-XGB-joint),10.0791,7.7285,1.752,0.0846,True,False,3
+6M,Baseline_A (XGB indep),45.71,10.1696,4.094,0.0001,True,True,6
+6M,Baseline_B (MOR-XGB),31.3132,10.1696,3.5037,0.0008,True,True,6
+6M,Baseline_C (MOR-XGB-joint),28.5927,10.1696,2.9519,0.0044,True,True,6

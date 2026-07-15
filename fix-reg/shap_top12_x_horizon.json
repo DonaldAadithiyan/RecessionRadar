@@ -1,0 +1,74 @@
+{
+  "OECD_CLI_index_trend": {
+    "Current": 1.1066,
+    "1M": 0.4553,
+    "3M": 0.8828,
+    "6M": 0.2906
+  },
+  "INDPRO_diff3": {
+    "Current": 1.5497,
+    "1M": 0.3305,
+    "3M": 0.1744,
+    "6M": 0.2353
+  },
+  "gdp_per_capita_residual": {
+    "Current": 0.2389,
+    "1M": 0.6547,
+    "3M": 0.5965,
+    "6M": 0.7993
+  },
+  "OECD_CLI_index_residual": {
+    "Current": 0.1631,
+    "1M": 0.1236,
+    "3M": 0.7083,
+    "6M": 0.8814
+  },
+  "gdp_per_capita_diff3": {
+    "Current": 0.3947,
+    "1M": 0.3256,
+    "3M": 0.3818,
+    "6M": 0.4774
+  },
+  "gdp_per_capita": {
+    "Current": 0.0422,
+    "1M": 0.1619,
+    "3M": 0.1928,
+    "6M": 1.1628
+  },
+  "10_year_rate_residual": {
+    "Current": 0.2027,
+    "1M": 0.3074,
+    "3M": 0.6228,
+    "6M": 0.3865
+  },
+  "OECD_CLI_index_diff1": {
+    "Current": 0.1979,
+    "1M": 0.4394,
+    "3M": 0.4322,
+    "6M": 0.2894
+  },
+  "gdp_per_capita_diff1": {
+    "Current": 0.4634,
+    "1M": 0.4758,
+    "3M": 0.2987,
+    "6M": 0.1117
+  },
+  "OECD_CLI_index_pct_change1": {
+    "Current": 0.2233,
+    "1M": 0.3171,
+    "3M": 0.3945,
+    "6M": 0.3531
+  },
+  "share_price": {
+    "Current": 0.2661,
+    "1M": 0.049,
+    "3M": 0.6098,
+    "6M": 0.2212
+  },
+  "gdp_per_capita_pct_change1": {
+    "Current": 0.4026,
+    "1M": 0.3005,
+    "3M": 0.167,
+    "6M": 0.128
+  }
+}

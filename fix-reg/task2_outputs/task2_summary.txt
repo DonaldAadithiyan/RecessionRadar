@@ -1,0 +1,6 @@
+TASK 2 SUMMARY
+==============
+Top 12 features: ['OECD_CLI_index_trend', 'INDPRO_diff3', 'gdp_per_capita_residual', 'OECD_CLI_index_residual', 'gdp_per_capita_diff3', 'gdp_per_capita', '10_year_rate_residual', 'OECD_CLI_index_diff1', 'gdp_per_capita_diff1', 'OECD_CLI_index_pct_change1', 'share_price', 'gdp_per_capita_pct_change1']
+Biggest rank change (1M→6M): PPI  (1M: 39, 6M: 4, Δ=+35)
+Features UP at 6M (forward-looking): ['OECD_CLI_index_residual', 'gdp_per_capita_diff3', 'gdp_per_capita', 'share_price']
+Features DOWN at 6M (current-state): ['OECD_CLI_index_trend', 'INDPRO_diff3', 'gdp_per_capita_residual', 'OECD_CLI_index_diff1', 'gdp_per_capita_diff1', 'OECD_CLI_index_pct_change1', 'gdp_per_capita_pct_change1']

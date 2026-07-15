@@ -1,0 +1,17 @@
+Horizon,Model,MAE,CI_lo_90,CI_hi_90
+Current,Ensemble (Ours),6.8292,1.1189,10.0542
+Current,XGB Indep (tuned),3.5982,0.2019,5.6607
+Current,Naive Mean,11.2759,8.72,13.8256
+Current,Probit (YC),3.3675,0.2267,6.3649
+1M,Ensemble (Ours),5.6336,0.9343,8.1054
+1M,XGB Indep (tuned),3.778,0.1976,5.5652
+1M,Naive Mean,11.2539,8.7041,12.5688
+1M,Probit (YC),3.563,0.3392,5.002
+3M,Ensemble (Ours),7.7285,2.095,10.9764
+3M,XGB Indep (tuned),12.6796,5.5137,16.5149
+3M,Naive Mean,10.0921,8.7878,10.1915
+3M,Probit (YC),2.6401,0.5909,2.7755
+6M,Ensemble (Ours),10.1696,4.1534,17.6319
+6M,XGB Indep (tuned),45.71,31.6009,63.7315
+6M,Naive Mean,8.9156,8.7823,9.0968
+6M,Probit (YC),2.3523,1.0702,4.0936
