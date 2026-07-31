@@ -1,0 +1,8 @@
+domain,model,Rare_Units,N,Composition_pct,Coverage,Wilson_lo,Wilson_hi,Width,Support_width
+Healthcare,ridge,0,254,0.0,84.93,78.24,89.83,17.116,9.3088
+Healthcare,ridge,1,254,0.39,84.93,78.24,89.83,17.062,9.4482
+Healthcare,ridge,4,254,1.57,86.3,79.79,90.95,18.1,10.5594
+Healthcare,ridge,8,254,3.15,86.99,80.57,91.51,18.172,10.8696
+Healthcare,ridge,16,254,6.3,88.36,82.14,92.6,18.438,11.7281
+Healthcare,ridge,32,254,12.6,90.41,84.55,94.2,21.543,15.6912
+Healthcare,ridge,45,254,17.72,92.47,87.01,95.74,24.249,16.3746

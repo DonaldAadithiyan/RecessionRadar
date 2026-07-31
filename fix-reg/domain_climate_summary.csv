@@ -1,0 +1,3 @@
+domain,draws,rho_supp,R2_supp,rho_rare,R2_rare,within_tertile_rho_rare,cov_mean,cov_std,model,pool,N,test,base_rate_pct,trailing_cov,trailing_wilson_lo,trailing_wilson_hi,trailing_boot_lo,trailing_boot_hi,trailing_width
+Climate,200,0.675,0.461,0.565,0.344,0.359,92.57,1.08,ridge,1377,254,243,6.11,90.95,86.67,93.95,86.42,94.65,10.35
+Climate,200,0.638,0.433,0.431,0.218,0.256,92.16,1.08,gradboost,1377,254,243,6.11,90.95,86.67,93.95,86.42,94.65,10.79

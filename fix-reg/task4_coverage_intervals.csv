@@ -1,0 +1,62 @@
+source_table,horizon,strategy,n_test,coverage_pct,wilson_lo,wilson_hi,wilson_halfwidth,note
+Table1_fixed_size_ablation,Current,rare=0,65,81.54,70.45,89.11,9.33,
+Table1_fixed_size_ablation,1M,rare=0,65,85.94,75.73,92.54,8.4,
+Table1_fixed_size_ablation,3M,rare=0,65,85.48,75.73,92.54,8.4,
+Table1_fixed_size_ablation,6M,rare=0,65,62.71,50.92,73.77,11.42,
+Table1_fixed_size_ablation,Current,rare=1,65,83.08,72.18,90.28,9.05,
+Table1_fixed_size_ablation,1M,rare=1,65,85.94,75.73,92.54,8.4,
+Table1_fixed_size_ablation,3M,rare=1,65,85.48,75.73,92.54,8.4,
+Table1_fixed_size_ablation,6M,rare=1,65,62.71,50.92,73.77,11.42,
+Table1_fixed_size_ablation,Current,rare=4,65,83.08,72.18,90.28,9.05,
+Table1_fixed_size_ablation,1M,rare=4,65,85.94,75.73,92.54,8.4,
+Table1_fixed_size_ablation,3M,rare=4,65,85.48,75.73,92.54,8.4,
+Table1_fixed_size_ablation,6M,rare=4,65,62.71,50.92,73.77,11.42,
+Table1_fixed_size_ablation,Current,rare=8,65,84.62,73.94,91.42,8.74,
+Table1_fixed_size_ablation,1M,rare=8,65,85.94,75.73,92.54,8.4,
+Table1_fixed_size_ablation,3M,rare=8,65,85.48,75.73,92.54,8.4,
+Table1_fixed_size_ablation,6M,rare=8,65,66.1,54.04,76.47,11.21,
+Table1_fixed_size_ablation,Current,rare=16,65,89.23,79.4,94.68,7.64,
+Table1_fixed_size_ablation,1M,rare=16,65,85.94,75.73,92.54,8.4,
+Table1_fixed_size_ablation,3M,rare=16,65,85.48,75.73,92.54,8.4,
+Table1_fixed_size_ablation,6M,rare=16,65,67.8,55.61,77.8,11.09,
+phase2_selection_comparison,Current,trailing-40%,65,89.23,79.4,94.68,7.64,
+phase2_selection_comparison,Current,fixed-ablation-16,65,89.23,79.4,94.68,7.64,
+phase2_selection_comparison,Current,diversity-optimal,65,92.31,83.22,96.67,6.72,headline selector result
+phase2_selection_comparison,1M,trailing-40%,65,85.94,75.73,92.54,8.4,
+phase2_selection_comparison,1M,fixed-ablation-16,65,85.94,75.73,92.54,8.4,
+phase2_selection_comparison,1M,diversity-optimal,65,89.06,79.4,94.68,7.64,headline selector result
+phase2_selection_comparison,3M,trailing-40%,65,85.48,75.73,92.54,8.4,
+phase2_selection_comparison,3M,fixed-ablation-16,65,85.48,75.73,92.54,8.4,
+phase2_selection_comparison,3M,diversity-optimal,65,90.32,81.29,95.7,7.21,headline selector result
+phase2_selection_comparison,6M,trailing-40%,65,67.8,55.61,77.8,11.09,
+phase2_selection_comparison,6M,fixed-ablation-16,65,67.8,55.61,77.8,11.09,
+phase2_selection_comparison,6M,diversity-optimal,65,81.36,70.45,89.11,9.33,headline selector result
+phase3a_mondrian,Current,Pooled_cov,65,89.23,79.4,94.68,7.64,
+phase3a_mondrian,Current,Mondrian_cov,65,81.54,70.45,89.11,9.33,
+phase3a_mondrian,1M,Pooled_cov,65,85.94,75.73,92.54,8.4,
+phase3a_mondrian,1M,Mondrian_cov,65,85.94,75.73,92.54,8.4,
+phase3a_mondrian,3M,Pooled_cov,65,85.48,75.73,92.54,8.4,
+phase3a_mondrian,3M,Mondrian_cov,65,85.48,75.73,92.54,8.4,
+phase3a_mondrian,6M,Pooled_cov,65,67.8,55.61,77.8,11.09,
+phase3a_mondrian,6M,Mondrian_cov,65,61.02,49.38,72.4,11.51,
+phase3bc_baselines,Current,pooled_cov,65,89.23,79.4,94.68,7.64,
+phase3bc_baselines,Current,PID_cov,65,89.23,79.4,94.68,7.64,
+phase3bc_baselines,Current,EVT_cov,65,87.69,77.55,93.63,8.04,
+phase3bc_baselines,1M,pooled_cov,65,85.94,75.73,92.54,8.4,
+phase3bc_baselines,1M,PID_cov,65,87.5,77.55,93.63,8.04,
+phase3bc_baselines,1M,EVT_cov,65,85.94,75.73,92.54,8.4,
+phase3bc_baselines,3M,pooled_cov,65,85.48,75.73,92.54,8.4,
+phase3bc_baselines,3M,PID_cov,65,87.1,77.55,93.63,8.04,
+phase3bc_baselines,3M,EVT_cov,65,85.48,75.73,92.54,8.4,
+phase3bc_baselines,6M,pooled_cov,65,67.8,55.61,77.8,11.09,
+phase3bc_baselines,6M,PID_cov,65,71.19,58.8,80.42,10.81,
+phase3bc_baselines,6M,EVT_cov,65,66.1,54.04,76.47,11.21,
+Table2_cross_country,EURORECM,mean over 200 draws,150,91.23,85.74,94.87,4.56,mean of a distribution; interval is for a single draw
+Table2_cross_country,GBRRECM,mean over 200 draws,163,93.37,88.32,96.19,3.93,mean of a distribution; interval is for a single draw
+Table2_cross_country,DEURECM,mean over 200 draws,151,91.96,86.62,95.4,4.39,mean of a distribution; interval is for a single draw
+Table2_cross_country,JPNRECM,mean over 200 draws,150,89.52,83.38,93.33,4.98,mean of a distribution; interval is for a single draw
+Table2_cross_country,CANRECM,mean over 200 draws,151,90.22,84.26,93.89,4.82,mean of a distribution; interval is for a single draw
+Domain_healthcare,-,ridge,146,88.36,82.14,92.6,5.23,"block-bootstrap [83.56,93.15]"
+Domain_healthcare,-,gradboost,146,90.41,84.55,94.2,4.83,"block-bootstrap [86.28,95.21]"
+Domain_climate,-,ridge,243,90.95,86.67,93.95,3.64,"block-bootstrap [86.42,94.65]"
+Domain_climate,-,gradboost,243,90.95,86.67,93.95,3.64,"block-bootstrap [86.42,94.65]"

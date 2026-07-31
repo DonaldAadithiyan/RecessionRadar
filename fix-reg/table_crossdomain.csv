@@ -1,0 +1,9 @@
+domain,model,scoring,unit,pool,N,test,rho_supp,R2_supp,rho_rare,R2_rare,within_tertile_rho_rare,cov_mean,cov_std,trailing_cov,trailing_wilson,trailing_boot
+"Macro-recession (US, 3M)",stacking-chain,in-sample,month,635,254,65,0.683,0.257,0.331,0.108,0.312,87.28,1.43,,,
+"Macro-recession (US, 6M)",stacking-chain,in-sample,month,635,254,65,0.913,0.847,0.098,0.017,0.045,72.69,1.66,,,
+"Macro-recession (US, 3M)",stacking-chain,out-of-fold,month,635,254,65,,,,,,95.16,,,,
+"Macro-recession (US, 6M)",stacking-chain,out-of-fold,month,635,254,65,,,,,,96.61,,,,
+Healthcare (readmission),ridge,out-of-fold,cohort,438,254,146,0.687,0.44,0.491,0.231,0.184,89.09,0.67,88.36,"[82.14,92.6]","[83.56,93.15]"
+Healthcare (readmission),gradboost,out-of-fold,cohort,438,254,146,0.632,0.357,0.34,0.113,0.063,90.13,0.45,90.41,"[84.55,94.2]","[86.28,95.21]"
+Climate (storm intensity),ridge,out-of-fold,region-month,1377,254,243,0.675,0.461,0.565,0.344,0.359,92.57,1.08,90.95,"[86.67,93.95]","[86.42,94.65]"
+Climate (storm intensity),gradboost,out-of-fold,region-month,1377,254,243,0.638,0.433,0.431,0.218,0.256,92.16,1.08,90.95,"[86.67,93.95]","[86.42,94.65]"

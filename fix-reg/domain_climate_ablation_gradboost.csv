@@ -1,0 +1,8 @@
+domain,model,Rare_Units,N,Composition_pct,Coverage,Wilson_lo,Wilson_hi,Width,Support_width
+Climate,gradboost,0,254,0.0,86.83,82.0,90.52,9.478,4.9097
+Climate,gradboost,1,254,0.39,88.48,83.85,91.91,9.879,5.7827
+Climate,gradboost,4,254,1.57,88.48,83.85,91.91,10.017,5.9703
+Climate,gradboost,8,254,3.15,89.71,85.25,92.93,10.245,6.5161
+Climate,gradboost,16,254,6.3,90.53,86.2,93.61,10.498,6.7005
+Climate,gradboost,32,254,12.6,91.77,87.63,94.61,10.921,8.4499
+Climate,gradboost,64,254,25.2,95.06,91.57,97.15,14.396,10.3949

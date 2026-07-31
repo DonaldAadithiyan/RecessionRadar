@@ -6,6 +6,11 @@ coverage (67.8 → 81.4%). But it buys coverage with much wider intervals, and 6
 still falls short of nominal, so the honest claim is "diversity-optimal selection
 is necessary but not sufficient at long horizons."**
 
+> **Superseded in part — read with the caveats at the bottom of this file.** The
+> numbers here are in-sample and remain correct as such. The "6M still falls
+> short of nominal" verdict does **not** survive unqualified: under out-of-fold
+> scoring it is undetermined, not confirmed. See `multidomain_findings.md`.
+
 ## Algorithm (greedy, per horizon)
 
 Budget N=254 from the 635-month pool. Objective: maximize **support width
@@ -55,6 +60,14 @@ to **81.4%**, a +13.6pp gain. It does **not** reach the 90% nominal, so:
   when rare-count is held fixed. But we should not claim the two are cleanly
   separable at selection time on this particular series.
 - Selection uses in-sample training residuals from the saved ensemble; no
-  retraining. A deployment version would need out-of-fold calibration scores.
+  retraining. **Update (multidomain revision):** the out-of-fold version this
+  caveat called for has since been run — see `multidomain_findings.md` (Task 3)
+  and `task3_insample_vs_oof.csv`. The selector's gain survives out-of-fold
+  scoring (+11.86pp at 6M), but the resulting coverage *levels* are not
+  quotable without their confidence intervals: at n=59 both the out-of-fold
+  baseline and the out-of-fold selector result have Wilson intervals spanning
+  90%, so the "still falls short of nominal" verdict at the top of this file is
+  established only under in-sample scoring and is currently **undetermined**
+  under out-of-fold scoring.
 
 Data: `fix-reg/phase2_selection_comparison.csv`.

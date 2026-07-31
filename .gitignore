@@ -1,53 +1,131 @@
-# Python bytecode
+# ─── Secrets ──────────────────────────────────────────────────────────────────
+# NOTE: .env is already TRACKED in this repo (commit 2768ce7e) and so keeps
+# being committed despite this rule. Listing a file here only stops *untracked*
+# files from being added; it does not untrack an existing file.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+secrets.yaml
+secrets.yml
+
+# ─── Python ───────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Environment
-.env
+# Virtual environments
 .venv/
-env/
 venv/
+env/
+ENV/
 
-# Jupyter Notebook checkpoints
+# Testing / linting caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage/
+.tox/
+.nox/
+
+# ─── Jupyter ──────────────────────────────────────────────────────────────────
 .ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+profile_default/
+ipython_config.py
 
-# PyCharm/VSCode settings
-.idea/
-.vscode/
-
-# Logs
-*.log
-
-# Pickle files
+# ─── Models and binary artifacts ──────────────────────────────────────────────
+# Trained models are large and mostly regenerable. IMPORTANT EXCEPTION: the
+# saved stacking ensemble is required to reproduce the ACI / calibration-
+# diversity results (fix-reg/task_oof_and_probit.py loads it), so it is
+# force-included below. If it is not already tracked, add it deliberately:
+#   git add -f fix-reg/models/full_chain_stacking.pkl
 *.pkl
 *.pt
-
-# Data
+*.pth
+*.joblib
 *.h5
+*.hdf5
+*.onnx
+*.cbm
 *.sqlite
+*.db
+!fix-reg/models/full_chain_stacking.pkl
 
-# macOS
-.DS_Store
-**/.DS_Store
+# Training telemetry
+catboost_info/
+mlruns/
+lightning_logs/
+wandb/
+runs/
 
-# Node / React frontend
+# ─── Large raw datasets (public, re-downloadable) ─────────────────────────────
+# Fetched by the domain scripts and far too large for git:
+#   data/domains/noaa/                 ~263 MB  NOAA Storm Events yearly CSVs
+#   data/domains/uci_diabetes_130.csv   ~19 MB  UCI Diabetes 130-US Hospitals
+# Both are public; exact sources are documented in
+# fix-reg/multidomain_findings.md. The small derived panel IS tracked so the
+# climate domain can be re-run without re-downloading 263 MB.
+data/domains/noaa/
+data/domains/uci_diabetes_130.csv
+!data/domains/noaa_panel.csv
+
+# ─── Node / React frontend ────────────────────────────────────────────────────
 node_modules/
 react-frontend/node_modules/
+.react-frontend/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
 .npm
 .yarn-integrity
-dist/
-build/
 .cache/
 .parcel-cache/
-coverage/
+.next/
+.nuxt/
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
+# ─── Editors / OS ─────────────────────────────────────────────────────────────
+.DS_Store
+**/.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+Thumbs.db
+desktop.ini
 
-.react-frontend/
+# ─── Logs and scratch ─────────────────────────────────────────────────────────
+*.log
+logs/
+tmp/
+scratch/
+*.tmp
+*.bak

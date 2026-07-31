@@ -86,9 +86,15 @@ calibration score distribution's upper tail reaches the test-time tail; rare-eve
 episodes and expansion-vintage breadth both help by widening that tail, and
 rare-event count per se is redundant once tail-reach is fixed.*
 
-**Unchanged / still open:** 6-month coverage cannot be brought fully to nominal
-by any calibration strategy tested (best: 81% via diversity-optimal) — a genuine
-limitation, honestly retained.
+**Revised by the multidomain revision (2026-07-31):** this file previously stated
+that 6-month coverage "cannot be brought fully to nominal by any calibration
+strategy tested (best: 81% via diversity-optimal)". That verdict holds **under
+in-sample scoring only**. Under out-of-fold scoring the point estimates rise
+(baseline 84.75%, diversity-optimal 96.61%), but at n=59 the Wilson intervals
+span 90% in both cases — so whether 6-month coverage reaches nominal is now
+**undetermined**, neither confirmed nor refuted. The in-sample and out-of-fold
+arms also come from different models (the saved ensemble cannot produce honest
+out-of-fold scores). See `fix-reg/multidomain_findings.md`.
 
 ## File index
 - Phase MDs: `fix-reg/phase1_diversity_relationship.md`, `phase2_diversity_selection_method.md`, `phase3_baseline_comparisons.md`, `phase4a_synthetic_generalization.md`, `phase4b_cross_series_check.md`, `phase5_theory_note.md`

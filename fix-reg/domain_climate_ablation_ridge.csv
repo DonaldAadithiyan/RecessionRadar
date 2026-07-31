@@ -1,0 +1,8 @@
+domain,model,Rare_Units,N,Composition_pct,Coverage,Wilson_lo,Wilson_hi,Width,Support_width
+Climate,ridge,0,254,0.0,87.24,82.46,90.87,8.863,4.8055
+Climate,ridge,1,254,0.39,88.07,83.39,91.56,9.261,5.1811
+Climate,ridge,4,254,1.57,88.48,83.85,91.91,9.379,5.3753
+Climate,ridge,8,254,3.15,90.53,86.2,93.61,9.99,5.6416
+Climate,ridge,16,254,6.3,90.95,86.67,93.95,10.255,6.2348
+Climate,ridge,32,254,12.6,93.83,90.07,96.22,11.189,7.8157
+Climate,ridge,64,254,25.2,96.71,93.64,98.32,13.247,9.7794
