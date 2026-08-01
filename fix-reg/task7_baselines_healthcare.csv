@@ -1,0 +1,17 @@
+domain,model,horizon,scoring,strategy,n,coverage,wilson_lo,wilson_hi,boot_lo,boot_hi,mean_width,target_spread,width_ratio,vacuous
+Healthcare,ridge,30-day,out-of-fold,pooled_trailing,146,88.36,82.14,92.6,83.56,93.15,19.869,22.514,0.9,False
+Healthcare,ridge,30-day,out-of-fold,mondrian,146,91.78,86.18,95.24,86.99,95.89,27.136,22.514,1.2,False
+Healthcare,ridge,30-day,out-of-fold,pid_conformal,146,88.36,82.14,92.6,83.56,93.15,19.17,22.514,0.9,False
+Healthcare,ridge,30-day,out-of-fold,evt_tail,146,89.04,82.94,93.14,84.25,93.84,20.191,22.514,0.9,False
+Healthcare,ridge,30-day,out-of-fold,diversity_optimal,146,92.47,87.01,95.74,88.36,96.58,25.261,22.514,1.1,False
+Healthcare,ridge,30-day,out-of-fold,dtaci,146,88.36,82.14,92.6,83.56,93.15,19.626,22.514,0.9,False
+Healthcare,ridge,30-day,out-of-fold,acmcp,146,80.82,73.68,86.38,73.97,86.99,30.737,22.514,1.4,False
+Healthcare,ridge,30-day,out-of-fold,bellman_ci,146,69.18,61.28,76.1,61.64,77.4,12.355,22.514,0.5,False
+Healthcare,gradboost,30-day,out-of-fold,pooled_trailing,146,90.41,84.55,94.2,86.28,95.21,21.035,22.514,0.9,False
+Healthcare,gradboost,30-day,out-of-fold,mondrian,146,91.78,86.18,95.24,86.99,95.89,27.664,22.514,1.2,False
+Healthcare,gradboost,30-day,out-of-fold,pid_conformal,146,90.41,84.55,94.2,86.28,95.21,20.133,22.514,0.9,False
+Healthcare,gradboost,30-day,out-of-fold,evt_tail,146,90.41,84.55,94.2,86.28,95.21,21.743,22.514,1.0,False
+Healthcare,gradboost,30-day,out-of-fold,diversity_optimal,146,93.84,88.7,96.72,89.73,97.26,25.736,22.514,1.1,False
+Healthcare,gradboost,30-day,out-of-fold,dtaci,146,89.04,82.94,93.14,84.25,93.84,20.59,22.514,0.9,False
+Healthcare,gradboost,30-day,out-of-fold,acmcp,146,89.73,83.74,93.67,84.25,94.52,41.063,22.514,1.8,False
+Healthcare,gradboost,30-day,out-of-fold,bellman_ci,146,66.44,58.44,73.59,58.9,74.66,11.814,22.514,0.5,False

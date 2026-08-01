@@ -145,6 +145,13 @@ MODELS = {
 scaler = StandardScaler().fit(X_pool)
 Xp_s, Xt_s = scaler.transform(X_pool), scaler.transform(X_test)
 
+# Exported for downstream reuse (Task 7 baseline horse race) so that the
+# baseline comparison runs on exactly these scores rather than a re-derivation.
+SCORES = {}
+PREDS_TEST = {}
+Y_TEST = y_test_pct
+RARE_POOL = rare_pool
+
 summary_rows = []
 for name, factory in MODELS.items():
     print("\n" + "-" * 74)
@@ -171,6 +178,8 @@ for name, factory in MODELS.items():
 
     scores_all = np.abs(oof - y_pool_pct)          # out-of-fold nonconformity
     is_rare = rare_pool
+    SCORES[name] = scores_all
+    PREDS_TEST[name] = pred_test
     print(f"  OOF nonconformity: mean={np.nanmean(scores_all):.2f} "
           f"support(p95-p5)={support_width(scores_all):.2f}")
 

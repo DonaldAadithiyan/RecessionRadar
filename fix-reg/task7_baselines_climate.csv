@@ -1,0 +1,17 @@
+domain,model,horizon,scoring,strategy,n,coverage,wilson_lo,wilson_hi,boot_lo,boot_hi,mean_width,target_spread,width_ratio,vacuous
+Climate,ridge,region-month,out-of-fold,pooled_trailing,243,90.95,86.67,93.95,86.42,94.65,10.349,8.778,1.2,False
+Climate,ridge,region-month,out-of-fold,mondrian,243,95.88,92.59,97.75,93.0,98.35,19.088,8.778,2.2,False
+Climate,ridge,region-month,out-of-fold,pid_conformal,243,89.71,85.25,92.93,85.19,93.42,9.812,8.778,1.1,False
+Climate,ridge,region-month,out-of-fold,evt_tail,243,90.53,86.2,93.61,86.01,94.24,10.081,8.778,1.1,False
+Climate,ridge,region-month,out-of-fold,diversity_optimal,243,99.59,97.71,99.93,98.77,100.0,17.774,8.778,2.0,False
+Climate,ridge,region-month,out-of-fold,dtaci,243,90.12,85.73,93.27,86.01,93.42,10.028,8.778,1.1,False
+Climate,ridge,region-month,out-of-fold,acmcp,243,88.89,84.32,92.25,78.18,97.12,19.039,8.778,2.2,False
+Climate,ridge,region-month,out-of-fold,bellman_ci,243,78.19,72.58,82.92,69.96,84.77,7.78,8.778,0.9,False
+Climate,gradboost,region-month,out-of-fold,pooled_trailing,243,90.95,86.67,93.95,86.42,94.65,10.793,8.778,1.2,False
+Climate,gradboost,region-month,out-of-fold,mondrian,243,94.65,91.06,96.85,91.36,97.53,21.731,8.778,2.5,False
+Climate,gradboost,region-month,out-of-fold,pid_conformal,243,88.89,84.32,92.25,83.95,93.0,10.218,8.778,1.2,False
+Climate,gradboost,region-month,out-of-fold,evt_tail,243,91.36,87.15,94.28,86.83,95.06,10.713,8.778,1.2,False
+Climate,gradboost,region-month,out-of-fold,diversity_optimal,243,98.77,96.43,99.58,96.71,100.0,19.36,8.778,2.2,False
+Climate,gradboost,region-month,out-of-fold,dtaci,243,90.95,86.67,93.95,86.42,94.65,10.525,8.778,1.2,False
+Climate,gradboost,region-month,out-of-fold,acmcp,243,88.07,83.39,91.56,78.6,97.12,15.84,8.778,1.8,False
+Climate,gradboost,region-month,out-of-fold,bellman_ci,243,79.42,73.9,84.03,72.02,85.6,7.884,8.778,0.9,False
