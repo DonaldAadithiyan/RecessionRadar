@@ -1,0 +1,3 @@
+domain,baseline,auc_binary,oof_mae_rate,test_mae_rate,n_cohorts_pool,n_cohorts_test
+Healthcare,LACE,0.5691,4.9,4.989,438,146
+Healthcare,HOSPITAL,0.5875,4.776,4.935,438,146

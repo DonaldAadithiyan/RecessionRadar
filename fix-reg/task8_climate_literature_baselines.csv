@@ -1,0 +1,17 @@
+domain,model,horizon,scoring,strategy,n,coverage,wilson_lo,wilson_hi,boot_lo,boot_hi,mean_width,target_spread,width_ratio,vacuous
+Climate,persistence,region-month,out-of-fold,pooled_trailing,252,90.87,86.68,93.84,86.51,95.24,13.648,8.838,1.5,False
+Climate,persistence,region-month,out-of-fold,mondrian,252,94.44,90.89,96.66,90.87,97.62,23.733,8.838,2.7,False
+Climate,persistence,region-month,out-of-fold,pid_conformal,252,90.48,86.22,93.52,86.11,94.84,12.781,8.838,1.4,False
+Climate,persistence,region-month,out-of-fold,evt_tail,252,90.87,86.68,93.84,86.51,95.24,14.025,8.838,1.6,False
+Climate,persistence,region-month,out-of-fold,diversity_optimal,252,99.21,97.15,99.78,98.02,100.0,27.573,8.838,3.1,False
+Climate,persistence,region-month,out-of-fold,dtaci,252,90.08,85.77,93.19,85.71,94.44,13.536,8.838,1.5,False
+Climate,persistence,region-month,out-of-fold,acmcp,252,93.25,89.46,95.75,86.51,99.21,30.711,8.838,3.5,False
+Climate,persistence,region-month,out-of-fold,bellman_ci,252,78.97,73.52,83.55,72.22,85.32,7.861,8.838,0.9,False
+Climate,climatology,region-month,out-of-fold,pooled_trailing,252,90.08,85.77,93.19,84.92,94.84,10.935,8.838,1.2,False
+Climate,climatology,region-month,out-of-fold,mondrian,252,96.83,93.86,98.38,94.44,98.81,20.789,8.838,2.4,False
+Climate,climatology,region-month,out-of-fold,pid_conformal,252,89.68,85.31,92.86,84.52,94.44,10.719,8.838,1.2,False
+Climate,climatology,region-month,out-of-fold,evt_tail,252,90.48,86.22,93.52,85.32,95.24,10.878,8.838,1.2,False
+Climate,climatology,region-month,out-of-fold,diversity_optimal,252,99.21,97.15,99.78,98.41,100.0,19.215,8.838,2.2,False
+Climate,climatology,region-month,out-of-fold,dtaci,252,90.08,85.77,93.19,85.71,94.44,10.841,8.838,1.2,False
+Climate,climatology,region-month,out-of-fold,acmcp,252,89.68,85.31,92.86,80.56,97.62,20.174,8.838,2.3,False
+Climate,climatology,region-month,out-of-fold,bellman_ci,252,75.4,69.72,80.31,66.67,83.33,8.655,8.838,1.0,False

@@ -1,0 +1,3 @@
+domain,baseline,oof_mae,test_mae,n_pool_scored,n_test,score_support
+Climate,persistence,3.56,2.515,1423,252,10.559
+Climate,climatology,3.054,3.032,1368,252,8.119
