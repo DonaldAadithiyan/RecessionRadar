@@ -129,9 +129,14 @@ reported as such:
 
 ## Honest caveats
 
-- **The negative result is specific to this N/pool regime.** At N=254 from
-  ~1200 scores, the upper tail is richly sampled. At much smaller N, or from a
-  pool whose extreme tail is sparser, selection could matter again. Not tested.
+- ~~The negative result is specific to this N/pool regime… not tested.~~
+  **RESOLVED by Task 12A** (`task12_boundary_tests.md`): the ceiling is attained
+  at ratio exactly 1.000000 in 56 of 56 configurations, with N swept from 254
+  down to 20 across all 8 cells. There is also a structural reason — the
+  alternating rule supplies ~N/2 extreme-tail scores while the operative
+  quantile needs only the top (1−q)·N ≈ 7–13%, so it is oversupplied ~4× at
+  every N. Optimality could only break at an operating quantile below the
+  median (q < 0.5), far outside the measured ACI window.
 - **The width budget never bound.** Because the objective saturates in `f` (the
   share drawn from the upper tail), all κ values selected the same subset. A
   budget that actually bit would have forced a narrower, lower-reach set — i.e.

@@ -11,6 +11,8 @@ bound what is achievable.
 | **11** | EVT pool augmentation (extend the pool, don't reselect) | **Partial positive** — +3.25pp at 1.42× width vs the selector's +6.06pp at 2.63× |
 | **11b** | Threshold + seed robustness | **Survives both** — 6/8 cells improve at all thresholds, 7/8 in 100% of seeds |
 | **11c** | Synthetic-fraction sensitivity | **Clean tuning dial** — coverage and width both monotone in 8/8 cells; works at every fraction tested |
+| **12A** | Does optimality survive small N? | **Yes, and structurally** — 56/56 configs at ratio 1.000000, N from 254 down to 20; holds for any operating quantile above the median |
+| **12B** | α-drift re-selection | **Falsified** — 0/8, identical to static; re-selected sets differ in membership but give identical operative quantiles |
 
 ---
 
@@ -37,6 +39,14 @@ where BCI and CPTC were winning.
 **Strengthened:** Phase 2's selector now has an optimality argument for the
 quantity Phase 5 proved is operative, not merely for the p95−p5 proxy it was
 designed around. Two unrelated objectives, same optimum.
+
+**And that argument is now unhedged (Task 12A).** It holds at every N from 254
+down to 20 — 56 of 56 configurations at ratio exactly 1.000000 — with a
+structural reason: the alternating rule supplies ~N/2 extreme-tail scores while
+the operative quantile depends on only the top 7–13%, so it is oversupplied ~4×
+regardless of N. The claim is falsifiable (it would break at an operating
+quantile below the median) but no calibration regime in this paper approaches
+that.
 
 **Newly explained:** the selector's 1.2–2.6× width cost is **intrinsic, not a
 design flaw**. Reaching the required tail quantile requires those extreme
