@@ -192,7 +192,11 @@ approximation.
 - **Diversity-optimal buys coverage with width** (1.2–2.3× baseline; up to
   4.3× at recession 1M). Consistent with Phase 2's finding; it is not a free
   lunch and must never be reported on coverage alone.
-- **Healthcare separates nothing.** With the baseline already at nominal, that
+- **Healthcare separates nothing** — and Task 15 later established *why*:
+  the domain is **low-headroom, not underpowered**. Its baseline sits at 88–91%
+  under every admissible target, so no strategy has room to distinguish itself,
+  and n is not the binding constraint. See `task15_healthcare_power.md`.
+  With the baseline already at nominal, that
   domain discriminates poorly between strategies. Its value here is confirming
   the mechanism transfers, not ranking methods.
 - **Climate overcovers** (98.8–99.6%) under diversity-optimal. Above-nominal

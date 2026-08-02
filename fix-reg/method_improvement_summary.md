@@ -15,6 +15,7 @@ bound what is achievable.
 | **12B** | α-drift re-selection | **Falsified** — 0/8, identical to static; re-selected sets differ in membership but give identical operative quantiles |
 | **13** | Temporal generalization (3 historical cutoffs) | **Holds — 12/12 cells.** Best-powered new cutoff (2006, 16 rare months) shows a *larger* gap than the published split |
 | **14** | Compute cost across 9 strategies | Selector is **1.0× baseline per step**, 0.06ms setup. EVT-tail is 110–199×; CPTC's state model is 190ms one-off |
+| **15** | Healthcare power vs headroom | **Low-headroom, not underpowered.** Baseline is 88–91% under every admissible target; separations appear only once the target is degraded past the noise floor |
 
 ---
 

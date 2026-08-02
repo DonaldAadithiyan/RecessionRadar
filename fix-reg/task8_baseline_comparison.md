@@ -225,7 +225,10 @@ the domain determines how much room there is to widen it.
 - **HOSPITAL is a 5-component variant, not the published score.** Two of seven
   components are unreconstructable from this dataset. Do not cite its numbers as
   the Donzé score's performance.
-- **Healthcare separates nothing, again.** Four models, no CI separation for any
+- **Healthcare separates nothing, again.** Task 15 diagnosed the cause: the
+  domain is **low-headroom** (baseline 88–91% under every admissible target),
+  not underpowered — more data would not help. See `task15_healthcare_power.md`.
+  Four models, no CI separation for any
   strategy. The domain's baseline sits near nominal, so it confirms the mechanism
   transfers but cannot rank strategies. Point estimates are not evidence.
 - **Climate diversity-optimal overcovers** (99.21%) at ~2× width. Reported as a
