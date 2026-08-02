@@ -1,0 +1,9 @@
+domain,model,horizon,n_draws,N,rho_supp_qc,R2_supp_qc,rho_supp_cov,R2_supp_cov,rho_rare_cov,R2_rare_cov,rho_qc_cov,R2_qc_cov,qc_beats_supp
+Recession,stacking-chain,Current,200,254,0.622,0.402,,,,,,,False
+Recession,stacking-chain,1M,200,254,0.67,0.443,0.59,0.389,0.386,0.172,0.716,0.603,True
+Recession,stacking-chain,3M,200,254,0.654,0.428,0.639,0.422,0.237,0.064,0.859,0.729,True
+Recession,stacking-chain,6M,200,254,0.724,0.492,0.725,0.532,0.283,0.089,0.961,0.792,True
+Healthcare,ridge,30-day,200,254,0.651,0.475,0.619,0.405,0.507,0.315,0.819,0.745,True
+Healthcare,gradboost,30-day,200,254,0.637,0.434,0.517,0.281,0.385,0.188,0.782,0.653,True
+Climate,ridge,region-month,200,254,0.698,0.447,0.594,0.321,0.589,0.337,0.889,0.798,True
+Climate,gradboost,region-month,200,254,0.741,0.547,0.599,0.345,0.481,0.232,0.859,0.734,True

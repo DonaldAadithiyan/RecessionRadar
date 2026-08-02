@@ -179,11 +179,18 @@ def fixed_size_ablation(scores_all, is_rare, y_test, pred_test, rare_counts,
 # ── 200-draw diversity sweep (mirrors "Diversity Explains It") ─────────────────
 
 def random_draw_sweep(scores_all, is_rare, y_test, pred_test, N,
-                      n_draws=200, gamma=GAMMA_DEFAULT, seed=7):
+                      n_draws=200, gamma=GAMMA_DEFAULT, seed=7,
+                      alpha_target=ALPHA_TARGET):
     """
     Draw `n_draws` random fixed-size (N) calibration sets from the pool, and for
-    each record diversity statistics, rare-event count, and realised ACI
-    coverage. Returns the per-draw frame.
+    each record diversity statistics, rare-event count, the calibration set's
+    own (1-alpha) quantile Q_C, and realised ACI coverage. Returns the per-draw
+    frame.
+
+    `alpha_target` sets both the ACI target and the level at which Q_C is
+    evaluated, so the recorded quantile is always the one ACI is actually
+    steering toward. It defaults to the paper's 0.10 and is varied only by the
+    Task 16D alpha sweep.
     """
     rng = np.random.default_rng(seed)
     scores_all = np.asarray(scores_all, dtype=float)
@@ -194,13 +201,24 @@ def random_draw_sweep(scores_all, is_rare, y_test, pred_test, N,
     for d in range(n_draws):
         sel = rng.choice(valid, size=N, replace=False)
         s = scores_all[sel]
-        covered, _, widths = run_aci(y_test, pred_test, s, gamma=gamma)
+        covered, _, widths = run_aci(y_test, pred_test, s, gamma=gamma,
+                                     alpha_init=alpha_target,
+                                     alpha_target=alpha_target)
         cov, w = coverage_and_width(covered, widths)
+        # Q_C: the calibration set's own (1-alpha) quantile — the quantity ACI
+        # actually consumes at each step. Support width is only a proxy for it
+        # (Section 4), so recording it makes the middle link of the theoretical
+        # chain support-width -> Q_C -> coverage directly testable rather than
+        # inferred. Added for Task 16A; harmless to every existing caller since
+        # it is an extra column.
+        s_fin = s[np.isfinite(s)]
+        qc = float(np.quantile(s_fin, 1.0 - alpha_target)) if len(s_fin) else np.nan
         rows.append(dict(draw=d,
                          rare_count=int(is_rare[sel].sum()),
                          supp=round(support_width(s), 5),
                          IQR=round(iqr(s), 5),
                          ent=round(shannon(s), 5),
+                         Q_C=round(qc, 5),
                          cov=round(cov, 4),
                          width=round(w, 4)))
     return pd.DataFrame(rows)
