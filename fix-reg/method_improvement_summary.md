@@ -13,6 +13,8 @@ bound what is achievable.
 | **11c** | Synthetic-fraction sensitivity | **Clean tuning dial** — coverage and width both monotone in 8/8 cells; works at every fraction tested |
 | **12A** | Does optimality survive small N? | **Yes, and structurally** — 56/56 configs at ratio 1.000000, N from 254 down to 20; holds for any operating quantile above the median |
 | **12B** | α-drift re-selection | **Falsified** — 0/8, identical to static; re-selected sets differ in membership but give identical operative quantiles |
+| **13** | Temporal generalization (3 historical cutoffs) | **Holds — 12/12 cells.** Best-powered new cutoff (2006, 16 rare months) shows a *larger* gap than the published split |
+| **14** | Compute cost across 9 strategies | Selector is **1.0× baseline per step**, 0.06ms setup. EVT-tail is 110–199×; CPTC's state model is 190ms one-off |
 
 ---
 

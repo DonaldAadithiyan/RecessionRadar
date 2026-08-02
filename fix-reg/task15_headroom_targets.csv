@@ -1,0 +1,5 @@
+target,n_cohorts,n_test,mean_rate,rate_sd,rho_collinearity,A2_degenerate,base_cov,base_lo,base_hi,below_88
+"baseline (all cohorts, min=25)",584,146,11.07,7.19,0.509,True,90.41,84.55,94.2,False
+emergency admissions only,212,60,11.57,7.11,0.127,False,88.33,77.82,94.23,False
+long stays (>=5 days),253,63,12.51,7.52,0.611,True,93.65,84.78,97.5,False
+high prior utilisation (>=1 inpatient),220,60,16.06,8.4,0.478,False,93.33,84.07,97.38,False
