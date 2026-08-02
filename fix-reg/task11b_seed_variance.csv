@@ -1,0 +1,9 @@
+domain,model,horizon,n_seeds,cov_mean,cov_sd,cov_min,cov_max,width_mean,width_sd,base_cov,base_w,sel_cov,sel_w,frac_seeds_beating_base
+Recession,stacking-chain,Current,20,93.85,0.0,93.85,93.85,39.952,3.636,93.85,21.704,93.85,108.692,0.0
+Recession,stacking-chain,1M,20,90.62,0.0,90.62,90.62,44.451,5.237,89.06,21.472,96.88,92.111,1.0
+Recession,stacking-chain,3M,20,91.94,0.0,91.94,91.94,54.132,4.302,90.32,31.883,95.16,109.113,1.0
+Recession,stacking-chain,6M,20,91.69,1.058,89.83,94.92,75.191,8.371,84.75,53.279,96.61,123.864,1.0
+Healthcare,ridge,30-day,20,92.4,0.479,91.1,93.15,23.885,0.842,88.36,19.869,92.47,25.261,1.0
+Healthcare,gradboost,30-day,20,94.04,0.535,93.15,95.21,25.641,0.836,90.41,21.035,93.84,25.736,1.0
+Climate,ridge,region-month,20,94.24,0.487,93.42,95.06,11.225,0.249,90.95,10.349,99.59,17.774,1.0
+Climate,gradboost,region-month,20,94.9,0.329,93.83,95.06,12.532,0.328,90.95,10.793,98.77,19.36,1.0

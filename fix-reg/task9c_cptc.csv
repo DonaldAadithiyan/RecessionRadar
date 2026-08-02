@@ -1,0 +1,9 @@
+domain,model,horizon,strategy,n,coverage,wilson_lo,wilson_hi,boot_lo,boot_hi,mean_width,width_ratio
+Recession,stacking-chain,Current,cptc_hmm_state_input,55,87.27,75.98,93.7,72.73,100.0,149.854,186.4
+Recession,stacking-chain,1M,cptc_hmm_state_input,54,88.89,77.81,94.81,79.63,100.0,100.111,123.9
+Recession,stacking-chain,3M,cptc_hmm_state_input,52,86.54,74.73,93.32,71.15,100.0,128.799,176.0
+Recession,stacking-chain,6M,cptc_hmm_state_input,49,91.84,80.81,96.78,81.63,97.96,81.84,137.3
+Healthcare,ridge,30-day,cptc_hmm_state_input,126,89.68,83.15,93.87,84.13,94.44,22.733,1.0
+Healthcare,gradboost,30-day,cptc_hmm_state_input,126,88.1,81.28,92.65,82.54,93.65,21.718,1.0
+Climate,ridge,region-month,cptc_hmm_state_input,213,91.08,86.49,94.22,87.32,93.43,7.201,0.8
+Climate,gradboost,region-month,cptc_hmm_state_input,213,89.67,84.86,93.08,84.98,92.49,6.936,0.8

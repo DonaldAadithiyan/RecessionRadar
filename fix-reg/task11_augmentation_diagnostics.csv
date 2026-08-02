@@ -1,0 +1,9 @@
+domain,model,horizon,n_original,n_synth,applied,u,xi,sigma,n_exceedances,obs_max,endpoint,n_capped,cap,synth_max,pool_q90_before,pool_q90_after,reason
+Recession,stacking-chain,Current,254,51,True,18.1669,-1.0503,84.4709,51,98.5896,98.5896,0.0,197.1792,96.8116,52.4098,76.3778,ok
+Recession,stacking-chain,1M,254,0,False,19.6158,-1.1204,89.542,51,99.5385,99.5385,,,,,,bounded tail with endpoint <= observed max (99.538 <= 99.538)
+Recession,stacking-chain,3M,254,51,True,20.6954,-0.7705,58.2093,51,95.3288,96.2476,0.0,190.6576,91.6351,56.6006,68.6671,ok
+Recession,stacking-chain,6M,254,51,True,29.3851,-1.3368,94.2914,51,99.9206,99.9206,0.0,199.8412,99.3692,68.7195,85.2342,ok
+Healthcare,ridge,30-day,254,51,True,9.6046,-0.0026,5.5515,51,33.4847,2135.4434,0.0,66.9694,29.6565,13.2384,16.2522,ok
+Healthcare,gradboost,30-day,254,51,True,10.0551,-0.1087,5.8048,51,29.7857,63.4498,0.0,59.5714,27.4623,14.0555,16.8872,ok
+Climate,ridge,region-month,254,51,True,8.1526,0.4469,2.8446,51,37.3619,,0.0,74.7238,34.0094,10.0695,12.963,ok
+Climate,gradboost,region-month,254,51,True,8.809,0.3324,3.173,51,37.9367,,0.0,75.8733,31.1569,10.7535,13.7327,ok

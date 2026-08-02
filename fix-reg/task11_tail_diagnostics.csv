@@ -1,0 +1,9 @@
+domain,model,horizon,n_scores,obs_max,xi,sigma,u,n_exceedances,endpoint,endpoint_over_obsmax,xi_spread_across_thresholds,verdict
+Recession,stacking-chain,Current,545,98.5896,0.4786,16.4987,1.5476,109,,,2.1796,HEAVY (extrapolates upward)
+Recession,stacking-chain,1M,545,99.5385,0.6281,14.7995,1.272,109,,,2.751,HEAVY (extrapolates upward)
+Recession,stacking-chain,3M,545,95.3288,-0.0189,27.5871,2.1274,109,1458.174,15.296,1.3991,EXPONENTIAL-ish (extrapolates slowly)
+Recession,stacking-chain,6M,545,99.9206,-0.4878,56.1398,2.3203,109,117.4127,1.175,1.7058,BOUNDED (finite endpoint)
+Healthcare,ridge,30-day,438,33.4847,0.1224,4.4108,7.2386,88,,,0.2106,HEAVY (extrapolates upward)
+Healthcare,gradboost,30-day,438,29.7857,-0.0013,4.8731,7.7191,88,3674.8767,123.377,0.2079,EXPONENTIAL-ish (extrapolates slowly)
+Climate,ridge,region-month,1148,37.3619,0.3073,2.0509,4.1985,230,,,0.1683,HEAVY (extrapolates upward)
+Climate,gradboost,region-month,1148,37.9367,0.2865,2.2157,4.5946,230,,,0.0428,HEAVY (extrapolates upward)
