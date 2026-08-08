@@ -1,0 +1,3 @@
+horizon,B_effective,R2_supp_median,R2_supp_lo95,R2_supp_hi95,R2_rare_median,R2_rare_lo95,R2_rare_hi95,delta_R2_median,delta_R2_lo95,delta_R2_hi95,delta_excludes_zero
+3M,996,0.3481,0.0606,0.5192,0.1203,0.0077,0.3294,0.2048,-0.0121,0.3956,False
+6M,1000,0.4483,0.2031,0.6512,0.0457,0.0006,0.1699,0.3916,0.1666,0.5735,True
