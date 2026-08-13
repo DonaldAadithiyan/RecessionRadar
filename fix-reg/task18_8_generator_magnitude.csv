@@ -1,0 +1,13 @@
+domain,variant,freq,delta_s,predicted_gap,rho_supp,rho_rare,actual_gap,sign_correct,abs_error,ratio_to_actual
+Recession 3M,baseline,0.0844,2.194,0.464,0.626,0.162,0.402,True,0.062,1.15
+Recession 3M,heteroskedastic,0.0844,2.194,0.402,0.507,0.106,0.402,True,0.0,1.0
+Recession 3M,state_dependent_a,0.0844,2.194,0.479,0.626,0.147,0.402,True,0.077,1.19
+Recession 6M,baseline,0.0844,1.257,0.341,0.503,0.162,0.442,True,0.101,0.77
+Recession 6M,heteroskedastic,0.0844,1.257,0.471,0.563,0.092,0.442,True,0.029,1.07
+Recession 6M,state_dependent_a,0.0844,1.257,0.319,0.503,0.184,0.442,True,0.123,0.72
+Healthcare,baseline,0.1027,2.409,0.439,0.662,0.222,0.122,True,0.317,3.6
+Healthcare,heteroskedastic,0.1027,2.409,0.518,0.615,0.097,0.122,True,0.396,4.25
+Healthcare,state_dependent_a,0.1027,2.409,0.495,0.662,0.167,0.122,True,0.373,4.06
+Climate,baseline,0.1071,2.975,0.419,0.63,0.211,0.062,True,0.357,6.76
+Climate,heteroskedastic,0.1071,2.975,0.558,0.653,0.095,0.062,True,0.496,9.0
+Climate,state_dependent_a,0.1071,2.975,0.486,0.63,0.144,0.062,True,0.424,7.84

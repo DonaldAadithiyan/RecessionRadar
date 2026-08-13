@@ -1,0 +1,13 @@
+horizon,strategy,n,winkler_mean,winkler_median
+Current,diversity_optimal,65,147.201,118.672
+Current,pooled_trailing,65,118.72,20.377
+Current,dtaci,65,111.054,16.539
+1M,diversity_optimal,64,108.554,93.881
+1M,pooled_trailing,64,95.522,21.342
+1M,dtaci,64,76.838,13.983
+3M,diversity_optimal,62,139.397,113.114
+3M,pooled_trailing,62,118.645,32.463
+3M,dtaci,62,109.736,32.058
+6M,diversity_optimal,59,148.622,126.461
+6M,pooled_trailing,59,122.774,57.035
+6M,dtaci,59,116.712,57.185

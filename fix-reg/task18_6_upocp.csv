@@ -1,0 +1,5 @@
+horizon,trailing_cov,trailing_w,upocp_cov,upocp_w,upocp_lo,upocp_hi,selector_cov,selector_w,eta_first,eta_last,beats_trailing,closes_gap_frac
+Current,93.85,21.7,81.54,38.69,70.45,89.11,93.85,108.69,0.7433,0.2981,False,
+1M,89.06,21.47,81.25,41.98,70.03,88.94,96.88,92.11,0.7433,0.2983,False,-1.0
+3M,90.32,31.88,80.65,49.98,69.15,88.57,95.16,109.11,0.995,0.2985,False,-2.0
+6M,84.75,53.28,77.97,88.42,65.87,86.65,96.61,123.86,0.7433,0.2888,False,-0.571
