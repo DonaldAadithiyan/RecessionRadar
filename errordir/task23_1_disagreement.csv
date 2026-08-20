@@ -1,0 +1,13 @@
+feature,max_abs_corr,nearest_existing,r2_from_existing
+disag_std_Current,0.7081,unemployment_rate_diff3,0.8696
+disag_range_Current,0.7052,unemployment_rate_diff3,0.8662
+disag_maxpair_Current,0.7052,unemployment_rate_diff3,0.8662
+disag_std_1M,0.6812,gdp_per_capita_diff3,0.8867
+disag_range_1M,0.6805,gdp_per_capita_diff3,0.8832
+disag_maxpair_1M,0.6805,gdp_per_capita_diff3,0.8832
+disag_std_3M,0.6363,gdp_per_capita_diff3,0.8393
+disag_range_3M,0.6356,gdp_per_capita_diff3,0.8348
+disag_maxpair_3M,0.6356,gdp_per_capita_diff3,0.8348
+disag_std_6M,0.5067,OECD_CLI_index_diff1,0.6751
+disag_range_6M,0.5092,OECD_CLI_index_diff1,0.6768
+disag_maxpair_6M,0.5092,OECD_CLI_index_diff1,0.6768

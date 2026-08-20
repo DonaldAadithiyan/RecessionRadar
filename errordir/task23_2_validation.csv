@@ -1,0 +1,5 @@
+horizon,n_fit,n_cal,n_features,ridge_alpha,r_fit,r_cal_heldout,rho_cal_heldout,angle_pc1_deg,angle_pc2_deg,angle_pc3_deg,check1_not_variance,perturb_effect_beta,perturb_null_p95,perturb_percentile,check2_perturbation,disag_weight_frac,beta_validated
+Current,291,254,49,5.623413,0.9349,0.3023,0.3319,75.19,77.47,88.41,True,0.127802,1.311756,0.025,False,0.1866,False
+1M,291,254,49,0.001,0.9585,0.3537,0.33,89.24,89.31,89.82,True,0.315307,1.0087,0.03,False,0.2565,False
+3M,291,254,49,56.234133,0.7993,0.4772,0.3126,67.94,72.98,79.04,True,1.996036,2.320194,0.85,False,0.0874,False
+6M,291,254,49,562.341325,0.6633,0.5388,0.3905,47.61,55.98,73.55,True,8.526251,6.375718,1.0,True,0.1146,True

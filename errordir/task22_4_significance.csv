@@ -1,7 +1,7 @@
 method,baseline,n,mean_winkler_diff,win_rate_pct,wilcoxon_p,perm_shift_p,perm_signflip_p,wilcoxon_p_bh
-task22_both,diversity_optimal,59,-8.632,32.2,0.0018,0.381,0.335,0.0033
+task22_both,diversity_optimal,59,-8.632,32.2,0.0018,0.4545,0.335,0.0033
 task22_both,dtaci,59,-2.57,28.8,0.0022,0.821,0.342,0.0033
-fix1_only,diversity_optimal,59,-5.756,40.7,0.7171,0.059,0.2265,0.7171
+fix1_only,diversity_optimal,59,-5.756,40.7,0.7171,0.112,0.2265,0.7171
 fix1_only,dtaci,59,0.306,40.7,0.6398,0.8605,0.57,0.7171
-fix2_only,diversity_optimal,59,-7.804,32.2,0.0007,0.1885,0.3255,0.003
+fix2_only,diversity_optimal,59,-7.804,32.2,0.0007,0.2035,0.3255,0.003
 fix2_only,dtaci,59,-1.742,28.8,0.001,0.166,0.4415,0.003

@@ -1,0 +1,4 @@
+horizon,method,n,coverage,mean_width,width_spread_ratio,vacuous,winkler_mean,winkler_median,mean_multiplier
+6M,diversity_optimal,59,84.75,53.279,89.4,False,122.774,57.035,
+6M,dtaci,59,89.83,53.289,89.4,False,116.712,57.185,
+6M,errordir_disag,59,88.14,51.247,86.0,False,116.216,56.797,1.1297

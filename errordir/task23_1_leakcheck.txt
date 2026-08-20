@@ -1,0 +1,35 @@
+TASK 23 Item 1 — three-part legitimacy check
+======================================================================
+
+CHECK 1 — available at prediction time (no leakage)
+  unchanged when all FUTURE rows corrupted: True
+  unchanged when all PAST rows corrupted:   True
+    (row-local: disagreement at t depends on X[t] alone)
+  computation touches any outcome y:        NO
+  -> PASS
+
+CHECK 2 — continuous, computed every month, not label-conditioned
+  fit-pool months: 635   with all features finite: 635
+  distinct values of disag_std_6M: 635 (100.0% of months)
+  fraction exactly zero: 0.0000
+  -> PASS
+
+CHECK 3 — not redundant with beta's existing feature set
+  disag_std_Current      max|r| with any existing feature = 0.708 (unemployment_rate_diff3), R2 from ALL existing = 0.870
+  disag_range_Current    max|r| with any existing feature = 0.705 (unemployment_rate_diff3), R2 from ALL existing = 0.866
+  disag_maxpair_Current  max|r| with any existing feature = 0.705 (unemployment_rate_diff3), R2 from ALL existing = 0.866
+  disag_std_1M           max|r| with any existing feature = 0.681 (gdp_per_capita_diff3), R2 from ALL existing = 0.887
+  disag_range_1M         max|r| with any existing feature = 0.681 (gdp_per_capita_diff3), R2 from ALL existing = 0.883
+  disag_maxpair_1M       max|r| with any existing feature = 0.681 (gdp_per_capita_diff3), R2 from ALL existing = 0.883
+  disag_std_3M           max|r| with any existing feature = 0.636 (gdp_per_capita_diff3), R2 from ALL existing = 0.839
+  disag_range_3M         max|r| with any existing feature = 0.636 (gdp_per_capita_diff3), R2 from ALL existing = 0.835
+  disag_maxpair_3M       max|r| with any existing feature = 0.636 (gdp_per_capita_diff3), R2 from ALL existing = 0.835
+  disag_std_6M           max|r| with any existing feature = 0.507 (OECD_CLI_index_diff1), R2 from ALL existing = 0.675
+  disag_range_6M         max|r| with any existing feature = 0.509 (OECD_CLI_index_diff1), R2 from ALL existing = 0.677
+  disag_maxpair_6M       max|r| with any existing feature = 0.509 (OECD_CLI_index_diff1), R2 from ALL existing = 0.677
+  worst R2 (any disagreement feature from existing set): 0.8867
+  -> PASS (redundant iff R2 > 0.95)
+
+======================================================================
+GATE: check1=PASS  check2=PASS  check3=PASS
+PROCEED to Item 2
