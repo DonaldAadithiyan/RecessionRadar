@@ -1,0 +1,5 @@
+domain,model,n_fit,n_cal,n_features,ridge_alpha,r_fit,r_cal_heldout,rho_cal_heldout,angle_pc1_deg,angle_pc2_deg,check1_not_variance,perturb_effect,perturb_null_p95,perturb_percentile,check2_perturbation,disag_weight_frac,beta_validated
+healthcare,ridge,190,175,21,100.0,0.5116,0.1495,0.1126,89.63,85.18,True,2.531412,2.272624,0.98,True,0.0682,True
+healthcare,gradboost,190,175,21,100.0,0.5024,0.1278,0.1463,88.13,87.95,True,2.296478,2.788449,0.705,False,0.1303,False
+climate,ridge,597,551,22,562.341325,0.292,0.335,0.3491,85.79,63.77,True,0.850172,0.529502,1.0,True,0.0121,True
+climate,gradboost,597,551,22,562.341325,0.2999,0.3741,0.3531,79.49,59.94,True,0.85666,1.604352,0.07,False,0.0608,False
