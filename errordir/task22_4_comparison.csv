@@ -1,0 +1,7 @@
+method,horizon,n,coverage,mean_width,winkler_mean,winkler_median,mean_multiplier
+diversity_optimal,6M,59,84.75,53.279,122.774,57.035,
+dtaci,6M,59,89.83,53.289,116.712,57.185,
+task21_original,6M,59,88.14,52.498,116.923,58.261,1.1559
+fix1_only,6M,59,88.14,51.854,117.018,57.494,1.1432
+fix2_only,6M,59,96.61,81.904,114.97,92.218,2.4069
+task22_both,6M,59,96.61,80.22,114.142,90.42,2.3547

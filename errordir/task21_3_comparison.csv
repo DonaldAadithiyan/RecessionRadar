@@ -1,0 +1,5 @@
+method,horizon,n,coverage,mean_width,winkler_mean,winkler_median
+diversity_optimal,6M,59,84.75,53.279,122.774,57.035
+dtaci,6M,59,89.83,53.289,116.712,57.185
+pooled_trailing,6M,59,84.75,53.279,122.774,57.035
+errordir_pooled,6M,59,88.14,52.498,116.923,58.261

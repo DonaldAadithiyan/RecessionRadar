@@ -1,0 +1,2 @@
+n_fit_months,p99_fit_error,p90_fit_error,HI_new,HI_old,LO,worst_2020_error,hi_needed_for_worst_2020,ceiling_sufficient_for_worst
+291,96.3172,34.5117,2.7909,1.25,0.75,46.98,1.7635,True

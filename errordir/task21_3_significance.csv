@@ -1,0 +1,4 @@
+method,baseline,n,mean_winkler_diff,pct_better,wilcoxon_p,perm_shift_p,perm_signflip_p,wilcoxon_p_bh
+errordir_pooled,diversity_optimal,59,-5.851,40.7,0.7115,0.9825,0.2305,0.7742
+errordir_pooled,dtaci,59,0.21,33.9,0.7742,0.53,0.5235,0.7742
+errordir_pooled,pooled_trailing,59,-5.851,40.7,0.7115,0.983,0.211,0.7742

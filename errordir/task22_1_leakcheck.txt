@@ -1,0 +1,17 @@
+LEAKAGE CHECK — rolling recentering, Task 22 Item 1
+======================================================================
+  step   0: reference window identical after corrupting steps >= t: True
+  step   5: reference window identical after corrupting steps >= t: True
+  step  15: reference window identical after corrupting steps >= t: True
+  step  30: reference window identical after corrupting steps >= t: True
+  step  45: reference window identical after corrupting steps >= t: True
+  step  64: reference window identical after corrupting steps >= t: True
+
+  reference windows unaffected by present/future: PASS
+  projection path touches any TEST outcome: NO (inputs only)
+    (y_pool IS used, to fit beta on the FIT split — that is
+     training data, not a leak. No test outcome is touched.)
+
+  Conclusion: the rolling window at step t is built from CAL
+  projections plus test projections at steps STRICTLY < t.
+  Corrupting step t and everything after leaves it unchanged.
