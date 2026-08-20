@@ -1,0 +1,17 @@
+domain,model,baseline,n,mean_winkler_diff,win_rate_pct,perm_shift_p,perm_signflip_p,perm_signflip_p_bh
+healthcare,ridge,pooled_trailing,146,-0.976,55.5,,0.085,0.0971
+healthcare,ridge,diversity_optimal,146,-0.976,55.5,,0.07,0.0862
+healthcare,ridge,mondrian,146,3.891,30.8,,0.9655,0.9655
+healthcare,ridge,pid_conformal,146,-1.415,52.1,,0.0625,0.0833
+healthcare,ridge,evt_tail,146,-0.979,60.3,,0.055,0.08
+healthcare,ridge,dtaci,146,-0.522,47.9,,0.273,0.2912
+healthcare,ridge,acmcp,146,-22.481,71.9,,0.0,0.0
+healthcare,ridge,bellman_ci,146,-6.85,35.6,,0.0095,0.0152
+climate,ridge,pooled_trailing,243,-1.091,75.7,0.5735,0.0005,0.001
+climate,ridge,diversity_optimal,243,-1.607,89.7,0.9685,0.0,0.0
+climate,ridge,mondrian,243,-1.665,52.7,0.9435,0.0015,0.0027
+climate,ridge,pid_conformal,243,-1.211,64.2,0.9895,0.0,0.0
+climate,ridge,evt_tail,243,-1.053,69.1,0.5145,0.0,0.0
+climate,ridge,dtaci,243,-1.056,65.8,1.0,0.0,0.0
+climate,ridge,acmcp,243,-11.768,81.1,1.0,0.0,0.0
+climate,ridge,bellman_ci,243,-2.631,36.6,0.7765,0.0,0.0
