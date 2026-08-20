@@ -1,0 +1,5 @@
+domain,model,strategy,N,alpha_min,alpha_max,q_min,q_max,margin_min,margin_max,dist_to_boundary,reaches_boundary,n_test,coverage
+Climate,ridge,pooled_trailing,254,0.096,0.123,0.877,0.904,4.188,5.36,0.377,False,243,90.95
+Climate,ridge,diversity_optimal,254,0.1,0.216,0.784,0.9,2.309,4.885,0.284,False,243,99.59
+Climate,gradboost,pooled_trailing,254,0.1,0.132,0.868,0.9,3.765,4.923,0.368,False,243,90.95
+Climate,gradboost,diversity_optimal,254,0.1,0.206,0.794,0.9,2.396,4.885,0.294,False,243,98.77

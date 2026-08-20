@@ -1,0 +1,13 @@
+horizon,strategy,signal,n_scored,base_miss_pct,n_flagged,flagged_miss_pct,flagged_wilson_lo,flagged_wilson_hi,n_rest,rest_miss_pct,lift_pp,fisher_p,spearman_rho,fisher_p_bh
+region-month,ridge/pooled_trailing,A_margin,243,9.05,85,14.12,8.26,23.07,158,6.33,5.06,0.0396,-0.122,0.2376
+region-month,ridge/pooled_trailing,B_drift_max,237,9.28,60,11.67,5.77,22.18,177,8.47,2.38,0.3069,0.035,0.4604
+region-month,ridge/pooled_trailing,B_drift_p90,237,9.28,60,11.67,5.77,22.18,177,8.47,2.38,0.3069,0.059,0.4604
+region-month,ridge/diversity_optimal,A_margin,243,0.41,62,0.0,0.0,5.83,181,0.55,-0.41,1.0,-0.049,1.0
+region-month,ridge/diversity_optimal,B_drift_max,237,0.42,60,0.0,0.0,6.02,177,0.56,-0.42,1.0,0.006,1.0
+region-month,ridge/diversity_optimal,B_drift_p90,237,0.42,60,0.0,0.0,6.02,177,0.56,-0.42,1.0,0.036,1.0
+region-month,gradboost/pooled_trailing,A_margin,243,9.05,73,15.07,8.63,25.0,170,6.47,6.01,0.0322,-0.151,0.2376
+region-month,gradboost/pooled_trailing,B_drift_max,237,9.28,60,15.0,8.1,26.11,177,7.34,5.72,0.0699,0.084,0.2796
+region-month,gradboost/pooled_trailing,B_drift_p90,237,9.28,60,13.33,6.91,24.17,177,7.91,4.05,0.1596,0.1,0.3408
+region-month,gradboost/diversity_optimal,A_margin,243,1.23,64,3.12,0.86,10.7,179,0.56,1.89,0.1704,-0.107,0.3408
+region-month,gradboost/diversity_optimal,B_drift_max,237,1.27,60,3.33,0.92,11.36,177,0.56,2.07,0.1586,0.116,0.3408
+region-month,gradboost/diversity_optimal,B_drift_p90,237,1.27,60,1.67,0.29,8.86,177,1.13,0.4,0.5852,0.093,0.7803

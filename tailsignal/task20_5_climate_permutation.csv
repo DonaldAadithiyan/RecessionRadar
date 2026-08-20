@@ -1,0 +1,13 @@
+strategy,signal,observed_lift,perm_p
+ridge/pooled_trailing,A_margin,5.06,0.149
+ridge/pooled_trailing,B_drift_max,2.38,0.3535
+ridge/pooled_trailing,B_drift_p90,2.38,0.351
+ridge/diversity_optimal,A_margin,-0.41,1.0
+ridge/diversity_optimal,B_drift_max,-0.42,1.0
+ridge/diversity_optimal,B_drift_p90,-0.42,1.0
+gradboost/pooled_trailing,A_margin,6.01,0.0615
+gradboost/pooled_trailing,B_drift_max,5.72,0.139
+gradboost/pooled_trailing,B_drift_p90,4.05,0.25
+gradboost/diversity_optimal,A_margin,1.89,0.271
+gradboost/diversity_optimal,B_drift_max,2.07,0.2055
+gradboost/diversity_optimal,B_drift_p90,0.4,0.49

@@ -1,0 +1,25 @@
+horizon,strategy,signal,observed_lift,perm_p,note
+Current,pooled_trailing,A_margin,-6.15,1.0,
+Current,pooled_trailing,B_drift_max,0.0,,degenerate (no miss variation)
+Current,pooled_trailing,B_drift_p90,0.0,,degenerate (no miss variation)
+Current,diversity_optimal,A_margin,-6.15,1.0,
+Current,diversity_optimal,B_drift_max,0.0,,degenerate (no miss variation)
+Current,diversity_optimal,B_drift_p90,0.0,,degenerate (no miss variation)
+1M,pooled_trailing,A_margin,2.11,0.3815,
+1M,pooled_trailing,B_drift_max,4.94,0.219,
+1M,pooled_trailing,B_drift_p90,4.94,0.2425,
+1M,diversity_optimal,A_margin,-3.12,1.0,
+1M,diversity_optimal,B_drift_max,0.0,,degenerate (no miss variation)
+1M,diversity_optimal,B_drift_p90,0.0,,degenerate (no miss variation)
+3M,pooled_trailing,A_margin,7.97,0.3235,
+3M,pooled_trailing,B_drift_max,10.71,0.2125,
+3M,pooled_trailing,B_drift_p90,10.71,0.2035,
+3M,diversity_optimal,A_margin,-4.84,1.0,
+3M,diversity_optimal,B_drift_max,0.0,,degenerate (no miss variation)
+3M,diversity_optimal,B_drift_p90,0.0,,degenerate (no miss variation)
+6M,pooled_trailing,A_margin,11.06,0.1775,
+6M,pooled_trailing,B_drift_max,17.25,0.108,
+6M,pooled_trailing,B_drift_p90,17.25,0.117,
+6M,diversity_optimal,A_margin,0.31,0.461,
+6M,diversity_optimal,B_drift_max,10.51,0.213,
+6M,diversity_optimal,B_drift_p90,10.51,0.195,
