@@ -1,0 +1,7 @@
+dataset,model,n_fit,n_cal,n_test,r_fit,r_cal_heldout,angle_pc1_deg,check1_not_variance,perturb_effect,perturb_null_p95,perturb_percentile,check2_perturbation,beta_validated
+insurance,xgboost,1734,1600,400,0.1258,0.0885,70.84,True,0.264373,0.395687,0.41,False,False
+insurance,lightgbm,1734,1600,400,0.1315,0.096,73.45,True,0.188001,0.26016,0.32,False,False
+insurance,ridge,1734,1600,400,0.1238,0.1261,84.85,True,0.120857,0.08412,1.0,True,True
+energy,xgboost,1734,1600,400,0.5757,0.4099,77.81,True,0.955502,1.830207,0.465,False,False
+energy,lightgbm,1734,1600,400,0.5501,0.437,80.8,True,0.843204,1.825061,0.52,False,False
+energy,ridge,1734,1600,400,0.6023,0.4167,81.71,True,2.33006,1.56289,1.0,True,True

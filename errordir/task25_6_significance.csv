@@ -1,0 +1,17 @@
+dataset,model,baseline,n,mean_winkler_diff,win_rate_pct,perm_signflip_p,perm_signflip_p_bh
+insurance,ridge,pooled_trailing,400,-0.234,44.0,0.0215,0.0382
+insurance,ridge,diversity_optimal,400,-0.758,90.8,0.0,0.0
+insurance,ridge,mondrian,400,0.193,16.5,0.88,0.88
+insurance,ridge,pid_conformal,400,-0.232,61.5,0.031,0.0496
+insurance,ridge,evt_tail,400,-0.166,53.8,0.065,0.0867
+insurance,ridge,dtaci,400,-0.135,52.0,0.1,0.1231
+insurance,ridge,acmcp,400,-9.648,81.0,0.0,0.0
+insurance,ridge,bellman_ci,400,-1.599,27.5,0.0015,0.003
+energy,ridge,pooled_trailing,400,-1.841,52.2,0.0005,0.0011
+energy,ridge,diversity_optimal,400,-0.539,82.0,0.349,0.3723
+energy,ridge,mondrian,400,-1.185,21.0,0.142,0.1623
+energy,ridge,pid_conformal,400,-2.123,70.8,0.0,0.0
+energy,ridge,evt_tail,400,-1.457,51.5,0.0,0.0
+energy,ridge,dtaci,400,-0.926,25.2,0.0645,0.0867
+energy,ridge,acmcp,400,-53.911,91.5,0.0,0.0
+energy,ridge,bellman_ci,400,-6.665,27.8,0.0005,0.0011

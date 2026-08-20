@@ -1,0 +1,5 @@
+domain,model,effect_beta,nullA_p95,pctA,passA,nullB_p95,pctB,passB,stat_beta_C,nullC_p95,pctC,passC
+climate,ridge,0.850856,0.575839,1.0,True,0.524358,0.995,True,0.3468,0.235964,1.0,True
+climate,gb,1.00899,1.816162,0.035,False,1.815963,0.03,False,0.3307,0.23322,1.0,True
+healthcare,ridge,3.199585,1.97369,1.0,True,1.912109,1.0,True,0.1694,0.183297,0.91,False
+healthcare,gb,2.275999,3.118261,0.675,False,3.27275,0.68,False,0.2194,0.203739,0.965,True
