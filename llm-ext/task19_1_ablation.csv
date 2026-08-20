@@ -1,0 +1,11 @@
+generator,freq,delta_s,rare_k,cov_mean,supp_mean
+independent,0.12,1.0,0,89.64,1.872
+independent,0.12,1.0,4,89.54,1.875
+independent,0.12,1.0,8,90.87,1.973
+independent,0.12,1.0,16,92.67,2.043
+independent,0.12,1.0,32,95.79,2.222
+correlated,0.12,1.0,0,93.03,2.519
+correlated,0.12,1.0,4,93.28,2.552
+correlated,0.12,1.0,8,93.28,2.569
+correlated,0.12,1.0,16,93.95,2.595
+correlated,0.12,1.0,32,94.1,2.608

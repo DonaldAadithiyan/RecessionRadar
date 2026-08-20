@@ -1,0 +1,3 @@
+generator,n_cells,frac_gap_pos,median_gap,frac_r2gap_pos,median_r2_gap,median_within_tertile_rho
+independent,60,0.783,0.233,0.767,0.216,0.214
+correlated,60,1.0,0.408,1.0,0.243,0.091
