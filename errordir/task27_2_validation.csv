@@ -1,0 +1,5 @@
+domain,beta,n_fit,n_cal,n_test,tail_label_rate,r_cal_heldout,angle_pc1_deg,check1_not_variance,perturb_effect,perturb_percentile,check2_perturbation,beta_validated
+climate,beta_mean,597,551,243,0.1005,0.3332,84.61,True,0.625112,0.985,True,True
+climate,beta_tail,597,551,243,0.1005,0.2812,81.62,True,0.015478,0.03,False,False
+energy,beta_mean,1734,1600,400,0.1003,0.4167,81.71,True,2.33006,1.0,True,True
+energy,beta_tail,1734,1600,400,0.1003,0.3483,83.67,True,2.475286,1.0,True,True

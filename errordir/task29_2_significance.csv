@@ -1,0 +1,6 @@
+domain,baseline,n,mean_winkler_diff,win_rate_pct,perm_signflip_p,note,perm_signflip_p_bh
+climate,rlcp,243,-0.072,54.7,0.398,,0.556
+climate,rlcp_best_gamma,243,-0.072,54.7,0.417,,0.556
+climate,baselcp_task28,243,0.497,22.6,0.986,,0.986
+energy,rlcp,400,,,,baseline produced unbounded intervals,
+energy,baselcp_task28,400,-2.112,22.2,0.0625,,0.25

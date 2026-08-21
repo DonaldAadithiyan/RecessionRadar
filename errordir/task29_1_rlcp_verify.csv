@@ -1,0 +1,11 @@
+domain,method,n,coverage,mean_width,width_spread_ratio,vacuous,n_unbounded,winkler_mean,winkler_median,gamma
+climate,rlcp_g0.25,243,91.77,10.034,1.14,False,0,11.801,10.259,0.09163
+climate,rlcp_g0.5,243,90.95,9.846,1.12,False,0,11.585,10.229,0.18326
+climate,rlcp_g1.0,243,91.77,9.631,1.1,False,0,11.292,9.642,0.36651
+climate,rlcp_g2.0,243,92.59,9.443,1.08,False,1,,9.108,0.73303
+climate,rlcp_g4.0,243,92.18,9.32,1.06,False,1,,8.873,1.46605
+energy,rlcp_g0.25,400,75.5,3.787,0.31,False,15,,4.137,0.87888
+energy,rlcp_g0.5,400,75.75,3.824,0.31,False,21,,4.178,1.75776
+energy,rlcp_g1.0,400,76.75,3.831,0.31,False,27,,4.233,3.51553
+energy,rlcp_g2.0,400,78.0,3.849,0.32,False,38,,4.5,7.03105
+energy,rlcp_g4.0,400,80.25,3.846,0.32,False,49,,4.772,14.0621
