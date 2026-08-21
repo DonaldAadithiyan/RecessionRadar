@@ -1,0 +1,17 @@
+condition,baseline,n,mean_winkler_diff,win_rate_pct,lag1_autocorr_of_diff,perm_signflip_p,perm_signflip_p_bh
+temporal,pooled_trailing,600,-4.393,53.5,0.266,0.0,0.0
+temporal,diversity_optimal,600,-9.821,88.0,0.363,0.0055,0.0126
+temporal,mondrian,600,-0.687,27.8,0.187,0.41,0.5467
+temporal,pid_conformal,600,-4.3,63.5,0.34,0.1215,0.216
+temporal,evt_tail,600,-4.644,52.3,0.285,0.0,0.0
+temporal,dtaci,600,6.27,33.3,0.301,0.976,0.976
+temporal,acmcp,600,-151.006,83.5,0.5,0.0,0.0
+temporal,bellman_ci,600,-10.636,25.5,0.345,0.0045,0.012
+random,pooled_trailing,600,0.084,39.2,0.036,0.5225,0.5971
+random,diversity_optimal,600,-22.698,94.8,0.15,0.0,0.0
+random,mondrian,600,-3.84,40.2,0.064,0.1495,0.2392
+random,pid_conformal,600,0.531,19.5,0.027,0.606,0.6464
+random,evt_tail,600,-1.835,52.3,0.037,0.048,0.096
+random,dtaci,600,-0.019,35.5,0.033,0.4965,0.5971
+random,acmcp,600,-52.554,78.2,0.123,0.0,0.0
+random,bellman_ci,600,-1.753,35.7,0.117,0.2875,0.4182
