@@ -1,0 +1,13 @@
+domain,model,candidate,model_class,K,r_cal_heldout,angle_pc1_deg,check1_not_variance,perturb_effect,perturb_null_p95,perturb_percentile,check2_perturbation,validated
+insurance,xgboost,A_local_knn,tree,35.0,0.0211,64.55,True,0.272849,0.395687,0.515,False,False
+insurance,xgboost,B_disagreement,tree,,0.3958,62.55,True,0.278581,0.395687,0.565,False,False
+insurance,lightgbm,A_local_knn,tree,35.0,0.031,64.98,True,0.195403,0.26016,0.395,False,False
+insurance,lightgbm,B_disagreement,tree,,0.3059,84.57,True,0.210204,0.26016,0.6,False,False
+insurance,ridge,A_local_knn,linear,35.0,0.0219,75.28,True,0.099012,0.08412,0.965,True,True
+insurance,ridge,B_disagreement,linear,,0.0097,69.75,True,0.026108,0.08412,0.41,False,False
+energy,xgboost,A_local_knn,tree,35.0,0.3712,72.52,True,1.290459,1.830207,0.74,False,False
+energy,xgboost,B_disagreement,tree,,0.3782,79.82,True,1.024863,1.830207,0.54,False,False
+energy,lightgbm,A_local_knn,tree,35.0,0.4138,72.63,True,1.311556,1.825061,0.775,False,False
+energy,lightgbm,B_disagreement,tree,,0.3469,81.32,True,0.999517,1.825061,0.645,False,False
+energy,ridge,A_local_knn,linear,35.0,0.4335,77.08,True,2.59672,1.56289,1.0,True,True
+energy,ridge,B_disagreement,linear,,0.4151,86.64,True,0.246678,1.56289,0.175,False,False

@@ -1,0 +1,3 @@
+case,requirement,HOS,null_mean,percentile,verdict,correct
+signal,DETECT,0.5938,0.1577,1.0,DETECT,True
+null,REJECT,0.0432,0.0251,0.825,REJECT,True

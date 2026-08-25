@@ -1,0 +1,7 @@
+domain,model,model_class,h,angle_pc1_deg,check1_pass,check2_percentile,check2_pass,check2_caveat,HOS,HOS_null_mean,HOS_percentile,HOS_pass
+insurance,ridge,linear,0.56729,84.35,True,0.5042,False,,0.0465,0.0299,0.8,False
+insurance,xgboost,tree,0.56729,85.42,True,0.4607,False,hyper-responsive null (Task 33) unresolved,,,,
+insurance,lightgbm,tree,0.56729,83.78,True,0.485,False,hyper-responsive null (Task 33) unresolved,,,,
+energy,ridge,linear,0.58767,46.26,True,0.5402,False,,0.4183,0.0618,1.0,True
+energy,xgboost,tree,0.58767,65.67,True,0.3777,False,hyper-responsive null (Task 33) unresolved,,,,
+energy,lightgbm,tree,0.58767,63.69,True,0.4055,False,hyper-responsive null (Task 33) unresolved,,,,

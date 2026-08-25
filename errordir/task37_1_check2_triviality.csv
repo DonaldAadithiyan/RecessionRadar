@@ -1,0 +1,9 @@
+domain,candidate,n,check2_mean,check2_min,check2_max,pass_rate
+insurance,beta (real),1,0.995,0.995,0.995,1.0
+insurance,noise_target (fitted),10,0.395,0.085,0.84,0.0
+insurance,perm_target (fitted),10,0.409,0.015,0.92,0.0
+insurance,random_unit (untrained),10,0.525,0.0,0.975,0.1
+energy,beta (real),1,0.995,0.995,0.995,1.0
+energy,noise_target (fitted),10,0.182,0.0,0.67,0.0
+energy,perm_target (fitted),10,0.482,0.085,0.8,0.0
+energy,random_unit (untrained),10,0.5325,0.0,1.0,0.1

@@ -129,3 +129,7 @@ tmp/
 scratch/
 *.tmp
 *.bak
+
+# Task 31 raw datasets — regenerable via errordir/task31_build.py
+# fraud.csv is 145 MB (exceeds GitHub's 100 MB limit); epidemic.csv is kept.
+data/domains/task31/fraud.csv

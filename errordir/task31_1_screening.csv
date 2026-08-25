@@ -1,0 +1,3 @@
+candidate,n_pool,n_test,n_features,classifier_auc,frac_zbins_error_drift,median_test_fit_error_ratio,qualifies
+fraud,4000,400,29,0.4765,0.0,1.047,False
+epidemic,4000,400,13,0.9923,1.0,0.443,True

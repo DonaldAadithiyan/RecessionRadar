@@ -1,0 +1,9 @@
+domain,model,model_class,n_points,n_dirs,zero_rate,near_zero_rate,median_rel_change,frac_points_dead,target_sd
+insurance,xgboost,tree,40,200,0.00013,0.00013,0.186607,0.0,1.1772
+insurance,lightgbm,tree,40,200,0.0,0.0,0.141015,0.0,1.1772
+insurance,ridge,linear,40,200,0.0,0.0,0.026695,0.0,1.1772
+energy,xgboost,tree,40,200,0.0,0.0,0.104138,0.0,7.6787
+energy,lightgbm,tree,40,200,0.0,0.0,0.087604,0.0,7.6787
+energy,ridge,linear,40,200,0.0,0.0,0.080841,0.0,7.6787
+climate,gradboost,tree,40,200,0.0,0.0,0.31212,0.0,2.7594
+climate,ridge,linear,40,200,0.0,0.0,0.074287,0.0,2.7594

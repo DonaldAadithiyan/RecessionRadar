@@ -1,0 +1,11 @@
+baseline,anchor,n,mean_winkler_diff,win_rate_pct,perm_signflip_p,note,perm_signflip_p_bh
+pooled_trailing,online,400,0.5812,4.8,1.0,,1.0
+diversity_optimal,online,400,-4.4702,100.0,0.0,,0.0
+mondrian,online,400,-0.6284,16.2,0.0,,0.0
+pid_conformal,online,400,0.5779,6.5,1.0,,1.0
+evt_tail,online,400,-0.276,85.0,0.0,,0.0
+dtaci,online,400,0.4213,12.0,1.0,,1.0
+acmcp,online,400,-0.2213,40.8,0.151,,0.2517
+bellman_ci,online,400,0.5166,9.8,1.0,,1.0
+cqr,frozen,400,-0.6069,60.2,0.0,,0.0
+rlcp,frozen,400,-0.6288,76.5,0.0,,0.0

@@ -1,0 +1,3 @@
+domain,n_fit,n_test,ks_median_D,frac_features_ks_sig,classifier_auc,frac_zbins_error_drift,median_test_fit_error_ratio
+energy,1734,400,0.2132,0.917,0.7988,0.4,1.315
+climate,597,243,0.1728,0.619,0.958,0.0,1.276

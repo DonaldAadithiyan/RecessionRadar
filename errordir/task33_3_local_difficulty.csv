@@ -1,0 +1,7 @@
+domain,model,model_class,bandwidth_h,r_cal_heldout,angle_pc1_deg,check1_not_variance,mean_perturb_percentile,frac_points_pct_ge_95,check2_perturbation,validated
+insurance,xgboost,tree,4.3572,0.0406,55.76,True,0.5034,0.025,False,False
+insurance,lightgbm,tree,4.3572,0.0442,57.09,True,0.4968,0.025,False,False
+insurance,ridge,linear,4.3572,0.0554,73.66,True,0.9206,0.4,False,False
+energy,xgboost,tree,4.2096,0.3628,28.48,False,0.6706,0.05,False,False
+energy,lightgbm,tree,4.2096,0.3698,26.92,False,0.6933,0.1,False,False
+energy,ridge,linear,4.2096,0.342,22.23,False,0.8902,0.35,False,False

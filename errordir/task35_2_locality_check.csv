@@ -1,0 +1,13 @@
+domain,model,model_class,bandwidth_rule,h,n_fit_kernel,eff_neighbours,eff_nbr_frac,mean_abs_cosine,frac_grad_gt30deg,frac_live_grad,is_local
+insurance,ridge,linear,silverman,0.56729,1500,2.23,0.0015,0.2837,1.0,0.9725,True
+insurance,ridge,linear,median_task33,4.35724,1500,1221.48,0.8143,0.8329,0.0925,1.0,True
+insurance,xgboost,tree,silverman,0.56729,1500,2.23,0.0015,0.2844,0.9974,0.9725,True
+insurance,xgboost,tree,median_task33,4.35724,1500,1221.48,0.8143,0.8618,0.08,1.0,True
+insurance,lightgbm,tree,silverman,0.56729,1500,2.23,0.0015,0.2852,1.0,0.9725,True
+insurance,lightgbm,tree,median_task33,4.35724,1500,1221.48,0.8143,0.8524,0.0775,1.0,True
+energy,ridge,linear,silverman,0.58767,1500,4.34,0.0029,0.2915,1.0,0.9675,True
+energy,ridge,linear,median_task33,4.2096,1500,1041.51,0.6943,0.8859,0.0575,1.0,True
+energy,xgboost,tree,silverman,0.58767,1500,4.34,0.0029,0.2898,0.9974,0.9675,True
+energy,xgboost,tree,median_task33,4.2096,1500,1041.51,0.6943,0.9018,0.0425,1.0,False
+energy,lightgbm,tree,silverman,0.58767,1500,4.34,0.0029,0.29,0.9767,0.9675,True
+energy,lightgbm,tree,median_task33,4.2096,1500,1041.51,0.6943,0.902,0.0425,1.0,False

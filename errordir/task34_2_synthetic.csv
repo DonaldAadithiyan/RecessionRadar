@@ -1,0 +1,4 @@
+case,requirement,responsiveness,DS,DS_percentile,n_matched_dirs,verdict,correct,check2_percentile
+A_known_signal,DETECT,0.0273,0.4765,1.0,200,DETECT,True,0.0
+B_known_null,REJECT,0.0804,0.0047,0.6389,108,REJECT,True,0.0
+C_known_null_hyper,REJECT,0.194,0.0128,0.4632,190,REJECT,True,0.0
